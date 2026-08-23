@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <color name="ucrop_color_active_aspect_ratio">#FFD0BCFF</color>
+  <color name="ucrop_color_active_controls_color">#FFD0BCFF</color>
+  <color name="ucrop_color_inactive_aspect_ratio">#FFCAC4D0</color>
+  <color name="ucrop_color_progress_wheel_line">#FFD0BCFF</color>
+  <color name="ucrop_color_toolbar">#FF141218</color>
+  <color name="ucrop_color_toolbar_widget">#FFE6E0E9</color>
+  <color name="ucrop_color_widget">#FFE6E0E9</color>
+  <color name="ucrop_color_widget_active">#FF141218</color>
+  <color name="ucrop_color_widget_background">#FF211F26</color>
+  <color name="ucrop_color_widget_rotate_angle">#FFCAC4D0</color>
+  <color name="ucrop_color_widget_rotate_mid_line">#FFD0BCFF</color>
+  <color name="ucrop_color_widget_text">#FFD0BCFF</color>
+</resources>

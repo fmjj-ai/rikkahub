@@ -538,15 +538,8 @@ private fun ChatFilesPickerSheet(
     )
     val cameraLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { captureSuccessful ->
         if (captureSuccessful && cameraOutputUri != null) {
-            if (setting.displaySetting.skipCropImage) {
-                inputState.addImages(filesManager.createChatFilesByContents(listOf(cameraOutputUri!!)))
-                cameraOutputFile?.delete()
-                cameraOutputFile = null
-                cameraOutputUri = null
-                dismissAll()
-            } else {
-                launchCameraCrop(cameraOutputUri!!)
-            }
+            // 本地补丁：拍照成功后始终进入裁剪/预览页，不再受“跳过图片编辑”影响。
+            launchCameraCrop(cameraOutputUri!!)
         } else {
             cameraOutputFile?.delete()
             cameraOutputFile = null
@@ -577,36 +570,28 @@ private fun ChatFilesPickerSheet(
         }
     )
     val imagePickerLauncher =
-        rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) { selectedUris ->
-            if (selectedUris.isNotEmpty()) {
-                Log.d("ImagePickButton", "Selected URIs: $selectedUris")
-                if (setting.displaySetting.skipCropImage) {
-                    inputState.addImages(filesManager.createChatFilesByContents(selectedUris))
-                    dismissAll()
-                } else if (selectedUris.size == 1) {
-                    val tempFile = File(context.appTempFolder, "pick_temp_${System.currentTimeMillis()}.jpg")
-                    runCatching {
-                        val source = selectedUris.first()
-                        // HEIF/HEIC（尤其 HDR HEIF）交给 UCrop 前先解码转为 JPEG，规避裁剪解码失败
-                        val converted = ImageUtils.isHeifImage(context, source) &&
-                            ImageUtils.convertHeifToJpeg(context, source, tempFile)
-                        if (!converted) {
-                            context.contentResolver.openInputStream(source)?.use { input ->
-                                tempFile.outputStream().use { output -> input.copyTo(output) }
-                            }
+        rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { selectedUri ->
+            if (selectedUri != null) {
+                Log.d("ImagePickButton", "Selected URI: $selectedUri")
+                val tempFile = File(context.appTempFolder, "pick_temp_${System.currentTimeMillis()}.jpg")
+                runCatching {
+                    val source = selectedUri
+                    // HEIF/HEIC（尤其 HDR HEIF）交给 UCrop 前先解码转为 JPEG，规避裁剪解码失败。
+                    val converted = ImageUtils.isHeifImage(context, source) &&
+                        ImageUtils.convertHeifToJpeg(context, source, tempFile)
+                    if (!converted) {
+                        context.contentResolver.openInputStream(source)?.use { input ->
+                            tempFile.outputStream().use { output -> input.copyTo(output) }
                         }
-                        preCropTempFile = tempFile
-                        launchImageCrop(tempFile.toUri())
-                    }.onFailure {
-                        Log.e("ImagePickButton", "Failed to copy image to temp, falling back", it)
-                        launchImageCrop(selectedUris.first())
                     }
-                } else {
-                    inputState.addImages(filesManager.createChatFilesByContents(selectedUris))
-                    dismissAll()
+                    preCropTempFile = tempFile
+                    launchImageCrop(tempFile.toUri())
+                }.onFailure {
+                    Log.e("ImagePickButton", "Failed to copy image to temp, falling back", it)
+                    launchImageCrop(selectedUri)
                 }
             } else {
-                Log.d("ImagePickButton", "No images selected")
+                Log.d("ImagePickButton", "No image selected")
             }
         }
 

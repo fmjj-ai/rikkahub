@@ -15,6 +15,11 @@ import kotlin.uuid.Uuid
 private const val TAG = "ConversationSession"
 private const val IDLE_TIMEOUT_MS = 5_000L
 
+data class EnglishSessionAIConfig(
+    val modelId: Uuid? = null,
+    val reasoningEnabled: Boolean = true,
+)
+
 class ConversationSession(
     val id: Uuid,
     initial: Conversation,
@@ -29,6 +34,10 @@ class ConversationSession(
 
     // 处理状态（如 OCR 识别中）
     val processingStatus = MutableStateFlow<String?>(null)
+
+    // 英语学习页专用 AI 配置，只影响当前原生会话，不写入全局设置。
+    @Volatile
+    var englishAIConfig: EnglishSessionAIConfig? = null
 
     // 生成任务（内聚在 session 中）
     private val _generationJob = MutableStateFlow<Job?>(null)

@@ -1,0 +1,1541 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>考研英语阅读</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #f8f6ff;
+      --surface: #ffffff;
+      --surface-2: #f1effa;
+      --primary: #5b5fa7;
+      --primary-soft: #e4e4ff;
+      --on-primary-soft: #24305f;
+      --text: #202124;
+      --muted: #6e6a7a;
+      --border: #e3e0ec;
+      --ok: #168a4a;
+      --bad: #d33b3b;
+      --shadow: 0 14px 34px rgba(45, 42, 69, .08);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #121218;
+        --surface: #1d1b24;
+        --surface-2: #292633;
+        --primary: #c6c5ff;
+        --primary-soft: #35345c;
+        --on-primary-soft: #ededff;
+        --text: #f1eff7;
+        --muted: #bdb8ca;
+        --border: #373342;
+        --shadow: 0 14px 34px rgba(0, 0, 0, .28);
+      }
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.65;
+      overflow: hidden;
+    }
+    .app {
+      height: 100vh; max-width: 1440px; margin: 0 auto; padding: 0 22px 18px;
+      display: flex; flex-direction: column; min-height: 0;
+    }
+    .topbar { display: none; }
+    .top-controls { flex: 0 0 auto; margin: 8px 0 10px; padding: 12px 18px; }
+    .control-row { justify-content: space-between; gap: 14px; }
+    .selector-row { flex: 1 1 auto; min-width: 0; }
+    .title-row { min-height: 44px; display: flex; align-items: center; gap: 14px; justify-content: space-between; }
+    h1 { font-size: 24px; margin: 0; letter-spacing: .02em; white-space: nowrap; }
+    .sub { color: var(--muted); font-size: 13px; margin-top: 2px; }
+    .pill {
+      border: 0; border-radius: 999px; padding: 10px 14px;
+      background: var(--primary-soft); color: var(--on-primary-soft);
+      font-weight: 650; cursor: pointer;
+    }
+    .tabs { display: flex; gap: 10px; overflow-x: auto; padding: 2px; }
+    .tab {
+      border: 1px solid var(--border); background: var(--surface); color: var(--muted);
+      border-radius: 999px; padding: 10px 16px; font-weight: 650; cursor: pointer; white-space: nowrap;
+    }
+    .tab.active { background: var(--primary-soft); color: var(--on-primary-soft); border-color: transparent; }
+    .page { flex: 1 1 auto; min-height: 0; }
+    #page-read { display: flex; flex-direction: column; min-height: 0; padding-top: 0; }
+    #page-vocab, #page-ai { overflow-y: auto; padding-top: 0; }
+    #page-vocab .grid, #page-ai .grid { overflow: visible; align-items: start; }
+    .grid { flex: 1 1 auto; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) 370px; gap: 18px; align-items: stretch; overflow: hidden; }
+    #page-read main, #page-read aside.lookup { min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding-right: 4px; }
+    #page-read main::-webkit-scrollbar, #page-read aside.lookup::-webkit-scrollbar { width: 8px; }
+    #page-read main::-webkit-scrollbar-thumb, #page-read aside.lookup::-webkit-scrollbar-thumb { background: color-mix(in srgb, var(--muted) 30%, transparent); border-radius: 999px; }
+    @media (max-width: 860px) {
+      body { overflow: auto; }
+      .app { height: auto; min-height: 100vh; padding: 0 14px 14px; }
+      .top-controls { margin: 8px 0 10px; padding: 12px; }
+      .control-row { align-items: stretch; }
+      .title-row { align-items: flex-start; flex-direction: column; gap: 8px; }
+      #page-read { height: auto; display: block; }
+      .grid { display: block; overflow: visible; }
+      #page-read main, #page-read aside.lookup { overflow: visible; }
+    }
+    .card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 28px;
+      box-shadow: var(--shadow); padding: 18px; margin-bottom: 16px;
+    }
+    .card.flat { box-shadow: none; }
+    .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    label { color: var(--muted); font-size: 13px; font-weight: 650; }
+    select, input, textarea {
+      border: 1px solid var(--border); border-radius: 16px; padding: 10px 12px;
+      background: var(--surface-2); color: var(--text); font: inherit; outline: none;
+    }
+    textarea { width: 100%; min-height: 120px; resize: vertical; }
+    button {
+      border: 0; border-radius: 16px; padding: 10px 14px; cursor: pointer;
+      background: var(--surface-2); color: var(--text); font-weight: 650;
+    }
+    button.primary { background: var(--primary-soft); color: var(--on-primary-soft); }
+    button.ghost { background: transparent; border: 1px solid var(--border); color: var(--muted); }
+    .meta { color: var(--muted); font-size: 13px; }
+    .article p { margin: 0 0 16px; text-align: justify; }
+    .word { border-radius: 5px; padding: 0 1px; cursor: pointer; }
+    .word:active, .word:hover, .word.active { background: var(--primary-soft); color: var(--on-primary-soft); }
+    .word-popover {
+      position: fixed; z-index: 80; display: block; width: max-content;
+      min-width: 250px; max-width: min(380px, calc(100vw - 24px)); padding: 12px;
+      border: 1px solid var(--border); border-radius: 18px;
+      background: color-mix(in srgb, var(--surface) 92%, var(--surface-2));
+      box-shadow: 0 18px 46px rgba(45, 42, 69, .22); font-size: 15px; line-height: 1.55;
+    }
+    .word-popover::before {
+      content: ""; position: absolute; left: var(--arrow-left, 24px); top: -7px;
+      width: 12px; height: 12px; transform: rotate(45deg);
+      background: color-mix(in srgb, var(--surface) 92%, var(--surface-2));
+      border-left: 1px solid var(--border); border-top: 1px solid var(--border);
+    }
+    .word-popover.above::before { top: auto; bottom: -7px; border-left: 0; border-top: 0; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+    .popover-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 4px; }
+    .popover-word { font-weight: 850; font-size: 18px; color: var(--primary); }
+    .popover-ai { margin-top: 10px; border-top: 1px dashed var(--border); padding-top: 10px; white-space: pre-wrap; color: var(--muted); max-height: 240px; overflow-y: auto; }
+    .question { border-top: 1px solid var(--border); padding-top: 16px; margin-top: 16px; }
+    .option {
+      display: block; width: 100%; text-align: left; margin: 8px 0; padding: 12px 14px;
+      border: 1px solid var(--border); background: var(--surface-2); border-radius: 18px; font-weight: 500;
+    }
+    .option-letter { font-weight: 850; margin-right: 4px; }
+    .option.selected { border-color: var(--primary); background: var(--primary-soft); color: var(--on-primary-soft); }
+    .option.correct { border-color: color-mix(in srgb, var(--ok) 48%, var(--border)); background: color-mix(in srgb, var(--ok) 14%, var(--surface)); }
+    .option.wrong { border-color: color-mix(in srgb, var(--bad) 52%, var(--border)); background: color-mix(in srgb, var(--bad) 12%, var(--surface)); }
+    .answer-footer { margin-top: 18px; padding-top: 14px; border-top: 1px dashed var(--border); }
+    .answer-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 12px; }
+    .answer-cell { text-align: center; padding: 10px; border-radius: 16px; background: var(--surface-2); font-weight: 800; }
+    .side-title { font-weight: 800; margin: 0 0 8px; }
+    .lookup { position: sticky; top: 116px; }
+    .word-big { font-size: 22px; font-weight: 850; }
+    .meaning { white-space: pre-wrap; color: var(--muted); font-size: 14px; margin-top: 6px; }
+    .vocab-item { display: flex; justify-content: space-between; gap: 10px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+    .vocab-item:last-child { border-bottom: 0; }
+    .hide { display: none !important; }
+    .toast {
+      position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%);
+      background: rgba(32, 31, 39, .92); color: #fff; border-radius: 999px;
+      padding: 10px 16px; z-index: 99; max-width: calc(100vw - 32px); display: none;
+    }
+    .empty { color: var(--muted); padding: 18px; text-align: center; border: 1px dashed var(--border); border-radius: 22px; }
+    .vocab-mini-list { max-height: 260px; overflow-y: auto; padding-right: 2px; }
+    .vocab-word { font-weight: 850; }
+    .ai-log { min-height: 220px; max-height: 42vh; overflow-y: auto; border: 1px dashed var(--border); border-radius: 18px; padding: 12px; background: color-mix(in srgb, var(--surface-2) 46%, var(--surface)); }
+    .ai-msg { margin: 0 0 12px; padding: 10px 12px; border-radius: 16px; white-space: pre-wrap; }
+    .ai-msg.user { background: var(--primary-soft); color: var(--on-primary-soft); }
+    .ai-msg.assistant { background: var(--surface); border: 1px solid var(--border); }
+    .ai-msg .msg-head { font-weight: 850; margin-bottom: 5px; }
+    .ai-toolbar { margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap; }
+    button.small { padding: 7px 10px; border-radius: 12px; font-size: 12px; }
+    .md { line-height: 1.72; word-break: break-word; }
+    .md > :first-child { margin-top: 0; }
+    .md > :last-child { margin-bottom: 0; }
+    .md p { margin: 0 0 10px; }
+    .md h1, .md h2, .md h3, .md h4, .md h5, .md h6 { margin: 0 0 10px; line-height: 1.28; }
+    .md h1 { font-size: 22px; }
+    .md h2 { font-size: 19px; }
+    .md h3 { font-size: 17px; }
+    .md h4 { font-size: 15px; }
+    .md ul, .md ol { margin: 0 0 10px 1.25em; padding-left: 1.1em; }
+    .md li { margin: 0 0 4px; }
+    .md blockquote {
+      margin: 0 0 10px; padding: 10px 12px; border-left: 4px solid var(--primary-soft);
+      background: color-mix(in srgb, var(--surface-2) 72%, var(--surface)); border-radius: 14px;
+    }
+    .md code {
+      padding: 0 .32em; border-radius: 6px; background: color-mix(in srgb, var(--surface-2) 72%, var(--surface));
+      font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+    }
+    .md pre {
+      margin: 0 0 10px; padding: 12px 14px; overflow: auto;
+      border-radius: 16px; background: color-mix(in srgb, var(--surface-2) 84%, var(--surface));
+    }
+    .md pre code { padding: 0; background: transparent; }
+    .md a { color: var(--primary); text-decoration: underline; }
+    .md table { width: 100%; border-collapse: collapse; margin: 0 0 12px; font-size: 14px; }
+    .md th, .md td { border: 1px solid var(--border); padding: 7px 9px; vertical-align: top; }
+    .md th { background: var(--surface-2); font-weight: 850; }
+    .msg-body { white-space: normal; }
+    .ai-msg.user .msg-body { color: inherit; }
+    .ai-msg.assistant .msg-body { color: inherit; }
+    .ai-log.panel-log { height: 100%; max-height: none; flex: 1 1 auto; }
+    .word-popover, .selection-toolbar { backdrop-filter: blur(8px); }
+    .word-popover {
+      z-index: 180;
+      transform: translateZ(0);
+    }
+    .word-popover .meaning { white-space: pre-wrap; word-break: break-word; }
+    .selection-toolbar {
+      position: fixed; z-index: 170; display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+      padding: 8px; border: 1px solid var(--border); border-radius: 18px;
+      background: color-mix(in srgb, var(--surface) 92%, var(--surface-2));
+      box-shadow: 0 18px 44px rgba(45, 42, 69, .22);
+    }
+    .selection-toolbar .small { border-radius: 12px; }
+    .ai-fab {
+      position: fixed; right: 18px; bottom: 18px; z-index: 160;
+      width: 56px; height: 56px; border-radius: 999px; padding: 0;
+      display: grid; place-items: center; font-weight: 900;
+      box-shadow: 0 18px 40px rgba(45, 42, 69, .22);
+      background: linear-gradient(135deg, var(--primary-soft), color-mix(in srgb, var(--primary-soft) 70%, #ffffff));
+      color: var(--on-primary-soft);
+    }
+    .ai-float-panel {
+      position: fixed; left: 18px; top: 18px; z-index: 165;
+      width: calc(100vw - 36px); height: calc(100vh - 36px); min-width: 340px; min-height: 340px;
+      display: flex; flex-direction: column; overflow: hidden;
+      border: 1px solid var(--border); border-radius: 24px; background: color-mix(in srgb, var(--surface) 95%, var(--surface-2));
+      box-shadow: 0 16px 38px rgba(45, 42, 69, .18);
+      will-change: left, top, width, height;
+      contain: layout paint;
+    }
+    .ai-float-panel.resizing, .ai-float-panel.dragging { user-select: none; }
+    .ai-inline-float-panel { z-index: 166; }
+    .ai-resize-handle {
+      position: absolute; right: 0; bottom: 0; width: 46px; height: 46px; z-index: 3;
+      cursor: nwse-resize; touch-action: none; border: 0; background: transparent; padding: 0;
+    }
+    .ai-resize-handle::before {
+      content: ""; position: absolute; right: 10px; bottom: 10px; width: 18px; height: 18px;
+      border-right: 4px solid color-mix(in srgb, var(--primary) 72%, #ffffff);
+      border-bottom: 4px solid color-mix(in srgb, var(--primary) 72%, #ffffff);
+      border-radius: 2px; opacity: .9;
+    }
+    .ai-session-card { border: 1px solid var(--border); border-radius: 18px; padding: 12px; margin-bottom: 12px; background: var(--surface); }
+    .ai-session-head { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:8px; }
+    .ai-session-title { font-weight: 900; }
+    .ai-session-meta { color: var(--muted); font-size: 12px; white-space: nowrap; }
+    .ai-float-head {
+      flex: 0 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      padding: 12px 14px; border-bottom: 1px solid var(--border); cursor: move; user-select: none; touch-action: none;
+      background: color-mix(in srgb, var(--surface) 94%, var(--surface-2));
+    }
+    .ai-float-title { font-weight: 900; font-size: 16px; }
+    .ai-float-body {
+      flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; gap: 10px; padding: 12px 14px 14px;
+    }
+    .ai-float-body textarea { min-height: 90px; max-height: 160px; resize: vertical; }
+    .analysis-modal {
+      position: fixed; inset: 0; z-index: 190; display: flex; align-items: center; justify-content: center; padding: 16px;
+    }
+    .analysis-mask { position: absolute; inset: 0; background: rgba(16, 15, 22, .42); }
+    .analysis-dialog {
+      position: relative; z-index: 1; width: min(920px, calc(100vw - 24px)); max-height: calc(100vh - 24px);
+      display: flex; flex-direction: column; overflow: hidden;
+      border: 1px solid var(--border); border-radius: 24px; background: var(--surface);
+      box-shadow: 0 24px 66px rgba(0, 0, 0, .26);
+    }
+    .analysis-head {
+      flex: 0 0 auto; display: flex; align-items: flex-start; justify-content: space-between; gap: 10px;
+      padding: 16px 18px; border-bottom: 1px solid var(--border); background: color-mix(in srgb, var(--surface) 92%, var(--surface-2));
+    }
+    .analysis-title { font-size: 18px; font-weight: 900; }
+    .analysis-body { flex: 1 1 auto; min-height: 0; overflow: auto; padding: 18px; }
+    .analysis-body .empty { margin: 0; }
+    .analysis-body .msg-body { white-space: normal; }
+    .selection-result { z-index: 181; }
+    .selection-result .popover-ai { max-height: 320px; }
+    .ai-config-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; align-items: end; }
+    .ai-config-grid label { display: flex; flex-direction: column; gap: 6px; }
+    .ai-config-grid select { width: 100%; }
+    .ai-toggle { display: flex; flex-direction: column; gap: 6px; }
+    .ai-toggle .meta { font-size: 12px; }
+    .ai-toggle button { width: 100%; }
+    .ai-history-log { min-height: 320px; max-height: none; }
+    @media (max-width: 860px) { .ai-config-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 860px) {
+      .ai-fab { right: 12px; bottom: 12px; }
+      .ai-float-panel {
+        left: 12px !important; top: 12px !important; width: calc(100vw - 24px) !important; height: calc(100vh - 24px) !important;
+        min-width: 0; min-height: 0;
+      }
+      .selection-toolbar { max-width: calc(100vw - 24px); }
+      .analysis-dialog { width: calc(100vw - 24px); max-height: calc(100vh - 24px); }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="card flat top-controls">
+      <div class="row control-row">
+        <div id="readSelectors" class="row selector-row">
+          <label>类型 <select id="typeSelect"></select></label>
+          <label>年份 <select id="yearSelect"></select></label>
+          <label>Text <select id="textSelect"></select></label>
+          <button class="primary" onclick="renderReading()">打开</button>
+          <button onclick="randomReading()">随机一篇</button>
+        </div>
+        <div class="tabs">
+          <button class="tab active" data-page="read" onclick="switchPage('read')">阅读真题</button>
+          <button class="tab" data-page="vocab" onclick="switchPage('vocab')">总生词本</button>
+          <button class="tab" data-page="ai" onclick="switchPage('ai')">AI 学习</button>
+        </div>
+      </div>
+    </div>
+
+    <section id="page-read" class="page">
+      <div class="grid">
+        <main>
+          <div class="card">
+            <div class="row" style="justify-content:space-between">
+              <div>
+                <h2 id="readingTitle" style="margin:0;font-size:20px"></h2>
+                <div id="readingMeta" class="meta"></div>
+              </div>
+              <button onclick="sendCurrentToAI('translate')">AI 翻译选中/全文</button>
+            </div>
+            <div id="article" class="article" style="margin-top:16px"></div>
+          </div>
+          <div class="card">
+            <div class="row" style="justify-content:space-between">
+              <h3 style="margin:0">题目</h3>
+              <div id="score" class="meta"></div>
+            </div>
+            <div id="questions"></div>
+            <div class="answer-footer row" style="justify-content:space-between">
+              <button class="primary" onclick="toggleAnswers()" id="answerBtn">显示答案</button>
+            </div>
+            <div id="answers" class="answer-grid hide"></div>
+          </div>
+        </main>
+        <aside class="lookup">
+          <div class="card">
+            <div class="row" style="justify-content:space-between">
+              <p class="side-title">本篇生词</p>
+              <button class="small ghost" onclick="switchPage('vocab')">总生词本</button>
+            </div>
+            <div id="sideVocabList" class="vocab-mini-list"></div>
+          </div>
+          <div class="card">
+            <p class="side-title">本篇工具</p>
+            <div class="row">
+              <button class="primary" onclick="sendCurrentToAI('analyze')">AI 解析本篇</button>
+              <button onclick="sendCurrentToAI('vocab')">AI 提炼重点词</button>
+            </div>
+          </div>
+          <div class="card">
+            <div class="row" style="justify-content:space-between">
+              <p class="side-title">AI 交流窗口</p>
+              <span>
+                <button class="small ghost" type="button" onclick="toggleInlineFloatAI()">悬浮</button>
+                <button class="small ghost" onclick="resetInlineConversation()">重置会话</button>
+                <button class="small ghost" onclick="clearAI()">清空</button>
+              </span>
+            </div>
+            <div id="aiOutput" class="ai-log"></div>
+            <textarea id="aiInlineInput" placeholder="也可以直接输入要翻译、解析或改写的英文内容" style="margin-top:10px"></textarea>
+            <div class="ai-toolbar">
+              <button class="primary" onclick="sendInlineAI('send')">发送</button>
+              <button onclick="sendInlineAI('translate')">翻译</button>
+              <button onclick="sendInlineAI('vocab')">词汇</button>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section id="page-vocab" class="page hide">
+      <div class="grid">
+        <main>
+          <div class="card">
+            <div class="row" style="justify-content:space-between">
+              <h2 style="margin:0">生词本</h2>
+              <span id="vocabCount" class="meta"></span>
+            </div>
+            <div class="row" style="margin:14px 0">
+              <button class="primary" onclick="exportVocab('save')">保存 JSON</button>
+              <button onclick="exportVocab('share')">分享 JSON</button>
+              <button onclick="document.getElementById('importFile').click()">导入 JSON</button>
+              <input id="importFile" type="file" accept="application/json,.json" class="hide" onchange="importVocabFile(this.files && this.files[0])" />
+            </div>
+            <div id="vocabList"></div>
+          </div>
+        </main>
+        <aside>
+          <div class="card">
+            <p class="side-title">记忆卡片</p>
+            <div id="flashEmpty" class="empty">生词本有内容后可开始复习</div>
+            <div id="flashBox" class="hide">
+              <div class="word-big" id="flashWord"></div>
+              <div class="meaning hide" id="flashMeaning"></div>
+              <div class="row" style="margin-top:12px">
+                <button onclick="showFlashMeaning()">显示释义</button>
+                <button class="primary" onclick="rememberFlash()">记住了</button>
+                <button onclick="nextFlash()">下一个</button>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section id="page-ai" class="page hide">
+      <div class="grid">
+        <main>
+          <div class="card">
+            <h2 style="margin-top:0">AI 学习设置</h2>
+            <div class="ai-config-grid">
+              <label>助手 <select id="assistantSelect" onchange="saveAIConfig()"></select></label>
+              <label>模型 <select id="modelSelect" onchange="saveAIConfig()"></select></label>
+              <div class="ai-toggle">
+                <span>推理</span>
+                <button id="reasoningToggle" class="primary" type="button" onclick="toggleAIReasoning()">开启</button>
+              </div>
+              <div class="ai-toggle">
+                <span>按 Enter 发送</span>
+                <button id="enterToggle" class="primary" type="button" onclick="toggleAISendOnEnter()">开启</button>
+              </div>
+            </div>
+            <div class="row" style="margin-top:12px">
+              <button class="primary" type="button" onclick="loadNativeAIConfig(true)">刷新列表</button>
+            </div>
+          </div>
+          <div class="card">
+            <div class="row" style="justify-content:space-between">
+              <h2 style="margin:0">英语页聊天记录</h2>
+              <button class="small ghost" type="button" onclick="clearEnglishAIHistory()">清空记录</button>
+            </div>
+            <div id="englishAIHistory" class="ai-log ai-history-log" style="margin-top:12px"></div>
+          </div>
+        </main>
+        <aside>
+          <div class="card">
+            <p class="side-title">当前选择</p>
+            <div id="aiConfigSummary" class="meaning"></div>
+          </div>
+        </aside>
+      </div>
+    </section>
+    </section>
+  </div>
+  <div id="toast" class="toast"></div>
+  <div id="wordPopover" class="word-popover hide"></div>
+  <div id="selectionResult" class="word-popover selection-result hide"></div>
+  <div id="selectionToolbar" class="selection-toolbar hide">
+    <button class="primary small" type="button" onclick="sendSelectionAI('translate')">翻译</button>
+    <button class="small" type="button" onclick="sendSelectionAI('analyze')">解析</button>
+  </div>
+  <button id="aiFab" class="ai-fab" type="button" onclick="toggleFloatAI()">AI</button>
+  <section id="aiFloatPanel" class="ai-float-panel hide" aria-label="悬浮 AI 对话窗口">
+    <div id="aiFloatHead" class="ai-float-head">
+      <div>
+        <div class="ai-float-title">AI 对话窗口</div>
+      </div>
+      <span class="row">
+        <button class="small ghost" type="button" onclick="resetFloatConversation()">重置</button>
+        <button class="small ghost" type="button" onclick="clearFloatAI()">清空</button>
+        <button class="small" type="button" onclick="toggleFloatAI(false)">收起</button>
+      </span>
+    </div>
+    <div class="ai-float-body">
+      <div id="aiFloatOutput" class="ai-log panel-log"></div>
+      <textarea id="aiFloatInput" placeholder="直接输入内容，自由交流"></textarea>
+      <div class="ai-toolbar">
+        <button class="primary" type="button" onclick="sendFloatAI()">发送</button>
+      </div>
+    </div>
+    <button id="aiFloatResize" class="ai-resize-handle" type="button" aria-label="缩放窗口"></button>
+  </section>
+  <section id="aiInlineFloatPanel" class="ai-float-panel ai-inline-float-panel hide" aria-label="悬浮 AI 交流窗口">
+    <div id="aiInlineFloatHead" class="ai-float-head">
+      <div>
+        <div class="ai-float-title">AI 交流窗口</div>
+      </div>
+      <span class="row">
+        <button class="small ghost" type="button" onclick="resetInlineConversation()">重置</button>
+        <button class="small ghost" type="button" onclick="clearAI()">清空</button>
+        <button class="small" type="button" onclick="toggleInlineFloatAI(false)">收起</button>
+      </span>
+    </div>
+    <div class="ai-float-body">
+      <div id="aiInlineFloatOutput" class="ai-log panel-log"></div>
+      <textarea id="aiInlineFloatInput" placeholder="直接输入内容，自由交流"></textarea>
+      <div class="ai-toolbar">
+        <button class="primary" type="button" onclick="sendInlineFloatAI('send')">发送</button>
+        <button type="button" onclick="sendInlineFloatAI('translate')">翻译</button>
+        <button type="button" onclick="sendInlineFloatAI('vocab')">词汇</button>
+      </div>
+    </div>
+    <button id="aiInlineFloatResize" class="ai-resize-handle" type="button" aria-label="缩放窗口"></button>
+  </section>
+  <section id="analysisModal" class="analysis-modal hide" aria-label="长难句解析弹窗">
+    <div class="analysis-mask" onclick="closeAnalysisModal()"></div>
+    <div class="analysis-dialog">
+      <div class="analysis-head">
+        <div>
+          <div id="analysisTitle" class="analysis-title">长难句解析</div>
+          <div id="analysisSource" class="meta"></div>
+        </div>
+        <button class="small ghost" type="button" onclick="closeAnalysisModal()">关闭</button>
+      </div>
+      <div id="analysisBody" class="analysis-body"></div>
+    </div>
+  </section>
+
+  <script src="data/readings.js"></script>
+  <script src="data/dictionary.js"></script>
+  <script>
+    const storeKey = 'rikkahub_english_vocab_v1';
+    const lastReadingKey = 'rikkahub_english_last_reading_v1';
+    const aiHistoryKey = 'rikkahub_english_ai_history_v2';
+    const aiConfigKey = 'rikkahub_english_ai_config_v1';
+    const state = { reading: null, showAnswers: false, selected: {}, currentWord: '', popoverTarget: null, flashIndex: -1, lastPrompt: '', selectedText: '', selectedRect: null, activeModalMessageId: 0 };
+    let vocab = loadVocab();
+    let savedAIHistory = loadAIHistory();
+    let aiSessions = savedAIHistory.sessions;
+    let activeAISessions = savedAIHistory.active;
+    let aiMessageSeq = savedAIHistory.seq;
+    let aiMessages = activeSession('main').messages;
+    let floatMessages = activeSession('float').messages;
+    let hiddenMessages = activeSession('hidden').messages;
+    let aiConfig = normalizeAIConfig(loadAIConfig());
+    let syncAIQueued = false;
+
+    function $(id) { return document.getElementById(id); }
+    function cleanText(s) { return String(s ?? '').replace(/&quot;/g, '"').replace(/&#39;|&apos;/g, "'").replace(/&amp;/g, '&'); }
+    function esc(s) { return cleanText(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+    function renderInlineMarkdown(s) {
+      let out = esc(s);
+      out = out.replace(/`([^`]+)`/g, '<code>$1</code>');
+      out = out.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+      out = out.replace(/__([^_]+)__/g, '<strong>$1</strong>');
+      out = out.replace(/\*([^*\n]+)\*/g, '<em>$1</em>');
+      out = out.replace(/_([^_\n]+)_/g, '<em>$1</em>');
+      out = out.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+      return out;
+    }
+    function renderMarkdown(src) {
+      let text = cleanText(src || '').replace(/\r\n?/g, '\n');
+      if (!text.trim()) return '';
+      const fences = [];
+      text = text.replace(/```[^\n]*\n?([\s\S]*?)```/g, (_, code) => {
+        const key = `@@FENCE_${fences.length}@@`;
+        fences.push(`<pre><code>${esc(code.replace(/\n+$/g, ''))}</code></pre>`);
+        return `\n\n${key}\n\n`;
+      });
+      const lines = text.split('\n');
+      let html = '', para = [], list = '';
+      function flushPara() {
+        if (para.length) {
+          html += `<p>${para.map(renderInlineMarkdown).join('<br>')}</p>`;
+          para = [];
+        }
+      }
+      function closeList() {
+        if (list) { html += `</${list}>`; list = ''; }
+      }
+      function openList(type) {
+        flushPara();
+        if (list && list !== type) closeList();
+        if (!list) { list = type; html += `<${type}>`; }
+      }
+      function isTableSep(line) { return /^\s*\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)+\|?\s*$/.test(line); }
+      function splitTableRow(line) {
+        return line.trim().replace(/^\|/, '').replace(/\|$/, '').split('|').map(x => renderInlineMarkdown(x.trim()));
+      }
+      for (let i = 0; i < lines.length; i++) {
+        const raw = lines[i];
+        const line = raw.trimEnd();
+        const trimmed = line.trim();
+        if (!trimmed) { flushPara(); closeList(); continue; }
+        const fenceIndex = /^@@FENCE_(\d+)@@$/.exec(trimmed);
+        if (fenceIndex) { flushPara(); closeList(); html += fences[Number(fenceIndex[1])] || ''; continue; }
+        if (trimmed.includes('|') && i + 1 < lines.length && isTableSep(lines[i + 1])) {
+          flushPara(); closeList();
+          const headers = splitTableRow(trimmed);
+          i += 2;
+          const rows = [];
+          while (i < lines.length && lines[i].trim().includes('|')) { rows.push(splitTableRow(lines[i].trim())); i++; }
+          i--;
+          html += `<table><thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+          continue;
+        }
+        const heading = /^(#{1,6})\s+(.+)$/.exec(trimmed);
+        if (heading) { flushPara(); closeList(); html += `<h${heading[1].length}>${renderInlineMarkdown(heading[2])}</h${heading[1].length}>`; continue; }
+        const quote = /^>\s?(.+)$/.exec(trimmed);
+        if (quote) { flushPara(); closeList(); html += `<blockquote>${renderInlineMarkdown(quote[1])}</blockquote>`; continue; }
+        const ul = /^[-*+]\s+(.+)$/.exec(trimmed);
+        if (ul) { openList('ul'); html += `<li>${renderInlineMarkdown(ul[1])}</li>`; continue; }
+        const ol = /^\d+[.)]\s+(.+)$/.exec(trimmed);
+        if (ol) { openList('ol'); html += `<li>${renderInlineMarkdown(ol[1])}</li>`; continue; }
+        para.push(line);
+      }
+      flushPara(); closeList();
+      return html;
+    }
+    function setMarkdownBox(el, content) {
+      if (!el) return;
+      el.classList.add('md');
+      el.innerHTML = renderMarkdown(content);
+    }
+    function toast(msg) { const t=$('toast'); t.textContent=msg; t.style.display='block'; clearTimeout(window.__toastTimer); window.__toastTimer=setTimeout(()=>t.style.display='none',2200); }
+    function normalizeWord(w) { return String(w || '').replace(/^[^A-Za-z]+|[^A-Za-z]+$/g, '').toLowerCase(); }
+    function lookup(word) { return DICT_DATA[word] || DICT_DATA[word.toLowerCase()] || ''; }
+    function stripPhonetic(s) {
+      return cleanText(s || '')
+        .replace(/\\r\\n/g, '\n')
+        .replace(/\\n/g, '\n')
+        .replace(/\\r/g, '\n')
+        .replace(/\r\n?/g, '\n')
+        .split('\n')
+        .map(line => line.replace(/^\/[^/\n]+\/\s*/, '').trim())
+        .filter(Boolean)
+        .join('\n');
+    }
+    function lookupMeaning(word) { return stripPhonetic(lookup(word)); }
+    function formatMeaningForPopup(s) {
+      const text = stripPhonetic(s || '');
+      if (!text) return '';
+      const partOfSpeech = '(?:n|v|vt|vi|adj|adv|prep|conj|pron|abbr|phr|aux|art|det|num|int|interj|a|ad|modal|pl|sing|comparative|superlative)\\.';
+      return text
+        .replace(new RegExp(`\\s+(?=${partOfSpeech}(?:\\s|$))`, 'gi'), '\n')
+        .replace(/[ \t]+\n/g, '\n')
+        .replace(/\n{2,}/g, '\n')
+        .trim();
+    }
+    function loadVocab() { try { return JSON.parse(localStorage.getItem(storeKey) || '[]'); } catch { return []; } }
+    function saveVocabLocal() { localStorage.setItem(storeKey, JSON.stringify(vocab)); renderVocab(); }
+    function cleanMessageForStore(m) { return { id: Number(m.id) || 0, role: m.role || 'assistant', title: m.title || '', content: m.content || '', prompt: m.prompt || '', target: m.target || 'main', sessionId: m.sessionId || '' }; }
+    function newSessionId(target) { return `${target}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`; }
+    function targetLabel(target) { return target === 'float' ? '悬浮窗口' : (target === 'hidden' ? '选区/单词' : '右侧窗口'); }
+    function createAISession(target, messages = [], store = null) {
+      const now = new Date().toISOString();
+      const id = newSessionId(target);
+      const session = { id, target, title: `${targetLabel(target)}会话`, createdAt: now, updatedAt: now, messages: messages.map(cleanMessageForStore) };
+      session.messages.forEach(m => { m.target = target; m.sessionId = id; });
+      const bucket = store || aiSessions;
+      bucket[id] = session;
+      return session;
+    }
+    function loadAIHistory() {
+      try {
+        const raw = JSON.parse(localStorage.getItem(aiHistoryKey) || '{}');
+        const sessions = {};
+        const active = { main: '', float: '', hidden: '' };
+        let seq = Number(raw.seq) || 0;
+        if (raw.sessions && typeof raw.sessions === 'object') {
+          Object.values(raw.sessions).forEach(item => {
+            if (!item || typeof item !== 'object') return;
+            const target = item.target || 'main';
+            const id = item.id || newSessionId(target);
+            const messages = Array.isArray(item.messages) ? item.messages.map(cleanMessageForStore) : [];
+            messages.forEach(m => { m.target = target; m.sessionId = id; });
+            const updatedAt = item.updatedAt || item.createdAt || new Date().toISOString();
+            sessions[id] = { id, target, title: item.title || `${targetLabel(target)}会话`, createdAt: item.createdAt || new Date().toISOString(), updatedAt, messages };
+            seq = Math.max(seq, ...messages.map(m => Number(m.id) || 0));
+          });
+          Object.assign(active, raw.active || {});
+        } else {
+          const legacyMain = Array.isArray(raw.main) ? raw.main : [];
+          const legacyFloat = Array.isArray(raw.float) ? raw.float : [];
+          const legacyHidden = Array.isArray(raw.hidden) ? raw.hidden : [];
+          if (legacyMain.length) active.main = createAISession('main', legacyMain, sessions).id;
+          if (legacyFloat.length) active.float = createAISession('float', legacyFloat, sessions).id;
+          if (legacyHidden.length) active.hidden = createAISession('hidden', legacyHidden, sessions).id;
+          seq = Math.max(seq, ...legacyMain.concat(legacyFloat, legacyHidden).map(m => Number(m.id) || 0));
+        }
+        return { sessions, active, seq };
+      } catch { return { sessions: {}, active: { main: '', float: '', hidden: '' }, seq: 0 }; }
+    }
+    function activeSession(target) {
+      let id = activeAISessions[target];
+      let session = id && aiSessions[id];
+      if (!session) {
+        session = createAISession(target, []);
+        activeAISessions[target] = session.id;
+      }
+      return session;
+    }
+    function refreshActiveMessageRefs() {
+      aiMessages = activeSession('main').messages;
+      floatMessages = activeSession('float').messages;
+      hiddenMessages = activeSession('hidden').messages;
+    }
+    function touchSession(target, title) {
+      const session = activeSession(target);
+      session.updatedAt = new Date().toISOString();
+      if (title && (!session.title || session.messages.length <= 2)) session.title = `${targetLabel(target)} · ${title}`;
+      return session;
+    }
+    function resetSession(target) {
+      const session = createAISession(target, []);
+      activeAISessions[target] = session.id;
+      refreshActiveMessageRefs();
+      return session;
+    }
+    function scheduleAIHistorySave() {
+      clearTimeout(window.__aiHistoryTimer);
+      window.__aiHistoryTimer = setTimeout(saveAIHistory, 240);
+      if (!$('page-ai')?.classList.contains('hide')) renderEnglishAIHistory();
+    }
+    function saveAIHistory() {
+      try {
+        const outSessions = {};
+        Object.values(aiSessions).forEach(s => {
+          if (!s || !s.id) return;
+          if (!s.messages.length && s.id !== activeAISessions[s.target]) return;
+          outSessions[s.id] = { id: s.id, target: s.target || 'main', title: s.title || `${targetLabel(s.target)}会话`, createdAt: s.createdAt, updatedAt: s.updatedAt, messages: s.messages.map(cleanMessageForStore) };
+        });
+        const data = { seq: aiMessageSeq, active: activeAISessions, sessions: outSessions, updatedAt: new Date().toISOString() };
+        localStorage.setItem(aiHistoryKey, JSON.stringify(data));
+      } catch {}
+    }
+    function loadAIConfig() { try { return JSON.parse(localStorage.getItem(aiConfigKey) || '{}') || {}; } catch { return {}; } }
+    function normalizeAIConfig(cfg) {
+      const out = (cfg && typeof cfg === 'object') ? cfg : {};
+      if (out.assistantIndex == null) out.assistantIndex = '0';
+      if (out.modelId == null) out.modelId = '';
+      if (out.reasoningEnabled == null) out.reasoningEnabled = true;
+      if (out.sendOnEnter == null) out.sendOnEnter = true;
+      out.reasoningEnabled = out.reasoningEnabled !== false && out.reasoningEnabled !== 'false';
+      out.sendOnEnter = out.sendOnEnter !== false && out.sendOnEnter !== 'false';
+      out.assistantIndex = String(out.assistantIndex ?? '0');
+      out.modelId = String(out.modelId ?? '');
+      return out;
+    }
+    function saveAIConfigLocal() { try { localStorage.setItem(aiConfigKey, JSON.stringify(normalizeAIConfig(aiConfig))); } catch {} }
+    function syncAIConfigButtons() {
+      const reasoningBtn = $('reasoningToggle');
+      if (reasoningBtn) {
+        reasoningBtn.textContent = aiConfig.reasoningEnabled ? '开启' : '关闭';
+        reasoningBtn.classList.toggle('primary', !!aiConfig.reasoningEnabled);
+        reasoningBtn.setAttribute('aria-pressed', aiConfig.reasoningEnabled ? 'true' : 'false');
+      }
+      const enterBtn = $('enterToggle');
+      if (enterBtn) {
+        enterBtn.textContent = aiConfig.sendOnEnter ? '开启' : '关闭';
+        enterBtn.classList.toggle('primary', !!aiConfig.sendOnEnter);
+        enterBtn.setAttribute('aria-pressed', aiConfig.sendOnEnter ? 'true' : 'false');
+      }
+    }
+    function toggleAIReasoning() {
+      aiConfig.reasoningEnabled = !aiConfig.reasoningEnabled;
+      saveAIConfig(false);
+    }
+    function toggleAISendOnEnter() {
+      aiConfig.sendOnEnter = !aiConfig.sendOnEnter;
+      saveAIConfig(false);
+    }
+
+    function loadLastReadingSelection() {
+      try { return JSON.parse(localStorage.getItem(lastReadingKey) || 'null'); } catch { return null; }
+    }
+    function selectorHasValue(el, value) {
+      return !!(el && [...el.options].some(o => o.value === String(value)));
+    }
+    function saveLastReadingSelection(r) {
+      if (!r) return;
+      try { localStorage.setItem(lastReadingKey, JSON.stringify({ type: r.type, year: Number(r.year), textNum: Number(r.textNum), savedAt: new Date().toISOString() })); } catch {}
+    }
+    function initSelectors() {
+      const types = [...new Set(READINGS.map(r => r.type))];
+      $('typeSelect').innerHTML = types.map(t => `<option>${esc(t)}</option>`).join('');
+      $('typeSelect').onchange = () => fillYears();
+      $('yearSelect').onchange = () => fillTexts();
+      $('textSelect').onchange = () => renderReading();
+      if (!restoreLastReadingSelection()) fillYears();
+    }
+    function restoreLastReadingSelection() {
+      const saved = loadLastReadingSelection();
+      if (!saved || !saved.type || saved.year == null || saved.textNum == null) return false;
+      if (!selectorHasValue($('typeSelect'), saved.type)) return false;
+      $('typeSelect').value = String(saved.type);
+      fillYears(true);
+      if (!selectorHasValue($('yearSelect'), saved.year)) return false;
+      $('yearSelect').value = String(saved.year);
+      fillTexts(true);
+      if (!selectorHasValue($('textSelect'), saved.textNum)) return false;
+      $('textSelect').value = String(saved.textNum);
+      renderReading();
+      return true;
+    }
+    function fillYears(silent = false) {
+      const type = $('typeSelect').value;
+      const years = [...new Set(READINGS.filter(r => r.type === type).map(r => r.year))].sort((a,b)=>b-a);
+      $('yearSelect').innerHTML = years.map(y => `<option>${y}</option>`).join('');
+      fillTexts(silent);
+    }
+    function fillTexts(silent = false) {
+      const type = $('typeSelect').value, year = Number($('yearSelect').value);
+      const texts = READINGS.filter(r => r.type === type && r.year === year).map(r => r.textNum).sort((a,b)=>a-b);
+      $('textSelect').innerHTML = texts.map(n => `<option value="${n}">Text ${n}</option>`).join('');
+      if (!silent) renderReading();
+    }
+    function currentFromSelectors() {
+      return READINGS.find(r => r.type === $('typeSelect').value && r.year === Number($('yearSelect').value) && r.textNum === Number($('textSelect').value));
+    }
+    function randomReading() {
+      const type = $('typeSelect').value;
+      const pool = READINGS.filter(r => r.type === type);
+      const r = pool[Math.floor(Math.random() * pool.length)];
+      $('yearSelect').value = String(r.year); fillTexts(true); $('textSelect').value = String(r.textNum); renderReading();
+    }
+    function wrapWords(text) {
+      return esc(text).replace(/([A-Za-z][A-Za-z'\-]*)/g, m => `<span class="word" onclick="onWord(event, '${esc(normalizeWord(m))}')">${m}</span>`);
+    }
+    function renderOptionText(opt, qi) {
+      const raw = String(opt || '');
+      const match = raw.match(/^\s*([A-Za-z])[\.\．、]?\s*(.*)$/);
+      const letter = (match && match[1] ? match[1] : raw.trim().slice(0, 1)).toUpperCase();
+      const body = match ? match[2] : raw;
+      return `<button class="option" data-q="${qi}" data-letter="${esc(letter)}" onclick="selectOption(${qi}, '${esc(letter)}')"><span class="option-letter">${esc(letter)}.</span> ${wrapWords(body)}</button>`;
+    }
+    function renderReading() {
+      const r = currentFromSelectors(); if (!r) return;
+      saveLastReadingSelection(r);
+      hideWordPopover();
+      state.reading = r; state.showAnswers = false; state.selected = {}; state.currentWord = '';
+      $('answerBtn').textContent = '显示答案'; $('answers').classList.add('hide'); $('score').textContent = '';
+      $('readingTitle').textContent = `${r.type} ${r.year} Text ${r.textNum}`;
+      $('readingMeta').textContent = `${r.questions.length} 题`;
+      $('article').innerHTML = String(r.content || '').split(/\n\s*\n/).filter(Boolean).map(p => `<p>${wrapWords(p)}</p>`).join('');
+      $('questions').innerHTML = r.questions.map((q, qi) => {
+        const opts = (q.options || []).map(opt => renderOptionText(opt, qi)).join('');
+        return `<div class="question"><b>${esc(q.num)}. ${wrapWords(q.stem || '')}</b>${opts}<div class="meta" id="qmeta-${qi}">未作答</div></div>`;
+      }).join('');
+      renderAnswerGrid(); renderSideVocab();
+    }
+    function selectOption(qi, letter) {
+      state.selected[qi] = letter;
+      document.querySelectorAll(`.option[data-q="${qi}"]`).forEach(b => b.classList.toggle('selected', b.dataset.letter === letter));
+      $(`qmeta-${qi}`).textContent = `已选择 ${letter}`;
+      if (state.showAnswers) markAnswers(); else updateScoreOnly();
+    }
+    function updateScoreOnly() {
+      const r = state.reading; if (!r) return;
+      const done = Object.keys(state.selected).length;
+      $('score').textContent = done ? `已做 ${done}/${r.questions.length}` : '';
+    }
+    function toggleAnswers() {
+      state.showAnswers = !state.showAnswers;
+      $('answerBtn').textContent = state.showAnswers ? '隐藏答案' : '显示答案';
+      $('answers').classList.toggle('hide', !state.showAnswers);
+      markAnswers();
+    }
+    function renderAnswerGrid() {
+      const r = state.reading; if (!r) return;
+      $('answers').innerHTML = (r.answers || []).map((a, i) => `<div class="answer-cell">${esc(r.questions[i]?.num ?? i+1)} · ${esc(a)}</div>`).join('');
+    }
+    function markAnswers() {
+      const r = state.reading; if (!r) return;
+      let right = 0, done = 0;
+      document.querySelectorAll('.option').forEach(b => b.classList.remove('correct', 'wrong'));
+      r.questions.forEach((q, qi) => {
+        const ans = (q.answer || r.answers?.[qi] || '').toUpperCase();
+        const sel = state.selected[qi]; if (sel) done++;
+        if (state.showAnswers) {
+          document.querySelectorAll(`.option[data-q="${qi}"]`).forEach(b => {
+            if (b.dataset.letter === ans) b.classList.add('correct');
+            if (sel && b.dataset.letter === sel && sel !== ans) b.classList.add('wrong');
+          });
+          $(`qmeta-${qi}`).textContent = sel ? `你的答案 ${sel} · 正确答案 ${ans}` : `正确答案 ${ans}`;
+        }
+        if (sel && sel === ans) right++;
+      });
+      $('score').textContent = done ? `已做 ${done}/${r.questions.length} · 正确 ${right}` : '';
+    }
+    function onWord(ev, word) {
+      ev && ev.stopPropagation();
+      if (!word) return;
+      const sel = window.getSelection && window.getSelection();
+      if (selectionInReadableArea(sel) && String(sel || '').trim()) {
+        updateSelectionToolbar();
+        return;
+      }
+      hideSelectionToolbar();
+      state.currentWord = word;
+      renderWordPopover(ev.currentTarget, word);
+    }
+    function hideWordPopover() {
+      const pop = $('wordPopover');
+      if (pop) pop.classList.add('hide');
+      document.querySelectorAll('.word.active').forEach(n => n.classList.remove('active'));
+      state.popoverTarget = null;
+    }
+    function positionWordPopover(target) {
+      const pop = $('wordPopover');
+      if (!pop || !target || pop.classList.contains('hide')) return;
+      const rect = target.getBoundingClientRect();
+      const gap = 10;
+      const vw = window.innerWidth || document.documentElement.clientWidth;
+      const vh = window.innerHeight || document.documentElement.clientHeight;
+      const pw = pop.offsetWidth || 280;
+      const ph = pop.offsetHeight || 160;
+      let left = rect.left + rect.width / 2 - pw / 2;
+      left = Math.max(12, Math.min(left, vw - pw - 12));
+      let top = rect.bottom + gap;
+      pop.classList.remove('above');
+      if (top + ph > vh - 12) {
+        top = rect.top - ph - gap;
+        pop.classList.add('above');
+      }
+      if (top < 12) top = 12;
+      pop.style.left = `${left}px`;
+      pop.style.top = `${top}px`;
+      const arrow = Math.max(18, Math.min(rect.left + rect.width / 2 - left - 6, pw - 28));
+      pop.style.setProperty('--arrow-left', `${arrow}px`);
+    }
+    function renderWordPopover(target, word) {
+      const pop = $('wordPopover');
+      if (!pop || !target) return;
+      document.querySelectorAll('.word.active').forEach(n => n.classList.remove('active'));
+      target.classList.add('active');
+      state.popoverTarget = target;
+      const meaning = formatMeaningForPopup(lookupMeaning(word)) || '词典暂无释义，可加入生词本后用 AI 生成例句。';
+      const id = `popover-ai-${Date.now()}`;
+      pop.innerHTML = `<div class="popover-head"><span class="popover-word">${esc(word)}</span><button class="small ghost" type="button" data-act="close">关闭</button></div><div class="meaning">${esc(meaning)}</div><div class="row" style="margin-top:10px"><button class="primary small" type="button" data-act="add">加入生词本</button><button class="small" type="button" data-act="ai">AI 例句</button></div><div id="${id}" class="popover-ai hide"></div>`;
+      pop.classList.remove('hide');
+      positionWordPopover(target);
+      pop.querySelector('[data-act="close"]').onclick = hideWordPopover;
+      pop.querySelector('[data-act="add"]').onclick = () => addWord(word);
+      pop.querySelector('[data-act="ai"]').onclick = () => sendWordExample(word, $(id));
+      setTimeout(() => positionWordPopover(target), 0);
+    }
+    function addCurrentWord() { addWord(state.currentWord); }
+    function addWord(w) {
+      w = normalizeWord(w); if (!w) return;
+      if (vocab.some(x => x.word === w)) { toast('生词本已存在'); return; }
+      vocab.unshift({ word: w, meaning: lookupMeaning(w), addedAt: new Date().toISOString(), source: state.reading ? `${state.reading.type} ${state.reading.year} Text ${state.reading.textNum}` : '' });
+      saveVocabLocal(); toast('已加入生词本');
+    }
+    function renderSideVocab() {
+      const source = state.reading ? `${state.reading.type} ${state.reading.year} Text ${state.reading.textNum}` : '';
+      const items = vocab.filter(v => v.source === source);
+      const el = $('sideVocabList'); if (!el) return;
+      el.innerHTML = items.length ? items.map(v => {
+        const i = vocab.findIndex(x => x.word === v.word && x.addedAt === v.addedAt);
+        return `<div class="vocab-item"><div><div class="vocab-word">${esc(v.word)}</div><div class="meaning">${esc(stripPhonetic(v.meaning || ''))}</div></div><button class="small" onclick="removeVocab(${i})">移除</button></div>`;
+      }).join('') : '<div class="empty">本篇还没有加入生词。点击原文单词后可加入。</div>';
+    }
+    function renderVocab() {
+
+      $('vocabCount').textContent = `${vocab.length} 个单词`;
+      $('vocabList').innerHTML = vocab.length ? vocab.map((v, i) => `<div class="vocab-item"><div><b>${esc(v.word)}</b><div class="meaning">${esc(stripPhonetic(v.meaning || ''))}</div><div class="meta">${esc(v.source || '')}</div></div><button onclick="removeVocab(${i})">移除</button></div>`).join('') : '<div class="empty">暂无生词。阅读时点击单词即可加入。</div>';
+      if (vocab.length && state.flashIndex < 0) nextFlash();
+      $('flashEmpty').classList.toggle('hide', vocab.length > 0); $('flashBox').classList.toggle('hide', !vocab.length);
+      renderSideVocab();
+    }
+    function removeVocab(i) { vocab.splice(i,1); saveVocabLocal(); }
+    function nextFlash() { if (!vocab.length) return renderVocab(); state.flashIndex = Math.floor(Math.random()*vocab.length); $('flashWord').textContent = vocab[state.flashIndex].word; $('flashMeaning').textContent = stripPhonetic(vocab[state.flashIndex].meaning || '') || '暂无释义'; $('flashMeaning').classList.add('hide'); }
+    function showFlashMeaning() { $('flashMeaning').classList.remove('hide'); }
+    function rememberFlash() { if (state.flashIndex >= 0) { vocab.splice(state.flashIndex, 1); state.flashIndex = -1; saveVocabLocal(); nextFlash(); } }
+
+    function switchPage(page) {
+      hideWordPopover();
+      document.querySelectorAll('.page').forEach(p => p.classList.add('hide'));
+      $(`page-${page}`).classList.remove('hide');
+      document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.page === page));
+      $('readSelectors')?.classList.toggle('hide', page !== 'read');
+      if (page === 'vocab') renderVocab();
+      if (page === 'ai') { initAIConfigControls(); renderEnglishAIHistory(); }
+    }
+    function readingTextForPrompt() {
+      const r = state.reading; if (!r) return '';
+      const qs = r.questions.map(q => `${q.num}. ${cleanText(q.stem)}\n${q.options.map(cleanText).join('\n')}\n答案：${q.answer || ''}`).join('\n\n');
+      return `${r.type} ${r.year} Text ${r.textNum}\n\n文章：\n${cleanText(r.content)}\n\n题目：\n${qs}`;
+    }
+    function buildPrompt(kind, text) {
+      if (kind === 'translate') return `请把下面考研英语阅读内容翻译成自然、准确的中文：
+
+${text}`;
+      if (kind === 'vocab') return `请从下面考研英语阅读中提炼考研高频词、熟词僻义、短语搭配，按“单词/短语 - 释义 - 原文语境 - 记忆提示”输出：
+
+${text}`;
+      return `请作为考研英语阅读老师，解析下面文章和题目：先总结主旨，再逐题说明正确答案依据、干扰项错误原因、长难句和关键词。
+
+${text}`;
+    }
+    function buildSelectionPrompt(kind, text) {
+      if (kind === 'translate') return `请把下面英文翻译成自然中文，只输出译文，不要解析，不要展开说明。
+
+${text}`;
+      return `请对下面长按选中的考研英语长难句做详细解析。
+
+请按以下结构输出：
+- 原句
+- 句子主干
+- 从句和修饰成分切分
+- 重点短语 / 固定搭配 / 熟词僻义
+- 自然中文译文
+- 做题启示
+
+选中内容：
+${text}`;
+    }
+    function renderMessageBody(m) {
+      return `<div class="msg-body md">${renderMarkdown(m.content)}</div>`;
+    }
+    function renderAIHtml(list) {
+      return list.map(m => `<div class="ai-msg ${m.role}"><div class="msg-head">${esc(m.title)}</div>${renderMessageBody(m)}</div>`).join('');
+    }
+    function isNearBottom(el) { return !el || (el.scrollHeight - el.scrollTop - el.clientHeight < 72); }
+    function setScrollableHtml(el, html) {
+      if (!el) return;
+      const top = el.scrollTop;
+      el.innerHTML = html;
+      el.scrollTop = Math.min(top, Math.max(0, el.scrollHeight - el.clientHeight));
+    }
+    function syncAIViews() {
+      if (syncAIQueued) return;
+      syncAIQueued = true;
+      requestAnimationFrame(() => {
+        syncAIQueued = false;
+        refreshActiveMessageRefs();
+        const html = renderAIHtml(aiMessages) || '<div class="empty">暂无内容</div>';
+        setScrollableHtml($('aiOutput'), html);
+        setScrollableHtml($('aiInlineFloatOutput'), html);
+        const floatHtml = renderAIHtml(floatMessages) || '<div class="empty">暂无内容</div>';
+        setScrollableHtml($('aiFloatOutput'), floatHtml);
+        const active = findAIMessage(state.activeModalMessageId);
+        if (active) renderAnalysisMessage(active);
+        scheduleAIHistorySave();
+      });
+    }
+    function hasNativeInlineAI() { return !!(window.RikkaEnglish && typeof window.RikkaEnglish.sendInlineAI === 'function'); }
+    function messageList(target) { return target === 'float' ? floatMessages : (target === 'hidden' ? hiddenMessages : aiMessages); }
+    function renderEnglishAIHistory() {
+      const el = $('englishAIHistory'); if (!el) return;
+      const sessions = Object.values(aiSessions)
+        .filter(s => s && s.messages && s.messages.length)
+        .sort((a, b) => String(b.updatedAt || '').localeCompare(String(a.updatedAt || '')));
+      el.innerHTML = sessions.length ? sessions.map(s => {
+        const msgs = [...s.messages].map(cleanMessageForStore).sort((a, b) => (b.id || 0) - (a.id || 0));
+        const meta = `${targetLabel(s.target)} · ${new Date(s.updatedAt || s.createdAt || Date.now()).toLocaleString()}`;
+        return `<div class="ai-session-card"><div class="ai-session-head"><span class="ai-session-title">${esc(s.title || targetLabel(s.target))}</span><span class="ai-session-meta">${esc(meta)}</span></div>${renderAIHtml(msgs)}</div>`;
+      }).join('') : '<div class="empty">暂无英语页记录</div>';
+    }
+    function clearEnglishAIHistory() {
+      aiSessions = {};
+      activeAISessions = { main: '', float: '', hidden: '' };
+      state.activeModalMessageId = 0;
+      refreshActiveMessageRefs();
+      saveAIHistory(); syncAIViews(); renderEnglishAIHistory();
+    }
+    function pushAI(role, title, content, prompt, target = 'main') {
+      const session = touchSession(target, role === 'user' ? title : '');
+      const msg = { id: ++aiMessageSeq, role, title, content, prompt: prompt || '', target, sessionId: session.id };
+      session.messages.push(msg);
+      refreshActiveMessageRefs();
+      syncAIViews();
+      return msg;
+    }
+    function findAIMessage(id) {
+      const n = Number(id);
+      for (const session of Object.values(aiSessions)) {
+        const msg = session?.messages?.find(m => m.id === n);
+        if (msg) return msg;
+      }
+      return null;
+    }
+    function streamTextToMessage(msg, text, inlineBox) {
+      msg.content = ''; let i = 0; clearInterval(msg.timer);
+      msg.timer = setInterval(() => { msg.content += text.slice(i, i + 10); i += 10; syncAIViews(); if (inlineBox) setMarkdownBox(inlineBox, msg.content); if (i >= text.length) clearInterval(msg.timer); }, 18);
+    }
+    function sendPrompt(prompt, title = 'AI 学习', inlineBox = null, localText = '', opts = {}) {
+      state.lastPrompt = prompt;
+      const target = opts.target || 'main';
+      pushAI('user', title, prompt.length > 900 ? prompt.slice(0, 900) + '\n……' : prompt, prompt, target);
+      const nativeReady = hasNativeInlineAI();
+      const reply = pushAI('assistant', nativeReady ? 'RikkaHub AI · 等待输出' : '页面内流式输出', nativeReady ? '等待回复…' : '生成中…', prompt, target);
+      reply.inlineBox = inlineBox || null;
+      reply.modal = !!opts.modal;
+      if (reply.modal) {
+        state.activeModalMessageId = reply.id;
+        renderAnalysisMessage(reply);
+      }
+      if (opts.openFloat) toggleFloatAI(true);
+      if (inlineBox) { inlineBox.classList.remove('hide'); setMarkdownBox(inlineBox, opts.loadingText || (title.includes('例句') ? 'AI 例句生成中…' : '正在生成…')); }
+      if (nativeReady) {
+        try {
+          window.RikkaEnglish.sendInlineAI(prompt, reply.id);
+          toast('已发送');
+          return;
+        } catch (e) {
+          reply.title = '页面内 AI 启动失败，已回退';
+          reply.content = String(e && e.message || e || '启动失败');
+        }
+      }
+      const fallback = '已生成请求。';
+      streamTextToMessage(reply, localText || fallback, inlineBox);
+      toast('已生成');
+    }
+    window.rikkaEnglishAIUpdate = function(id, text, done, error) {
+      const msg = findAIMessage(id);
+      if (!msg) return;
+      if (error) {
+        msg.title = 'RikkaHub AI · 错误';
+        msg.content = String(error || '生成失败');
+      } else {
+        msg.title = done ? 'RikkaHub AI · 完成' : 'RikkaHub AI · 生成中';
+        msg.content = text || (done ? '本次没有收到文本输出。' : '等待模型输出…');
+      }
+      if (msg.inlineBox) {
+        msg.inlineBox.classList.remove('hide');
+        setMarkdownBox(msg.inlineBox, msg.content);
+      }
+      if (msg.sessionId && aiSessions[msg.sessionId]) aiSessions[msg.sessionId].updatedAt = new Date().toISOString();
+      syncAIViews();
+    };
+    function clearAI() { activeSession('main').messages = []; state.activeModalMessageId = 0; refreshActiveMessageRefs(); syncAIViews(); saveAIHistory(); }
+    function clearFloatAI() { activeSession('float').messages = []; refreshActiveMessageRefs(); syncAIViews(); saveAIHistory(); }
+    function resetInlineConversation() {
+      resetSession('main');
+      state.activeModalMessageId = 0;
+      syncAIViews(); saveAIHistory();
+      if (window.RikkaEnglish && typeof window.RikkaEnglish.resetInlineAI === 'function') {
+        window.RikkaEnglish.resetInlineAI();
+        toast('已重置页面内 AI 会话');
+      } else {
+        toast('当前版本未暴露原生会话重置桥');
+      }
+    }
+    function copyPromptById(id) { const m = findAIMessage(id); if (m?.prompt) { navigator.clipboard?.writeText(m.prompt); toast('已复制'); } }
+    function sendPromptExternalById(id) { const m = findAIMessage(id); if (m?.prompt) sendExternal(m.prompt); }
+    function sendExternal(prompt) {
+      if (window.RikkaEnglish && typeof window.RikkaEnglish.sendToAI === 'function') { window.RikkaEnglish.sendToAI(prompt); return; }
+      navigator.clipboard?.writeText(prompt); toast('已复制提示词，请粘贴到 RikkaHub AI');
+    }
+    function sendCurrentToAI(kind) {
+      const selected = String(window.getSelection && window.getSelection() || '').trim();
+      const text = selected || readingTextForPrompt();
+      if (!text) return toast('没有可发送内容');
+      sendPrompt(buildPrompt(kind, text), kind === 'translate' ? 'AI 翻译' : (kind === 'vocab' ? 'AI 提炼重点词' : 'AI 解析本篇'));
+    }
+    function copyCurrentPrompt() { const p = buildPrompt('analyze', readingTextForPrompt()); state.lastPrompt = p; navigator.clipboard?.writeText(p); toast('已复制解析提示词'); }
+    function sendWordExample(word, inlineBox) {
+      const w = normalizeWord(word || state.currentWord); if (!w) return;
+      const prompt = `请用考研英语难度为单词 “${w}” 生成 3 个英文例句，并给出中文翻译、搭配和记忆提示。词典释义：${lookupMeaning(w) || lookup(w)}`;
+      const local = `1. In this passage, the word “${w}” helps reveal the author's attitude toward the issue.
+   在这篇文章中，“${w}” 一词有助于揭示作者对该问题的态度。
+
+2. Readers should infer the meaning of “${w}” from the surrounding context rather than translate it mechanically.
+   读者应根据上下文推断 “${w}” 的含义，而不是机械翻译。
+
+3. A precise understanding of “${w}” can make the difference between two similar options.
+   准确理解 “${w}” 可能决定两个相近选项之间的取舍。`;
+      sendPrompt(prompt, `AI 例句 · ${w}`, inlineBox || null, local);
+    }
+    function sendCustomAI(kind) { const text=$('aiInput')?.value?.trim() || ''; if (!text) return toast('请输入内容'); sendPrompt(buildPrompt(kind, text), 'AI 学习'); }
+    function inlinePrompt(kind, text) { return kind === 'send' ? text : buildPrompt(kind, text); }
+    function inlineTitle(kind) { return kind === 'translate' ? '右侧 AI 翻译' : (kind === 'vocab' ? '右侧 AI 词汇' : '右侧 AI 交流'); }
+    function sendInlineAI(kind = 'send') {
+      const input = $('aiInlineInput');
+      const text = input.value.trim();
+      if (!text) return toast('请输入内容');
+      input.value = '';
+      sendPrompt(inlinePrompt(kind, text), inlineTitle(kind));
+    }
+    function sendInlineFloatAI(kind = 'send') {
+      const input = $('aiInlineFloatInput');
+      const text = input.value.trim();
+      if (!text) return toast('请输入内容');
+      input.value = '';
+      sendPrompt(inlinePrompt(kind, text), inlineTitle(kind));
+    }
+    function sendFloatAI() {
+      const input = $('aiFloatInput');
+      const text = input.value.trim();
+      if (!text) return toast('请输入内容');
+      input.value = '';
+      sendPrompt(text, 'AI 对话', null, '', { target: 'float', openFloat: true });
+    }
+    function fillSelect(el, items, fallbackLabel) {
+      if (!el) return;
+      const value = el.value || '';
+      el.innerHTML = (items && items.length ? items : [{ value: '', label: fallbackLabel }]).map(x => `<option value="${esc(x.value ?? '')}">${esc(x.label ?? x.name ?? '')}</option>`).join('');
+      if ([...el.options].some(o => o.value === value)) el.value = value;
+    }
+    function initAIConfigControls() {
+      const assistantEl = $('assistantSelect'), modelEl = $('modelSelect');
+      if (!assistantEl || !modelEl) return;
+      if (!assistantEl.options.length) {
+        fillSelect(assistantEl, [{ value: '0', label: '第一个自定义助手' }], '第一个自定义助手');
+        fillSelect(modelEl, [{ value: '', label: '当前默认聊天模型' }], '当前默认聊天模型');
+      }
+      if (aiConfig.assistantIndex != null) assistantEl.value = String(aiConfig.assistantIndex);
+      if (aiConfig.modelId != null) modelEl.value = String(aiConfig.modelId);
+      syncAIConfigButtons();
+      loadNativeAIConfig(false);
+      updateAIConfigSummary();
+    }
+    function loadNativeAIConfig(showToast) {
+      const assistantEl = $('assistantSelect'), modelEl = $('modelSelect');
+      if (!assistantEl || !modelEl) return;
+      let gotNative = false;
+      try {
+        if (window.RikkaEnglish && typeof window.RikkaEnglish.getAIConfig === 'function') {
+          const data = JSON.parse(window.RikkaEnglish.getAIConfig() || '{}');
+          const assistants = Array.isArray(data.assistants) ? data.assistants.map(a => ({ value: String(a.index ?? 0), label: a.name || `助手 ${Number(a.index || 0) + 1}` })) : [];
+          const models = [{ value: '', label: '当前默认聊天模型' }].concat(Array.isArray(data.models) ? data.models.map(m => ({ value: String(m.id || ''), label: m.name || m.modelId || '模型' })) : []);
+          fillSelect(assistantEl, assistants, '第一个自定义助手');
+          fillSelect(modelEl, models, '当前默认聊天模型');
+          gotNative = true;
+        }
+      } catch {}
+      if (aiConfig.assistantIndex != null && [...assistantEl.options].some(o => o.value === String(aiConfig.assistantIndex))) assistantEl.value = String(aiConfig.assistantIndex);
+      if (aiConfig.modelId != null && [...modelEl.options].some(o => o.value === String(aiConfig.modelId))) modelEl.value = String(aiConfig.modelId);
+      saveAIConfig(false);
+      if (showToast) toast(gotNative ? '已刷新' : '已使用页面内默认项');
+    }
+    function saveAIConfig(resetNative = true) {
+      const assistantEl = $('assistantSelect'), modelEl = $('modelSelect');
+      if (assistantEl) aiConfig.assistantIndex = assistantEl.value || '0';
+      if (modelEl) aiConfig.modelId = modelEl.value || '';
+      aiConfig = normalizeAIConfig(aiConfig);
+      saveAIConfigLocal();
+      applyAIConfigBridge();
+      if (resetNative && window.RikkaEnglish && typeof window.RikkaEnglish.resetInlineAI === 'function') window.RikkaEnglish.resetInlineAI();
+      syncAIConfigButtons();
+      updateAIConfigSummary();
+    }
+    function applyAIConfigBridge() {
+      try {
+        if (window.RikkaEnglish && typeof window.RikkaEnglish.setAIConfig === 'function') {
+          window.RikkaEnglish.setAIConfig(String(aiConfig.assistantIndex ?? '0'), String(aiConfig.modelId ?? ''), !!aiConfig.reasoningEnabled);
+        }
+      } catch {}
+    }
+    function updateAIConfigSummary() {
+      const el = $('aiConfigSummary'); if (!el) return;
+      const a = $('assistantSelect')?.selectedOptions?.[0]?.textContent || '第一个自定义助手';
+      const m = $('modelSelect')?.selectedOptions?.[0]?.textContent || '当前默认聊天模型';
+      el.innerHTML = `<div><b>助手</b>：${esc(a)}</div><div><b>模型</b>：${esc(m)}</div><div><b>推理</b>：${aiConfig.reasoningEnabled ? '开启' : '关闭'}</div><div><b>按 Enter 发送</b>：${aiConfig.sendOnEnter ? '开启' : '关闭'}</div>`;
+    }
+    function resetFloatConversation() {
+      resetSession('float');
+      syncAIViews(); saveAIHistory();
+      if (window.RikkaEnglish && typeof window.RikkaEnglish.resetInlineAI === 'function') {
+        window.RikkaEnglish.resetInlineAI();
+        toast('已重置');
+      }
+    }
+
+    function toggleFloatAI(force) {
+      const panel = $('aiFloatPanel');
+      if (!panel) return;
+      const show = typeof force === 'boolean' ? force : panel.classList.contains('hide');
+      panel.classList.toggle('hide', !show);
+      if (show) {
+        const vw = window.innerWidth || document.documentElement.clientWidth;
+        const vh = window.innerHeight || document.documentElement.clientHeight;
+        if (!panel.dataset.placed) {
+          panel.style.left = '18px';
+          panel.style.top = '18px';
+          panel.style.width = `${Math.max(340, vw - 36)}px`;
+          panel.style.height = `${Math.max(340, vh - 36)}px`;
+          panel.dataset.placed = '1';
+        }
+        syncAIViews();
+        setTimeout(() => $('aiFloatInput')?.focus(), 80);
+      }
+    }
+    function toggleInlineFloatAI(force) {
+      const panel = $('aiInlineFloatPanel');
+      if (!panel) return;
+      const show = typeof force === 'boolean' ? force : panel.classList.contains('hide');
+      panel.classList.toggle('hide', !show);
+      if (show) {
+        const vw = window.innerWidth || document.documentElement.clientWidth;
+        const vh = window.innerHeight || document.documentElement.clientHeight;
+        if (!panel.dataset.placed) {
+          const minW = Math.min(340, Math.max(260, vw - 24));
+          const minH = Math.min(320, Math.max(240, vh - 24));
+          const width = Math.max(minW, Math.floor(vw / 2) - 18);
+          const height = Math.max(minH, vh - 36);
+          panel.style.left = `${Math.max(8, vw - width - 18)}px`;
+          panel.style.top = '18px';
+          panel.style.width = `${width}px`;
+          panel.style.height = `${height}px`;
+          panel.dataset.placed = '1';
+        }
+        syncAIViews();
+        setTimeout(() => $('aiInlineFloatInput')?.focus(), 80);
+      }
+    }
+    function initFloatPanelDrag(panelId, headId, handleId) {
+      const panel = $(panelId), head = $(headId), handle = $(handleId);
+      if (!panel || !head) return;
+      let drag = null, resize = null, raf = 0;
+      function clamp(n, min, max) { return Math.max(min, Math.min(n, max)); }
+      function requestPaint() { if (!raf) raf = requestAnimationFrame(paint); }
+      function paint() {
+        raf = 0;
+        if (drag) {
+          panel.style.left = `${drag.nextLeft}px`;
+          panel.style.top = `${drag.nextTop}px`;
+        }
+        if (resize) {
+          panel.style.width = `${resize.nextWidth}px`;
+          panel.style.height = `${resize.nextHeight}px`;
+        }
+      }
+      head.addEventListener('pointerdown', ev => {
+        if (ev.target.closest('button')) return;
+        const rect = panel.getBoundingClientRect();
+        drag = { id: ev.pointerId, startX: ev.clientX, startY: ev.clientY, left: rect.left, top: rect.top, width: rect.width, height: rect.height, nextLeft: rect.left, nextTop: rect.top };
+        panel.classList.add('dragging');
+        head.setPointerCapture?.(ev.pointerId);
+        ev.preventDefault();
+      });
+      head.addEventListener('pointermove', ev => {
+        if (!drag || drag.id !== ev.pointerId) return;
+        const vw = window.innerWidth || document.documentElement.clientWidth;
+        const vh = window.innerHeight || document.documentElement.clientHeight;
+        drag.nextLeft = clamp(drag.left + ev.clientX - drag.startX, 8, Math.max(8, vw - Math.min(drag.width, vw) - 8));
+        drag.nextTop = clamp(drag.top + ev.clientY - drag.startY, 8, Math.max(8, vh - 72));
+        requestPaint();
+      });
+      function stopDrag(ev) {
+        if (!drag || (ev && drag.id !== ev.pointerId)) return;
+        drag = null;
+        panel.classList.remove('dragging');
+      }
+      head.addEventListener('pointerup', stopDrag);
+      head.addEventListener('pointercancel', stopDrag);
+      if (handle) {
+        handle.addEventListener('pointerdown', ev => {
+          const rect = panel.getBoundingClientRect();
+          resize = { id: ev.pointerId, startX: ev.clientX, startY: ev.clientY, width: rect.width, height: rect.height, left: rect.left, top: rect.top, nextWidth: rect.width, nextHeight: rect.height };
+          panel.classList.add('resizing');
+          handle.setPointerCapture?.(ev.pointerId);
+          ev.preventDefault();
+        });
+        handle.addEventListener('pointermove', ev => {
+          if (!resize || resize.id !== ev.pointerId) return;
+          const vw = window.innerWidth || document.documentElement.clientWidth;
+          const vh = window.innerHeight || document.documentElement.clientHeight;
+          const minW = Math.min(340, Math.max(260, vw - 24));
+          const minH = Math.min(320, Math.max(240, vh - 24));
+          resize.nextWidth = clamp(resize.width + ev.clientX - resize.startX, minW, Math.max(minW, vw - resize.left - 8));
+          resize.nextHeight = clamp(resize.height + ev.clientY - resize.startY, minH, Math.max(minH, vh - resize.top - 8));
+          requestPaint();
+        });
+        function stopResize(ev) {
+          if (!resize || (ev && resize.id !== ev.pointerId)) return;
+          resize = null;
+          panel.classList.remove('resizing');
+        }
+        handle.addEventListener('pointerup', stopResize);
+        handle.addEventListener('pointercancel', stopResize);
+      }
+    }
+    function initFloatDrag() {
+      initFloatPanelDrag('aiFloatPanel', 'aiFloatHead', 'aiFloatResize');
+      initFloatPanelDrag('aiInlineFloatPanel', 'aiInlineFloatHead', 'aiInlineFloatResize');
+    }
+    function bindEnglishEnterSend(id, sendFn) {
+      const el = $(id);
+      if (!el || el.dataset.enterBound === '1') return;
+      el.dataset.enterBound = '1';
+      el.addEventListener('keydown', ev => {
+        if (!aiConfig.sendOnEnter || ev.key !== 'Enter' || ev.shiftKey || ev.altKey || ev.ctrlKey || ev.metaKey || ev.isComposing) return;
+        if (!String(el.value || '').trim()) return;
+        ev.preventDefault();
+        sendFn();
+      });
+    }
+    function initEnglishInputShortcuts() {
+      bindEnglishEnterSend('aiInlineInput', () => sendInlineAI('send'));
+      bindEnglishEnterSend('aiInlineFloatInput', () => sendInlineFloatAI('send'));
+    }
+
+    function openAnalysisModal(title, sourceText) {
+      const modal = $('analysisModal');
+      if (!modal) return;
+      $('analysisTitle').textContent = title || '长难句解析';
+      $('analysisSource').textContent = sourceText ? `选中内容：${sourceText.slice(0, 90)}${sourceText.length > 90 ? '…' : ''}` : '';
+      $('analysisBody').innerHTML = '<div class="empty">正在请求 AI 解析，请稍候…</div>';
+      modal.classList.remove('hide');
+    }
+    function closeAnalysisModal() {
+      $('analysisModal')?.classList.add('hide');
+      state.activeModalMessageId = 0;
+    }
+    function renderAnalysisMessage(msg) {
+      const body = $('analysisBody');
+      if (!body || $('analysisModal')?.classList.contains('hide')) return;
+      const top = body.scrollTop;
+      body.innerHTML = `<div class="ai-msg assistant"><div class="msg-head">${esc(msg.title)}</div>${renderMessageBody(msg)}</div>`;
+      body.scrollTop = top;
+    }
+
+    function selectionInReadableArea(sel) {
+      if (!sel || sel.rangeCount < 1 || sel.isCollapsed) return false;
+      const active = document.activeElement;
+      if (active && ['TEXTAREA', 'INPUT', 'SELECT'].includes(active.tagName)) return false;
+      const root = $('page-read');
+      const a = sel.anchorNode && (sel.anchorNode.nodeType === 1 ? sel.anchorNode : sel.anchorNode.parentElement);
+      const f = sel.focusNode && (sel.focusNode.nodeType === 1 ? sel.focusNode : sel.focusNode.parentElement);
+      return !!(root && ((a && root.contains(a)) || (f && root.contains(f))));
+    }
+    function currentSelectionText() {
+      const sel = window.getSelection && window.getSelection();
+      if (!selectionInReadableArea(sel)) return '';
+      return String(sel || '').replace(/\s+/g, ' ').trim();
+    }
+    function hideSelectionToolbar() {
+      const bar = $('selectionToolbar');
+      if (bar) bar.classList.add('hide');
+    }
+    function updateSelectionToolbar() {
+      const bar = $('selectionToolbar');
+      const sel = window.getSelection && window.getSelection();
+      const text = currentSelectionText();
+      if (!bar || !text) { hideSelectionToolbar(); return; }
+      state.selectedText = text;
+      hideWordPopover();
+      let rect = null;
+      try {
+        const range = sel.getRangeAt(0);
+        const rects = range.getClientRects();
+        rect = rects.length ? rects[rects.length - 1] : range.getBoundingClientRect();
+      } catch { rect = null; }
+      if (!rect || (!rect.width && !rect.height)) { hideSelectionToolbar(); return; }
+      state.selectedRect = { left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom, width: rect.width, height: rect.height };
+      bar.classList.remove('hide');
+      const bw = bar.offsetWidth || 150, bh = bar.offsetHeight || 44;
+      const vw = window.innerWidth || document.documentElement.clientWidth;
+      const vh = window.innerHeight || document.documentElement.clientHeight;
+      let left = rect.left + rect.width / 2 - bw / 2;
+      left = Math.max(12, Math.min(left, vw - bw - 12));
+      let top = rect.bottom + 10;
+      if (top + bh > vh - 12) top = Math.max(12, rect.top - bh - 10);
+      bar.style.left = `${left}px`;
+      bar.style.top = `${top}px`;
+    }
+    function positionSelectionResult() {
+      const box = $('selectionResult');
+      const rect = state.selectedRect;
+      if (!box || !rect || box.classList.contains('hide')) return;
+      const gap = 10;
+      const vw = window.innerWidth || document.documentElement.clientWidth;
+      const vh = window.innerHeight || document.documentElement.clientHeight;
+      const bw = box.offsetWidth || 320, bh = box.offsetHeight || 180;
+      let left = rect.left + rect.width / 2 - bw / 2;
+      left = Math.max(12, Math.min(left, vw - bw - 12));
+      let top = rect.bottom + gap;
+      box.classList.remove('above');
+      if (top + bh > vh - 12) { top = Math.max(12, rect.top - bh - gap); box.classList.add('above'); }
+      box.style.left = `${left}px`;
+      box.style.top = `${top}px`;
+      const arrow = Math.max(18, Math.min(rect.left + rect.width / 2 - left - 6, bw - 28));
+      box.style.setProperty('--arrow-left', `${arrow}px`);
+    }
+    function hideSelectionResult() {
+      const box = $('selectionResult');
+      if (box) box.classList.add('hide');
+    }
+    function openSelectionResult(text) {
+      const box = $('selectionResult');
+      if (!box) return null;
+      const id = `selection-ai-${Date.now()}`;
+      box.innerHTML = `<div class="popover-head"><span class="popover-word">选区翻译</span><button class="small ghost" type="button" data-act="close">关闭</button></div><div class="meta">${esc(text.slice(0, 120))}${text.length > 120 ? '…' : ''}</div><div id="${id}" class="popover-ai">正在请求翻译…</div>`;
+      box.classList.remove('hide');
+      box.querySelector('[data-act="close"]').onclick = hideSelectionResult;
+      positionSelectionResult();
+      setTimeout(positionSelectionResult, 0);
+      return $(id);
+    }
+    function sendSelectionAI(kind) {
+      const text = state.selectedText || currentSelectionText();
+      if (!text) return toast('请先长按选择单词、短语或句子');
+      hideSelectionToolbar();
+      if (kind === 'analyze') {
+        hideSelectionResult();
+        openAnalysisModal('选区长难句解析', text);
+        sendPrompt(buildSelectionPrompt('analyze', text), '选区长难句解析', null, '', { modal: true });
+      } else {
+        const inlineBox = openSelectionResult(text);
+        sendPrompt(buildSelectionPrompt('translate', text), '选区翻译', inlineBox, '已发送翻译请求。', { target: 'hidden', loadingText: '正在翻译…' });
+      }
+    }
+
+    function exportJson() { return JSON.stringify({ app: 'RikkaHub English', version: 1, exportedAt: new Date().toISOString(), count: vocab.length, items: vocab }, null, 2); }
+    function exportVocab(mode) {
+      const filename = `rikkahub_english_vocab_${new Date().toISOString().slice(0,10)}.json`;
+      const json = exportJson();
+      if (window.RikkaEnglish) {
+        if (mode === 'share' && typeof window.RikkaEnglish.shareVocab === 'function') window.RikkaEnglish.shareVocab(json, filename);
+        else if (typeof window.RikkaEnglish.saveVocab === 'function') window.RikkaEnglish.saveVocab(json, filename);
+        else fallbackDownload(json, filename);
+      } else fallbackDownload(json, filename);
+    }
+    function fallbackDownload(json, filename) {
+      const blob = new Blob([json], {type:'application/json;charset=utf-8'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href=url; a.download=filename; a.click();
+      setTimeout(()=>URL.revokeObjectURL(url), 1000);
+      toast('已触发浏览器下载');
+    }
+    function importVocabFile(file) {
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const data = JSON.parse(String(reader.result || '{}'));
+          const items = Array.isArray(data) ? data : (Array.isArray(data.items) ? data.items : []);
+          const map = new Map(vocab.map(v => [v.word, v]));
+          items.forEach(x => { const w = normalizeWord(x.word); if (w && !map.has(w)) map.set(w, {word:w, meaning:x.meaning || lookup(w), addedAt:x.addedAt || new Date().toISOString(), source:x.source || '导入'}); });
+          vocab = [...map.values()]; saveVocabLocal(); toast('导入完成');
+        } catch (e) { toast('JSON 格式不正确'); }
+      };
+      reader.readAsText(file, 'utf-8');
+    }
+
+    document.addEventListener('click', ev => {
+      const pop = $('wordPopover');
+      const bar = $('selectionToolbar');
+      const selBox = $('selectionResult');
+      if (bar && !bar.classList.contains('hide') && bar.contains(ev.target)) return;
+      if (ev.target.closest?.('#aiFloatPanel, #aiInlineFloatPanel, #analysisModal')) return;
+      if (selBox && !selBox.classList.contains('hide') && !selBox.contains(ev.target) && !bar?.contains(ev.target)) hideSelectionResult();
+      if (!pop || pop.classList.contains('hide')) return;
+      if (pop.contains(ev.target) || ev.target.classList?.contains('word')) return;
+      hideWordPopover();
+    });
+    document.addEventListener('selectionchange', () => {
+      clearTimeout(window.__selectionTimer);
+      window.__selectionTimer = setTimeout(updateSelectionToolbar, 160);
+    });
+    document.addEventListener('pointerup', () => setTimeout(updateSelectionToolbar, 90), true);
+    document.addEventListener('keyup', () => setTimeout(updateSelectionToolbar, 90), true);
+    window.addEventListener('resize', () => { positionWordPopover(state.popoverTarget); updateSelectionToolbar(); positionSelectionResult(); });
+    document.addEventListener('scroll', () => { positionWordPopover(state.popoverTarget); updateSelectionToolbar(); positionSelectionResult(); }, true);
+
+    initSelectors(); renderVocab(); initAIConfigControls(); syncAIViews(); initFloatDrag(); initEnglishInputShortcuts();
+  </script>
+</body>
+</html>
+
+
+

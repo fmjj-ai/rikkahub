@@ -260,6 +260,27 @@ class ChatService(
         return session.processingStatus
     }
 
+    fun configureEnglishSession(
+        conversationId: Uuid,
+        assistantId: Uuid,
+        modelId: Uuid?,
+        reasoningEnabled: Boolean,
+    ) {
+        val session = getOrCreateSession(conversationId)
+        session.englishAIConfig = EnglishSessionAIConfig(
+            modelId = modelId,
+            reasoningEnabled = reasoningEnabled,
+        )
+        val current = session.state.value
+        if (current.assistantId != assistantId) {
+            updateConversation(conversationId, current.copy(assistantId = assistantId))
+        }
+    }
+
+    fun isGenerating(conversationId: Uuid): Boolean {
+        return sessions[conversationId]?.isGenerating == true
+    }
+
     fun getConversationJobs(): Flow<Map<Uuid, Job?>> {
         return _sessionsVersion.flatMapLatest {
             val currentSessions = sessions.values.toList()
@@ -469,10 +490,23 @@ class ChatService(
         messageRange: ClosedRange<Int>? = null
     ) {
         val settings = settingsStore.settingsFlow.first()
-        val initialConversation = getConversationFlow(conversationId).value
-        val assistant = settings.getAssistantById(initialConversation.assistantId)
+        val session = getOrCreateSession(conversationId)
+        val initialConversation = session.state.value
+        val englishAIConfig = session.englishAIConfig
+        val baseAssistant = settings.getAssistantById(initialConversation.assistantId)
             ?: settings.getCurrentAssistant()
-        val model = settings.findModelById(assistant.chatModelId ?: settings.chatModelId) ?: return
+        val assistant = englishAIConfig?.let { config ->
+            baseAssistant.copy(
+                chatModelId = config.modelId ?: baseAssistant.chatModelId,
+                reasoningLevel = if (config.reasoningEnabled) {
+                    baseAssistant.reasoningLevel
+                } else {
+                    ReasoningLevel.OFF
+                },
+            )
+        } ?: baseAssistant
+        val model = settings.findModelById(englishAIConfig?.modelId ?: assistant.chatModelId ?: settings.chatModelId)
+            ?: return
 
         val senderName = if (assistant.useAssistantAvatar) {
             assistant.name.ifEmpty { context.getString(R.string.assistant_page_default_assistant) }
@@ -501,7 +535,6 @@ class ChatService(
             val conversation = getConversationFlow(conversationId).value
 
             // start generating
-            val session = getOrCreateSession(conversationId)
             generationHandler.generateText(
                 settings = settings,
                 model = model,

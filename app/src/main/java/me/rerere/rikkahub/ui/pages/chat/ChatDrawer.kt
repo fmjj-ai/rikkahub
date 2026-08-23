@@ -1,5 +1,6 @@
 package me.rerere.rikkahub.ui.pages.chat
 
+import android.content.Intent
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -54,6 +55,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import me.rerere.hugeicons.HugeIcons
+import me.rerere.hugeicons.stroke.BookOpen01
 import me.rerere.hugeicons.stroke.ChartColumn
 import me.rerere.hugeicons.stroke.Delete01
 import me.rerere.hugeicons.stroke.Folder01
@@ -75,6 +77,7 @@ import me.rerere.rikkahub.data.model.Conversation
 import me.rerere.rikkahub.data.model.Folder
 import me.rerere.rikkahub.data.repository.ConversationRepository
 import me.rerere.rikkahub.ui.components.ai.AssistantPicker
+import me.rerere.rikkahub.ui.activity.EnglishStudyActivity
 import me.rerere.rikkahub.ui.components.ui.BackupReminderCard
 import me.rerere.rikkahub.ui.components.ui.Greeting
 import me.rerere.rikkahub.ui.components.ui.Tooltip
@@ -218,13 +221,18 @@ fun ChatDrawerContent(
                             }
                         )
 
+                        // 考研英语阅读入口（点击昵称文字仍可修改昵称）
                         Icon(
-                            imageVector = HugeIcons.PencilEdit01,
-                            contentDescription = "Edit",
+                            imageVector = HugeIcons.BookOpen01,
+                            contentDescription = "English",
                             modifier = Modifier
+                                .clip(CircleShape)
                                 .onClick {
-                                    nicknameEditState.open(settings.displaySetting.userNickname)
+                                    context.startActivity(
+                                        Intent(context, EnglishStudyActivity::class.java)
+                                    )
                                 }
+                                .padding(2.dp)
                                 .size(LocalTextStyle.current.fontSize.toDp())
                         )
                     }

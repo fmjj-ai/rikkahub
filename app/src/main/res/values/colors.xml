@@ -7,4 +7,27 @@
   <color name="teal_700">#FF018786</color>
   <color name="black">#FF000000</color>
   <color name="white">#FFFFFFFF</color>
+  <color name="ucrop_color_active_aspect_ratio">#FF6750A4</color>
+  <color name="ucrop_color_active_controls_color">#FF6750A4</color>
+  <color name="ucrop_color_black">#FF000000</color>
+  <color name="ucrop_color_blaze_orange">#FFFF6300</color>
+  <color name="ucrop_color_crop_background">#FF000000</color>
+  <color name="ucrop_color_default_crop_frame">#FFFFFFFF</color>
+  <color name="ucrop_color_default_crop_grid">#80FFFFFF</color>
+  <color name="ucrop_color_default_dimmed">#8C000000</color>
+  <color name="ucrop_color_default_logo">#4F212121</color>
+  <color name="ucrop_color_ebony_clay">#FF20242F</color>
+  <color name="ucrop_color_heather">#FFB3BECE</color>
+  <color name="ucrop_color_inactive_aspect_ratio">#FF49454F</color>
+  <color name="ucrop_color_inactive_controls_color">#FFB3BECE</color>
+  <color name="ucrop_color_progress_wheel_line">#FF6750A4</color>
+  <color name="ucrop_color_toolbar">#FFFFFBFE</color>
+  <color name="ucrop_color_toolbar_widget">#FF1C1B1F</color>
+  <color name="ucrop_color_white">#FFFFFFFF</color>
+  <color name="ucrop_color_widget">#FF1C1B1F</color>
+  <color name="ucrop_color_widget_active">#FFFFFFFF</color>
+  <color name="ucrop_color_widget_background">#FFECE6F0</color>
+  <color name="ucrop_color_widget_rotate_angle">#FF49454F</color>
+  <color name="ucrop_color_widget_rotate_mid_line">#FF6750A4</color>
+  <color name="ucrop_color_widget_text">#FF6750A4</color>
 </resources>
