@@ -34,10 +34,21 @@ import java.text.NumberFormat
 import kotlin.math.roundToInt
 
 @Composable
-private fun contextColor(ratio: Float): Color = when {
-    ratio >= 0.7f -> MaterialTheme.extendColors.red6
-    ratio >= 0.5f -> MaterialTheme.extendColors.orange6
-    else -> MaterialTheme.extendColors.green6
+private fun contextColor(ratio: Float): Color {
+    return when {
+        ratio >= 0.7f -> MaterialTheme.colorScheme.error
+        ratio >= 0.5f -> MaterialTheme.colorScheme.tertiary
+        else -> MaterialTheme.colorScheme.primary
+    }
+}
+
+@Composable
+private fun contextTrackColor(ratio: Float): Color {
+    return when {
+        ratio >= 0.7f -> MaterialTheme.colorScheme.errorContainer
+        ratio >= 0.5f -> MaterialTheme.colorScheme.tertiaryContainer
+        else -> MaterialTheme.colorScheme.primaryContainer
+    }
 }
 
 @Composable
@@ -63,7 +74,7 @@ fun ContextUsageButton(
                 progress = { ratio.coerceIn(0f, 1f) },
                 modifier = Modifier.size(22.dp),
                 color = color,
-                trackColor = color.copy(alpha = 0.3f),
+                trackColor = contextTrackColor(ratio),
                 strokeWidth = 3.dp,
             )
         }
@@ -121,7 +132,7 @@ fun ContextUsageDialog(
                         progress = { ratio.coerceIn(0f, 1f) },
                         modifier = Modifier.size(80.dp),
                         color = contextColor(ratio),
-                        trackColor = contextColor(ratio).copy(alpha = 0.18f),
+                        trackColor = contextTrackColor(ratio),
                         strokeWidth = 6.dp,
                     )
                     Text("${(ratio * 100).roundToInt()}%", style = MaterialTheme.typography.titleMedium)
