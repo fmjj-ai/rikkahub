@@ -82,7 +82,8 @@ class ConversationSession(
         _generationJob.value?.cancel()
         _generationJob.value = job
         job?.invokeOnCompletion {
-            _generationJob.value = null
+            // 旧任务结束时不覆盖刚开始的新任务，否则压缩和发送可能同时运行。
+            _generationJob.compareAndSet(job, null)
             if (refCount.get() <= 0) {
                 scheduleIdleCheck()
             }

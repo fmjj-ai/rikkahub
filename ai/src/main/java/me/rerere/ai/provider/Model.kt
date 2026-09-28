@@ -17,7 +17,19 @@ data class Model(
     val abilities: List<ModelAbility> = emptyList(),
     val tools: Set<BuiltInTools> = emptySet(),
     val providerOverwrite: ProviderSetting? = null,
-)
+    val contextWindowTokens: Int = DEFAULT_CONTEXT_WINDOW_TOKENS,
+    val autoCompressThresholdTokens: Int = DEFAULT_AUTO_COMPRESS_THRESHOLD_TOKENS,
+) {
+    val contextWindow: Int get() = contextWindowTokens.takeIf { it > 0 } ?: DEFAULT_CONTEXT_WINDOW_TOKENS
+    val autoCompressThreshold: Int
+        get() = autoCompressThresholdTokens.takeIf { it > 0 }
+            ?.coerceAtMost(contextWindow) ?: minOf(DEFAULT_AUTO_COMPRESS_THRESHOLD_TOKENS, contextWindow)
+    val hasValidContextSettings: Boolean
+        get() = contextWindowTokens > 0 && autoCompressThresholdTokens in 1..contextWindowTokens
+}
+
+const val DEFAULT_CONTEXT_WINDOW_TOKENS = 472_000
+const val DEFAULT_AUTO_COMPRESS_THRESHOLD_TOKENS = 272_000
 
 @Serializable
 enum class ModelType {

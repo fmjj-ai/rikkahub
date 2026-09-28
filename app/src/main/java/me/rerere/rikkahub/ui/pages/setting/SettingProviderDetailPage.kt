@@ -623,6 +623,7 @@ private fun ModelSettingsForm(
                                     onModelChange(model.copy(abilities = it))
                                 }
                             )
+                            ModelContextSettings(model, onModelChange)
                         }
                     }
                 }
@@ -671,6 +672,51 @@ private fun ModelSettingsForm(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun ModelContextSettings(model: Model, onModelChange: (Model) -> Unit) {
+    var totalText by rememberSaveable(model.id) { mutableStateOf(model.contextWindowTokens.toString()) }
+    var thresholdText by rememberSaveable(model.id) {
+        mutableStateOf(model.autoCompressThresholdTokens.toString())
+    }
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text("上下文", style = MaterialTheme.typography.titleSmall)
+        OutlinedTextField(
+            value = totalText,
+            onValueChange = {
+                totalText = it
+                onModelChange(model.copy(contextWindowTokens = it.toIntOrNull() ?: 0))
+            },
+            label = { Text("总上下文") },
+            suffix = { Text("Token") },
+            supportingText = { Text("默认 472k（472,000 Token），1k = 1,000 Token") },
+            isError = model.contextWindowTokens <= 0,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        OutlinedTextField(
+            value = thresholdText,
+            onValueChange = {
+                thresholdText = it
+                onModelChange(model.copy(autoCompressThresholdTokens = it.toIntOrNull() ?: 0))
+            },
+            label = { Text("自动压缩上下文") },
+            suffix = { Text("Token") },
+            supportingText = {
+                Text(if (model.hasValidContextSettings) {
+                    "默认 272k，达到阈值时自动生成历史摘要；原始记录保留。"
+                } else {
+                    "请输入正整数，自动压缩阈值不能超过总上下文。"
+                })
+            },
+            isError = !model.hasValidContextSettings,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth(),
+        )
     }
 }
 
@@ -825,6 +871,7 @@ private fun AddModelButton(
                                     dialogState.confirm()
                                 }
                             },
+                            enabled = modelState.type != ModelType.CHAT || modelState.hasValidContextSettings,
                         ) {
                             Text(stringResource(R.string.setting_provider_page_add))
                         }
@@ -1240,6 +1287,7 @@ private fun ModelCard(
                                     dialogState.confirm()
                                 }
                             },
+                            enabled = editingModel.type != ModelType.CHAT || editingModel.hasValidContextSettings,
                         ) {
                             Text(stringResource(R.string.confirm))
                         }

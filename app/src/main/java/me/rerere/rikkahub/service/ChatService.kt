@@ -7,9 +7,7 @@ import androidx.core.net.toUri
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -40,6 +38,14 @@ import me.rerere.ai.ui.canResumeToolExecution
 import me.rerere.ai.ui.finishPendingTools
 import me.rerere.ai.ui.finishReasoning
 import me.rerere.ai.ui.isEmptyInputMessage
+import me.rerere.ai.ui.ContextCompaction
+import me.rerere.ai.ui.compressionTarget
+import me.rerere.ai.ui.compressContextText
+import me.rerere.ai.ui.compressionText
+import me.rerere.ai.ui.contextMessages
+import me.rerere.ai.ui.contextFingerprint
+import me.rerere.ai.ui.estimateTokens
+import me.rerere.rikkahub.data.ai.transformers.transforms
 import me.rerere.common.android.Logging
 import me.rerere.rikkahub.AppScope
 import me.rerere.rikkahub.R
@@ -562,6 +568,20 @@ class ChatService(
                     add(workspaceReminderTransformer)
                 },
                 outputTransformers = outputTransformers,
+                compressContext = { messages ->
+                    if (messages.compressionTarget() == null) {
+                        messages
+                    } else {
+                        session.processingStatus.value = context.getString(R.string.chat_page_compressing)
+                        try {
+                            val compacted = compactMessages(messages, assistant, model)
+                            saveCompactedMessages(conversationId, messages, compacted)
+                            compacted
+                        } finally {
+                            session.processingStatus.value = null
+                        }
+                    }
+                },
                 tools = buildList {
                     if (assistant.enableWebSearch) {
                         addAll(createSearchTools(settings))
@@ -862,88 +882,109 @@ class ChatService(
 
     // ---- 压缩对话历史 ----
 
-    suspend fun compressConversation(
+    fun compressConversation(
         conversationId: Uuid,
-        conversation: Conversation,
         additionalPrompt: String,
         targetTokens: Int,
-        keepRecentMessages: Int = 32
-    ): Result<Unit> = runCatching {
+        keepRecentMessages: Int = 4,
+    ): Job {
+        val session = getOrCreateSession(conversationId)
+        if (session.isGenerating) {
+            addError(IllegalStateException("请等待当前生成或压缩完成"), conversationId)
+            return Job().apply { complete() }
+        }
+        val job = appScope.launch(Dispatchers.IO, start = kotlinx.coroutines.CoroutineStart.LAZY) {
+            try {
+                val settings = settingsStore.settingsFlow.first()
+                val conversation = session.state.value
+                val assistant = settings.getAssistantById(conversation.assistantId) ?: settings.getCurrentAssistant()
+                val model = settings.findModelById(assistant.chatModelId ?: settings.chatModelId)
+                    ?: error("请先选择模型")
+                session.processingStatus.value = context.getString(R.string.chat_page_compressing)
+                val compacted = compactMessages(
+                    conversation.currentMessages, assistant, model, additionalPrompt, targetTokens, keepRecentMessages
+                )
+                saveCompactedMessages(conversationId, conversation.currentMessages, compacted)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                addError(e, conversationId, context.getString(R.string.error_title_compress_conversation))
+            } finally {
+                session.processingStatus.value = null
+            }
+        }
+        session.setJob(job)
+        job.start()
+        return job
+    }
+
+    private suspend fun saveCompactedMessages(
+        conversationId: Uuid,
+        originalMessages: List<UIMessage>,
+        compactedMessages: List<UIMessage>,
+    ) {
+        kotlinx.coroutines.currentCoroutineContext().ensureActive()
+        val latest = getConversationFlow(conversationId).value
+        check(latest.currentMessages.take(originalMessages.size).contextFingerprint() ==
+            originalMessages.contextFingerprint()) {
+            "压缩期间对话已改变，请重新压缩"
+        }
+        saveConversation(conversationId, latest.updateCurrentMessages(compactedMessages).copy(chatSuggestions = emptyList()))
+    }
+
+    private suspend fun compactMessages(
+        messages: List<UIMessage>,
+        assistant: Assistant,
+        chatModel: Model,
+        additionalPrompt: String = "",
+        targetTokens: Int = 2_000,
+        keepRecentMessages: Int = 4,
+    ): List<UIMessage> = kotlinx.coroutines.withContext(Dispatchers.IO) {
+        val activeMessages = messages.contextMessages()
+        val originalBoundary = messages.compressionTarget(keepRecentMessages)
+            ?: error("至少需要两轮用户消息，最新一轮和工具调用会完整保留")
+        val boundary = activeMessages.indexOfFirst { it.id == messages[originalBoundary].id }
         val settings = settingsStore.settingsFlow.first()
-        val model = settings.findModelById(settings.compressModelId)
-            ?: settings.getCurrentChatModel()
-            ?: throw IllegalStateException("No model available for compression")
-        val provider = model.findProvider(settings.providers)
-            ?: throw IllegalStateException("Provider not found")
-
+        val model = settings.findModelById(settings.compressModelId) ?: chatModel
+        val provider = model.findProvider(settings.providers) ?: error("找不到压缩模型的服务商")
         val providerHandler = providerManager.getProviderByType(provider)
+        val outputBudget = targetTokens.coerceIn(128, (model.contextWindow / 4).coerceAtLeast(128))
+        fun prompt(content: String) = settings.compressPrompt.applyPlaceholders(
+            "content" to content,
+            "target_tokens" to outputBudget.toString(),
+            "additional_context" to additionalPrompt,
+            "locale" to Locale.getDefault().displayName,
+        )
+        val inputBudget = minOf(32_000, model.contextWindow - outputBudget - prompt("").estimateTokens() - 512)
+        check(inputBudget >= 128) { "压缩模型的上下文容量不足，请调整模型设置" }
+        // 展开完整附件和 OCR；不再把每条消息截成 2,000 字符。
+        val source = activeMessages.take(boundary + 1).transforms(
+            transformers = listOf(DocumentAsPromptTransformer, OcrTransformer),
+            context = context,
+            model = chatModel,
+            assistant = assistant,
+            settings = settings,
+        ).joinToString("\n\n") { it.compressionText() }
 
-        val maxMessagesPerChunk = 256
-        val allMessages = conversation.currentMessages
-
-        // Split messages into those to compress and those to keep
-        val messagesToCompress: List<UIMessage>
-        val messagesToKeep: List<UIMessage>
-
-        if (keepRecentMessages > 0 && allMessages.size > keepRecentMessages) {
-            messagesToCompress = allMessages.dropLast(keepRecentMessages)
-            messagesToKeep = allMessages.takeLast(keepRecentMessages)
-        } else if (keepRecentMessages > 0) {
-            // Not enough messages to compress while keeping recent ones
-            throw IllegalStateException(context.getString(R.string.chat_page_compress_not_enough_messages))
-        } else {
-            messagesToCompress = allMessages
-            messagesToKeep = emptyList()
-        }
-
-        fun splitMessages(messages: List<UIMessage>): List<List<UIMessage>> {
-            if (messages.size <= maxMessagesPerChunk) return listOf(messages)
-            val mid = messages.size / 2
-            val left = splitMessages(messages.subList(0, mid))
-            val right = splitMessages(messages.subList(mid, messages.size))
-            return left + right
-        }
-
-        suspend fun compressMessages(messages: List<UIMessage>): String {
-            val contentToCompress = messages.joinToString("\n\n") { it.summaryAsText(maxLength = 2000) }
-            val prompt = settings.compressPrompt.applyPlaceholders(
-                "content" to contentToCompress,
-                "target_tokens" to targetTokens.toString(),
-                "additional_context" to if (additionalPrompt.isNotBlank()) {
-                    "Additional instructions from user: $additionalPrompt"
-                } else "",
-                "locale" to Locale.getDefault().displayName
-            )
-
+        suspend fun summarize(content: String): String {
             val result = providerHandler.generateText(
                 providerSetting = provider,
-                messages = listOf(UIMessage.user(prompt)),
-                params = backgroundTextGenerationParams(model),
+                messages = listOf(UIMessage.user(prompt(content))),
+                params = backgroundTextGenerationParams(model, ReasoningLevel.OFF).copy(maxTokens = outputBudget),
             )
-
-            return result.choices[0].message?.toText()?.trim()
-                ?: throw IllegalStateException("Failed to generate compressed summary")
+            return result.choices.firstOrNull()?.message?.toText()?.trim()?.takeIf { it.isNotBlank() }
+                ?: error("压缩模型返回了空摘要，原始记录已保留")
         }
 
-        val compressedSummaries = coroutineScope {
-            splitMessages(messagesToCompress)
-                .map { chunk -> async { compressMessages(chunk) } }
-                .awaitAll()
-        }
-
-        // Create new conversation with compressed history as multiple user messages + kept messages
-        val newMessageNodes = buildList {
-            compressedSummaries.forEach { summary ->
-                add(UIMessage.user(summary).toMessageNode())
-            }
-            addAll(messagesToKeep.map { it.toMessageNode() })
-        }
-        val newConversation = conversation.copy(
-            messageNodes = newMessageNodes,
-            chatSuggestions = emptyList(),
+        // 顺序分块避免同时发起大量请求；多块摘要再合并，确保压缩确实降低占用。
+        val summary = compressContextText(source, inputBudget, ::summarize)
+        val compaction = ContextCompaction(
+            summary = summary,
+            prefixHash = messages.take(originalBoundary + 1).contextFingerprint(),
         )
-
-        saveConversation(conversationId, newConversation)
+        messages.mapIndexed { index, message ->
+            if (index == originalBoundary) message.copy(contextCompaction = compaction) else message
+        }
     }
 
     // ---- 对话状态更新 ----

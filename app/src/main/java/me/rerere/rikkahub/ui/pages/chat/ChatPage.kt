@@ -74,6 +74,7 @@ import me.rerere.rikkahub.data.model.Conversation
 import me.rerere.rikkahub.data.repository.WorkspaceRepository
 import me.rerere.rikkahub.service.ChatError
 import me.rerere.rikkahub.ui.components.ai.ChatInput
+import me.rerere.rikkahub.ui.components.ai.ContextUsageDialog
 import me.rerere.rikkahub.ui.components.ai.FilesPicker
 import me.rerere.rikkahub.ui.components.ai.completion.WorkspaceCompletionProvider
 import me.rerere.rikkahub.ui.components.ai.useCropLauncher
@@ -282,7 +283,9 @@ private fun ChatPageContent(
     var previewMode by rememberSaveable { mutableStateOf(false) }
     val hazeState = rememberHazeState()
     val assistant = setting.getCurrentAssistant()
+    val contextUsage by vm.contextUsage.collectAsStateWithLifecycle()
     var showFilesSheet by remember { mutableStateOf(false) }
+    var showContextUsageDialog by remember { mutableStateOf(false) }
 
     val completionProviders = remember(assistant.workspaceId, conversation.workspaceCwd, workspaceRepository) {
         assistant.workspaceId?.let { workspaceId ->
@@ -328,6 +331,7 @@ private fun ChatPageContent(
                     loading = loadingJob != null,
                     settings = setting,
                     hazeState = hazeState,
+                    contextUsage = contextUsage,
                     completionProviders = completionProviders,
                     onCancelClick = {
                         vm.stopGeneration()
@@ -404,6 +408,9 @@ private fun ChatPageContent(
                     },
                     onMoreClick = {
                         showFilesSheet = true
+                    },
+                    onContextUsageClick = {
+                        showContextUsageDialog = true
                     },
                 )
             },
@@ -494,6 +501,17 @@ private fun ChatPageContent(
                 assistant = assistant,
                 vm = vm,
                 onDismiss = { showFilesSheet = false },
+            )
+        }
+
+        if (showContextUsageDialog && currentChatModel != null) {
+            ContextUsageDialog(
+                usage = contextUsage,
+                model = currentChatModel,
+                canCompress = loadingJob == null && contextUsage.canCompress,
+                busy = loadingJob != null,
+                onDismiss = { showContextUsageDialog = false },
+                onCompress = { vm.handleImmediateCompressContext() },
             )
         }
     }

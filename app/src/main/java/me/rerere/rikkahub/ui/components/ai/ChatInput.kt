@@ -1,5 +1,6 @@
 package me.rerere.rikkahub.ui.components.ai
 
+import android.content.res.Configuration
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -27,6 +28,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
@@ -63,6 +65,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -83,6 +86,7 @@ import kotlinx.coroutines.flow.collectLatest
 import me.rerere.ai.provider.Model
 import me.rerere.ai.provider.ModelAbility
 import me.rerere.ai.provider.ModelType
+import me.rerere.ai.ui.ContextUsage
 import me.rerere.asr.ASRStatus
 import me.rerere.hugeicons.HugeIcons
 import me.rerere.hugeicons.stroke.Add01
@@ -120,6 +124,7 @@ fun ChatInput(
     loading: Boolean,
     settings: Settings,
     hazeState: HazeState,
+    contextUsage: ContextUsage,
     enableSearch: Boolean,
     onToggleSearch: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
@@ -128,6 +133,7 @@ fun ChatInput(
     onUpdateAssistant: (Assistant) -> Unit,
     onUpdateSearchService: (Int) -> Unit,
     onMoreClick: () -> Unit,
+    onContextUsageClick: () -> Unit,
     onCancelClick: () -> Unit,
     onSendClick: () -> Unit,
     onLongSendClick: () -> Unit,
@@ -139,6 +145,9 @@ fun ChatInput(
 
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
+    val configuration = LocalConfiguration.current
+    val isTabletLandscape = configuration.smallestScreenWidthDp >= 600 &&
+        configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
     // 键盘弹出时让底部两角变直角，贴合 IME
     val imeVisible = WindowInsets.isImeVisible
@@ -295,6 +304,17 @@ fun ChatInput(
                                         onUpdateAssistant(assistant.copy(reasoningLevel = it))
                                     },
                                     onlyIcon = true,
+                                )
+                            }
+
+                            // 上下文使用量
+                            if (model != null) {
+                                ContextUsageButton(
+                                    usage = contextUsage,
+                                    model = model,
+                                    onClick = onContextUsageClick,
+                                    // 仅平板横屏微调圆环，与旁边按钮在视觉上对齐。
+                                    modifier = if (isTabletLandscape) Modifier.offset(y = 4.dp) else Modifier,
                                 )
                             }
 

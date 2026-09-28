@@ -25,12 +25,17 @@ import me.rerere.ai.provider.Provider
 import me.rerere.ai.provider.ProviderManager
 import me.rerere.ai.provider.ProviderSetting
 import me.rerere.ai.provider.TextGenerationParams
+import me.rerere.ai.provider.providers.DEFAULT_CLAUDE_MAX_TOKENS
 import me.rerere.ai.registry.ModelRegistry
 import me.rerere.ai.ui.UIMessage
 import me.rerere.ai.ui.UIMessagePart
 import me.rerere.ai.ui.ToolApprovalState
 import me.rerere.ai.ui.handleMessageChunk
 import me.rerere.ai.ui.limitContext
+import me.rerere.ai.ui.contextMessages
+import me.rerere.ai.ui.contextFingerprint
+import me.rerere.ai.ui.contextUsage
+import me.rerere.ai.ui.estimateTokens
 import me.rerere.rikkahub.data.ai.transformers.InputMessageTransformer
 import me.rerere.rikkahub.data.ai.transformers.MessageTransformer
 import me.rerere.rikkahub.data.ai.transformers.OutputMessageTransformer
@@ -83,6 +88,7 @@ class GenerationHandler(
         conversationModeInjectionIds: Set<Uuid> = emptySet(),
         conversationLorebookIds: Set<Uuid> = emptySet(),
         workspaceCwd: String? = null,
+        compressContext: suspend (List<UIMessage>) -> List<UIMessage> = { it },
     ): Flow<GenerationChunk> = flow {
         val provider = model.findProvider(settings.providers) ?: error("Provider not found")
         val providerImpl = providerManager.getProviderByType(provider)
@@ -161,6 +167,7 @@ class GenerationHandler(
                     conversationModeInjectionIds = conversationModeInjectionIds,
                     conversationLorebookIds = conversationLorebookIds,
                     workspaceCwd = workspaceCwd,
+                    compressContext = compressContext,
                 )
                 messages = messages.visualTransforms(
                     transformers = outputTransformers,
@@ -360,8 +367,10 @@ class GenerationHandler(
         conversationModeInjectionIds: Set<Uuid> = emptySet(),
         conversationLorebookIds: Set<Uuid> = emptySet(),
         workspaceCwd: String? = null,
+        compressContext: suspend (List<UIMessage>) -> List<UIMessage> = { it },
     ) {
-        val internalMessages = buildList {
+        var messages = messages
+        suspend fun prepareMessages(): List<UIMessage> = buildList {
             val system = buildString {
                 val effectiveSystemPrompt =
                     if (assistant.allowConversationSystemPrompt && !conversationSystemPrompt.isNullOrBlank()) {
@@ -385,7 +394,7 @@ class GenerationHandler(
                 }
             }
             if (system.isNotBlank()) add(UIMessage.system(prompt = system))
-            addAll(messages.limitContext(assistant.contextMessageLimit))
+            addAll(messages.contextMessages().limitContext(assistant.contextMessageLimit))
         }.transforms(
             transformers = transformers,
             context = context,
@@ -398,7 +407,41 @@ class GenerationHandler(
             workspaceCwd = workspaceCwd,
         )
 
-        var messages: List<UIMessage> = messages
+        var internalMessages = prepareMessages()
+        val toolTokens = tools.sumOf { tool ->
+            (tool.name + tool.description + tool.parameters().toString()).estimateTokens().toLong()
+        }
+        fun inputTokenCount() = maxOf(
+            (internalMessages.estimateTokens().toLong() + toolTokens).coerceAtMost(Int.MAX_VALUE.toLong()).toInt(),
+            messages.contextUsage(model, messageLimit = assistant.contextMessageLimit).usedTokens,
+        )
+        val reservedOutput = assistant.maxTokens?.coerceAtLeast(0)
+            ?: if (provider is ProviderSetting.Claude) DEFAULT_CLAUDE_MAX_TOKENS else 0
+        val initialInputTokens = inputTokenCount()
+        if (initialInputTokens >= model.autoCompressThreshold ||
+            initialInputTokens.toLong() + reservedOutput > model.contextWindow
+        ) {
+            val compacted = compressContext(messages)
+            if (compacted != messages) {
+                messages = compacted
+                internalMessages = prepareMessages()
+            }
+        }
+        val inputTokens = inputTokenCount()
+        check(inputTokens.toLong() + reservedOutput <= model.contextWindow) {
+            "当前输入约 $inputTokens Token，预留输出 $reservedOutput Token，超过模型总上下文 ${model.contextWindow}。" +
+                "请缩短当前输入、减少附件，或调整模型上下文设置。"
+        }
+        val inputHash = messages.contextMessages().contextFingerprint()
+        suspend fun publishMessages() {
+            if (messages.lastOrNull()?.role == MessageRole.ASSISTANT) {
+                messages = messages.dropLast(1) + messages.last().copy(
+                    contextInputTokens = inputTokens,
+                    contextInputHash = inputHash,
+                )
+            }
+            onUpdateMessages(messages)
+        }
         val params = TextGenerationParams(
             model = model,
             temperature = assistant.temperature,
@@ -431,7 +474,7 @@ class GenerationHandler(
                         }
                     }
                 }
-                onUpdateMessages(messages)
+                publishMessages()
             }
         } else {
             val chunk = providerImpl.generateText(
@@ -451,7 +494,7 @@ class GenerationHandler(
                     }
                 }
             }
-            onUpdateMessages(messages)
+            publishMessages()
         }
     }
 

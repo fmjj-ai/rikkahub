@@ -13,6 +13,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.analytics.FirebaseAnalytics
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.sample
+import me.rerere.ai.ui.ContextUsage
+import me.rerere.ai.ui.contextUsage
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -112,6 +119,21 @@ class ChatVM(
         settings.getCurrentChatModel()
     }.stateIn(viewModelScope, SharingStarted.Lazily, null)
 
+    // 大上下文的估算放在后台，并限制流式生成时的刷新频率。
+    @OptIn(kotlinx.coroutines.FlowPreview::class)
+    val contextUsage = combine(conversation, settings) { conversation, settings -> conversation to settings }
+        .sample(500)
+        .mapLatest { (conversation, settings) ->
+            withContext(Dispatchers.Default) {
+                val model = settings.getCurrentChatModel() ?: return@withContext ContextUsage()
+                val assistant = settings.getCurrentAssistant()
+                val system = if (assistant.allowConversationSystemPrompt && !conversation.customSystemPrompt.isNullOrBlank()) {
+                    conversation.customSystemPrompt.orEmpty()
+                } else assistant.systemPrompt
+                conversation.currentMessages.contextUsage(model, system, assistant.contextMessageLimit)
+            }
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ContextUsage())
+
     // 错误状态
     val errors: StateFlow<List<ChatError>> = chatService.errors
 
@@ -190,17 +212,16 @@ class ChatVM(
     }
 
     fun handleCompressContext(additionalPrompt: String, targetTokens: Int, keepRecentMessages: Int): Job {
-        return viewModelScope.launch {
-            chatService.compressConversation(
-                _conversationId,
-                conversation.value,
-                additionalPrompt,
-                targetTokens,
-                keepRecentMessages
-            ).onFailure {
-                chatService.addError(it, title = context.getString(R.string.error_title_compress_conversation))
-            }
-        }
+        return chatService.compressConversation(_conversationId, additionalPrompt, targetTokens, keepRecentMessages)
+    }
+
+    /** 聊天页直接压缩早期历史，并至少保留最新一轮。 */
+    fun handleImmediateCompressContext(): Job {
+        return handleCompressContext(
+            additionalPrompt = "",
+            targetTokens = 2_000,
+            keepRecentMessages = 4,
+        )
     }
 
     suspend fun forkMessage(message: UIMessage): Conversation {

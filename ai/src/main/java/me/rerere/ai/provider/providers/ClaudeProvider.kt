@@ -65,6 +65,7 @@ import kotlin.time.Clock
 
 private const val TAG = "ClaudeProvider"
 private const val ANTHROPIC_VERSION = "2023-06-01"
+const val DEFAULT_CLAUDE_MAX_TOKENS = 164_000
 
 class ClaudeProvider(private val client: OkHttpClient, context: Context? = null) : Provider<ProviderSetting.Claude> {
     private val keyRoulette = if (context != null) KeyRoulette.lru(context) else KeyRoulette.default()
@@ -279,7 +280,7 @@ class ClaudeProvider(private val client: OkHttpClient, context: Context? = null)
                 "messages",
                 buildMessages(messages, providerSetting.promptCaching, providerSetting.promptCacheTtl)
             )
-            put("max_tokens", params.maxTokens ?: 64_000)
+            put("max_tokens", params.maxTokens ?: DEFAULT_CLAUDE_MAX_TOKENS)
 
             // 顶层 cache_control: 让 Anthropic 自动管理缓存断点
             if (providerSetting.promptCaching) {
