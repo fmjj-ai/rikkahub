@@ -38,8 +38,16 @@ data class Assistant(
     val customHeaders: List<CustomHeader> = emptyList(),
     val customBodies: List<CustomBody> = emptyList(),
     val mcpServers: Set<Uuid> = emptySet(),
-    val localTools: List<LocalToolOption> = listOf(LocalToolOption.TimeInfo),
+    // 新建助手默认开启画图子 agent；存量助手沿用已保存的配置（不做数据迁移强开）
+    val localTools: List<LocalToolOption> = listOf(
+        LocalToolOption.TimeInfo,
+        LocalToolOption.ImageGeneration,
+    ),
     val enableWebSearch: Boolean = false, // 网络搜索开关(每个助手独立)
+    // 「快速模式 / 优先级模式」开关(每个助手独立, 默认开启)：
+    // 开启且当前服务商为 OpenAI 系时，聊天主请求携带 service_tier: "priority"。
+    // 注意与后台廉价小模型的 settings.fastModelId 无关，命名上刻意不做 "fast" 前缀以免混淆。
+    val enablePriorityTier: Boolean = true,
     val workspaceId: Uuid? = null,
     val background: String? = null, // 聊天页背景图地址(本地文件 URI 或网络 URL), 为 null 时无背景
     val backgroundOpacity: Float = 1.0f, // 背景图不透明度(0~1)

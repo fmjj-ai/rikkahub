@@ -318,6 +318,14 @@ fun ChatInput(
                                 )
                             }
 
+                            // 快速模式 / 优先级模式：常驻显示，默认开启，状态跟随助手配置
+                            PriorityTierButton(
+                                enabled = assistant.enablePriorityTier,
+                                onToggle = { enabled ->
+                                    onUpdateAssistant(assistant.copy(enablePriorityTier = enabled))
+                                },
+                            )
+
                         }
 
                         ActionIconButton(

@@ -21,6 +21,7 @@ import kotlinx.serialization.Transient
 import me.rerere.ai.core.MessageRole
 import me.rerere.ai.core.ReasoningLevel
 import me.rerere.ai.provider.Model
+import me.rerere.ai.provider.ModelType
 import me.rerere.ai.provider.ProviderSetting
 import me.rerere.rikkahub.AppScope
 import me.rerere.rikkahub.data.ai.mcp.McpServerConfig
@@ -603,7 +604,7 @@ data class DisplaySetting(
     val showTokenUsage: Boolean = true,
     val showThinkingContent: Boolean = true,
     val autoCloseThinking: Boolean = true,
-    val showUpdates: Boolean = true,
+    val showUpdates: Boolean = false, // 自建改版与上游版本线不一致，默认不提醒更新
     val showMessageJumper: Boolean = true,
     val messageJumperOnLeft: Boolean = false,
     val fontSizeRatio: Float = 1.0f,
@@ -676,6 +677,20 @@ fun List<ProviderSetting>.findModelById(uuid: Uuid): Model? {
 
 fun Settings.getCurrentChatModel(): Model? {
     return findModelById(this.getCurrentAssistant().chatModelId ?: this.chatModelId)
+}
+
+/**
+ * 解析「生图模型」。
+ *
+ * 优先使用用户在生图页显式选中的模型（[Settings.imageGenerationModelId]）；
+ * 该字段默认是随机 UUID（未曾选择过），此时回退到**第一个标记为 IMAGE 类型的模型**，
+ * 这样"把生图模型设为 IMAGE 类型"就足以开箱画图，不必再额外进生图页点一次。
+ */
+fun Settings.findImageGenerationModel(): Model? {
+    findModelById(imageGenerationModelId)?.let { return it }
+    return providers.asSequence()
+        .flatMap { it.models.asSequence() }
+        .firstOrNull { it.type == ModelType.IMAGE }
 }
 
 fun Settings.getCurrentAssistant(): Assistant {

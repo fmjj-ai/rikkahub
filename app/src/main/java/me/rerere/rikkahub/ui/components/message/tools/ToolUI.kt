@@ -68,6 +68,13 @@ interface ToolUIRenderer {
     /** 步骤展开时是否显示内联摘要 */
     fun hasSummary(context: ToolUIContext): Boolean = false
 
+    /**
+     * 渲染器是否自行在 [Summary] 中绘制工具的图片输出。
+     *
+     * 返回 true 时, 消息组件不再追加通用的缩略图行, 避免同一张图被展示两次
+     */
+    fun rendersImages(context: ToolUIContext): Boolean = false
+
     /** 步骤展开时的内联摘要 */
     @Composable
     fun Summary(context: ToolUIContext) {
@@ -99,6 +106,7 @@ object ToolUIRegistry {
         GetScreenTimeToolUI,
         CalendarQueryToolUI,
         CalendarCreateToolUI,
+        ImageGenerationToolUI,
         UseSkillToolUI,
         RecentChatsToolUI,
         ConversationSearchToolUI,

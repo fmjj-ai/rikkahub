@@ -97,6 +97,8 @@ fun ChainOfThoughtScope.ChatMessageToolStep(
     val isPending = tool.approvalState is ToolApprovalState.Pending
     val isDenied = tool.approvalState is ToolApprovalState.Denied
     val images = tool.output.filterIsInstance<UIMessagePart.Image>()
+    // 注册了 rendersImages 的渲染器会自行绘制图片, 这里不再追加通用缩略图行
+    val rendererRendersImages = renderer.rendersImages(context)
 
     // 摘要由注册的渲染器决定; 图片输出与拒绝原因为所有工具通用
     val hasExtraContent = renderer.hasSummary(context) || isDenied || images.isNotEmpty()
@@ -167,7 +169,7 @@ fun ChainOfThoughtScope.ChatMessageToolStep(
             {
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     renderer.Summary(context)
-                    if (images.isNotEmpty()) {
+                    if (images.isNotEmpty() && !rendererRendersImages) {
                         LazyRow(
                             horizontalArrangement = Arrangement.spacedBy(4.dp),
                             modifier = Modifier.wrapContentWidth(),

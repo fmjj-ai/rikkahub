@@ -64,6 +64,9 @@ import kotlin.time.Clock
 
 private const val TAG = "ResponseAPI"
 
+/** 快速模式 / 优先级模式对应的服务等级取值（OpenAI 系）。 */
+private const val SERVICE_TIER_PRIORITY = "priority"
+
 class ResponseAPI(
     private val client: OkHttpClient,
     private val keyRoulette: KeyRoulette = KeyRoulette.default()
@@ -281,6 +284,12 @@ class ResponseAPI(
                         }
                     }
                 }
+            }
+
+            // 快速模式 / 优先级模式：Responses API 同样以 service_tier 表达服务等级。
+            // 写在 mergeCustomBody 之前，用户自定义请求体中的 service_tier 会覆盖此处。
+            if (params.serviceTierPriority) {
+                put("service_tier", SERVICE_TIER_PRIORITY)
             }
         }.mergeCustomBody(params.customBody)
     }

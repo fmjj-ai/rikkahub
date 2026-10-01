@@ -3,9 +3,14 @@ package me.rerere.ai.provider.providers
 import android.content.Context
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.buffer
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonArray
@@ -31,6 +36,8 @@ import me.rerere.ai.util.KeyRoulette
 import me.rerere.ai.util.configureReferHeaders
 import me.rerere.ai.util.json
 import me.rerere.ai.util.mergeCustomBody
+import me.rerere.ai.util.parseErrorDetail
+import me.rerere.ai.util.stringSafe
 import me.rerere.ai.util.toHeaders
 import me.rerere.common.http.await
 import me.rerere.common.http.getByKey
@@ -40,11 +47,18 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.Response
+import okhttp3.sse.EventSource
+import okhttp3.sse.EventSourceListener
+import okhttp3.sse.EventSources
 import java.io.File
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 
 private const val TAG = "OpenAIProvider"
+
+/** OpenAI Images API 的 partial_images 取值范围为 1..3 */
+private const val MAX_PARTIAL_IMAGES = 3
 
 class OpenAIProvider(
     private val client: OkHttpClient,
@@ -210,26 +224,31 @@ class OpenAIProvider(
 
         val key = keyRoulette.next(providerSetting.apiKey, providerSetting.id.toString())
 
-        val requestBody = json.encodeToString(
-            buildJsonObject {
-                put("model", params.model.modelId)
-                put("prompt", params.prompt)
-                put("n", params.numOfImages)
-                if (params.size.isNotBlank()) {
-                    put("size", params.size)
-                }
+        val requestBody = buildJsonObject {
+            put("model", params.model.modelId)
+            put("prompt", params.prompt)
+            put("n", params.numOfImages)
+            if (params.size.isNotBlank()) {
+                put("size", params.size)
             }
-                .mergeCustomBody(params.customBody)
-        )
+        }.mergeCustomBody(params.customBody)
 
         Log.i(TAG, "generateImage: $requestBody")
+
+        // 使用方只用支持流式生图的服务商：partialImages > 0 时直接走流式，
+        // 不做"先探测、失败再回退"——中转若忽略 stream 字段照常出图，回退会造成一次画图重复计费。
+        // 多张时各家流式语义不统一（partial_image_index 是半成品序号而非图片序号），n > 1 保持非流式。
+        if (params.partialImages > 0 && params.numOfImages == 1) {
+            streamImageGeneration(providerSetting, params, requestBody, key).collect { emit(it) }
+            return@flow
+        }
 
         val request = Request.Builder()
             .url("${providerSetting.baseUrl}/images/generations")
             .headers(params.customHeaders.toHeaders())
             .addHeader("Authorization", "Bearer $key")
             .addHeader("Content-Type", "application/json")
-            .post(requestBody.toRequestBody("application/json".toMediaType()))
+            .post(json.encodeToString(requestBody).toRequestBody("application/json".toMediaType()))
             .configureReferHeaders(providerSetting.baseUrl)
             .build()
 
@@ -242,6 +261,98 @@ class OpenAIProvider(
         }
 
         items.forEach { emit(it) }
+    }
+
+    /**
+     * OpenAI Images API 的流式生图（`stream: true` + `partial_images`）。
+     *
+     * 事件形态：
+     * - `image_generation.partial_image`：半成品，带 `partial_image_index`
+     * - `image_generation.completed`：最终图
+     */
+    private fun streamImageGeneration(
+        providerSetting: ProviderSetting.OpenAI,
+        params: ImageGenerationParams,
+        requestBody: JsonObject,
+        key: String,
+    ): Flow<ImageGenerationItem> = callbackFlow {
+        val streamBody = buildJsonObject {
+            requestBody.forEach { (name, value) -> put(name, value) }
+            put("stream", true)
+            put("partial_images", params.partialImages.coerceIn(1, MAX_PARTIAL_IMAGES))
+        }
+
+        val request = Request.Builder()
+            .url("${providerSetting.baseUrl}/images/generations")
+            .headers(params.customHeaders.toHeaders())
+            .addHeader("Authorization", "Bearer $key")
+            .addHeader("Content-Type", "application/json")
+            .addHeader("Accept", "text/event-stream")
+            .post(json.encodeToString(streamBody).toRequestBody("application/json".toMediaType()))
+            .configureReferHeaders(providerSetting.baseUrl)
+            .build()
+
+        Log.i(TAG, "streamImageGeneration: ${json.encodeToString(streamBody)}")
+
+        val listener = object : EventSourceListener() {
+            override fun onEvent(
+                eventSource: EventSource,
+                id: String?,
+                type: String?,
+                data: String
+            ) {
+                if (data == "[DONE]") {
+                    close()
+                    return
+                }
+                val item = runCatching { parseImageGenerationEvent(data) }.getOrElse {
+                    Log.w(TAG, "onEvent: failed to parse image stream event: $data", it)
+                    return
+                } ?: return
+                trySend(item)
+            }
+
+            override fun onFailure(eventSource: EventSource, t: Throwable?, response: Response?) {
+                val bodyRaw = response?.body?.stringSafe()
+                val exception = if (!bodyRaw.isNullOrBlank()) {
+                    runCatching { json.parseToJsonElement(bodyRaw).parseErrorDetail() }
+                        .getOrElse { t ?: IllegalStateException("Image generation stream failed: ${response?.code}") }
+                } else {
+                    t ?: IllegalStateException("Image generation stream failed: ${response?.code}")
+                }
+                close(exception)
+            }
+
+            override fun onClosed(eventSource: EventSource) {
+                close()
+            }
+        }
+
+        val eventSource = EventSources.createFactory(client).newEventSource(request, listener)
+
+        awaitClose { eventSource.cancel() }
+    }.buffer(Channel.UNLIMITED)
+
+    /** 解析单个流式事件；非图片事件（如心跳、错误包装）返回 null */
+    private fun parseImageGenerationEvent(data: String): ImageGenerationItem? {
+        val payload = data.trim().split("\n")
+            .filter { it.isNotBlank() }
+            .map { json.parseToJsonElement(it).jsonObject }
+            .firstOrNull { it["b64_json"] != null }
+            ?: return null
+
+        val b64Json = payload["b64_json"]?.jsonPrimitive?.contentOrNull ?: return null
+        val outputFormat = payload["output_format"]?.jsonPrimitive?.contentOrNull ?: "png"
+        val partialIndex = payload["partial_image_index"]?.jsonPrimitive?.contentOrNull?.toIntOrNull()
+        val isPartial = partialIndex != null ||
+            payload["type"]?.jsonPrimitive?.contentOrNull?.contains("partial") == true
+
+        return ImageGenerationItem(
+            data = b64Json,
+            mimeType = outputFormat.toImageMimeType(),
+            partial = isPartial,
+            partialImageIndex = partialIndex,
+        )
     }
 
     override suspend fun editImage(

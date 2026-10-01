@@ -63,6 +63,12 @@ data class TextGenerationParams(
     val reasoningLevel: ReasoningLevel = ReasoningLevel.OFF,
     val customHeaders: List<CustomHeader> = emptyList(),
     val customBody: List<CustomBody> = emptyList(),
+    /**
+     * 快速模式 / 优先级模式：为 true 时 OpenAI 系请求写入 `service_tier: "priority"`。
+     * 仅由聊天主请求设置；标题 / 建议 / 翻译 / 上下文压缩等后台调用一律保持 false。
+     * 若自定义请求体中已存在 service_tier，则由用户显式配置覆盖（mergeCustomBody 后写入）。
+     */
+    val serviceTierPriority: Boolean = false,
 )
 
 @Serializable

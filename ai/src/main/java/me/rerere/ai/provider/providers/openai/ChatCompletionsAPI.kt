@@ -67,6 +67,9 @@ import kotlin.time.Clock
 
 private const val TAG = "ChatCompletionsAPI"
 
+/** 快速模式 / 优先级模式对应的服务等级取值（OpenAI 系）。 */
+private const val SERVICE_TIER_PRIORITY = "priority"
+
 class ChatCompletionsAPI(
     private val client: OkHttpClient,
     private val keyRoulette: KeyRoulette
@@ -449,6 +452,12 @@ class ChatCompletionsAPI(
                         })
                     }
                 }
+            }
+
+            // 快速模式 / 优先级模式：服务等级标记。写在 mergeCustomBody 之前，
+            // 因此用户自定义请求体中的 service_tier 会覆盖此处（显式配置优先）。
+            if (params.serviceTierPriority) {
+                put("service_tier", SERVICE_TIER_PRIORITY)
             }
         }.mergeCustomBody(params.customBody)
     }

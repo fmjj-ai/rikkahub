@@ -151,10 +151,27 @@ data class ContextUsage(
     val usedTokens: Int = 0,
     val inputTokens: Int = 0,
     val outputTokens: Int = 0,
+    val cachedTokens: Int = 0,
     val estimated: Boolean = true,
     val canCompress: Boolean = false,
 ) {
     fun ratio(model: Model): Float = usedTokens.toFloat() / model.contextWindow
+
+    /**
+     * 缓存命中率 = cachedTokens / promptTokens。
+     *
+     * 仓库内各 provider 解析出的 promptTokens **均已包含**缓存部分
+     * （OpenAI `prompt_tokens` / Responses `input_tokens`、Google `promptTokenCount`、
+     * Claude `input + cache_read + cache_creation`），因此分母直接取 inputTokens。
+     * 对异常数据做夹取，保证分母 ≥ 分子且结果落在 0..1；
+     * 无真实缓存数据（首轮请求 / 服务商不返回 / 模型不支持缓存）时返回 null，由 UI 显示占位符。
+     */
+    val cacheHitRate: Float?
+        get() {
+            if (cachedTokens <= 0 || inputTokens <= 0) return null
+            val denominator = inputTokens.coerceAtLeast(cachedTokens)
+            return (cachedTokens.toFloat() / denominator).coerceIn(0f, 1f)
+        }
 }
 
 /** in/out 为最近一次请求；used 为当前有效上下文，绝不累计每轮重复输入。 */
@@ -176,6 +193,7 @@ fun List<UIMessage>.contextUsage(model: Model, systemPrompt: String = "", messag
         } else estimated,
         inputTokens = input,
         outputTokens = output,
+        cachedTokens = usage?.cachedTokens ?: 0,
         estimated = !hasMatchingRequest || usage == null || trailing > 0,
         canCompress = compressionTarget() != null,
     )

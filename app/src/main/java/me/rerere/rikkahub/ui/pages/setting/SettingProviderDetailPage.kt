@@ -691,7 +691,10 @@ private fun ModelContextSettings(model: Model, onModelChange: (Model) -> Unit) {
             },
             label = { Text("总上下文") },
             suffix = { Text("Token") },
-            supportingText = { Text("默认 472k（472,000 Token），1k = 1,000 Token") },
+            // 正常状态下不显示任何说明文案，仅在校验失败时给出极简错误提示
+            supportingText = if (model.contextWindowTokens <= 0) {
+                { Text("请输入正整数") }
+            } else null,
             isError = model.contextWindowTokens <= 0,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             singleLine = true,
@@ -705,13 +708,10 @@ private fun ModelContextSettings(model: Model, onModelChange: (Model) -> Unit) {
             },
             label = { Text("自动压缩上下文") },
             suffix = { Text("Token") },
-            supportingText = {
-                Text(if (model.hasValidContextSettings) {
-                    "默认 272k，达到阈值时自动生成历史摘要；原始记录保留。"
-                } else {
-                    "请输入正整数，自动压缩阈值不能超过总上下文。"
-                })
-            },
+            // 原说明文案同时承担校验提示职责，这里只保留校验失败时的极简错误提示
+            supportingText = if (!model.hasValidContextSettings) {
+                { Text("请输入正整数，自动压缩阈值不能超过总上下文。") }
+            } else null,
             isError = !model.hasValidContextSettings,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             singleLine = true,

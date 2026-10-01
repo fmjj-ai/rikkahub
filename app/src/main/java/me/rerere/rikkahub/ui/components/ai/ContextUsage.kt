@@ -140,16 +140,8 @@ fun ContextUsageDialog(
                 UsageRow("used · 当前占用", "${formatTokens(usage.usedTokens)} / ${formatTokens(model.contextWindow)}")
                 UsageRow("in · 最近输入", formatTokens(usage.inputTokens))
                 UsageRow("out · 最近输出", formatTokens(usage.outputTokens))
+                UsageRow("缓存命中率", formatCacheHitRate(usage))
                 UsageRow("自动压缩阈值", formatTokens(model.autoCompressThreshold))
-                Text(
-                    if (usage.estimated) {
-                        "单位：Token。当前占用为估算；附件、工具和不同模型的计数可能存在偏差。in / out 优先使用服务端用量。"
-                    } else {
-                        "单位：Token。当前占用包含最近一次请求的输入与输出，使用服务端返回的用量。"
-                    },
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
                 if (!canCompress) {
                     Text(
                         if (busy) "请等待当前生成或压缩完成" else "暂无可压缩的历史，最新一轮会完整保留",
@@ -180,3 +172,14 @@ private fun UsageRow(label: String, value: String) {
 
 private fun formatTokens(tokens: Int): String =
     NumberFormat.getIntegerInstance().format(tokens.coerceAtLeast(0))
+
+/**
+ * 缓存命中率展示：百分比 + 括号内分数，例如 `85%（1,700 / 2,000）`。
+ * 无真实缓存用量时显示 `—`，避免让用户误以为"缓存完全没命中"。
+ */
+private fun formatCacheHitRate(usage: ContextUsage): String {
+    val rate = usage.cacheHitRate ?: return "—"
+    val cached = formatTokens(usage.cachedTokens)
+    val total = formatTokens(usage.inputTokens.coerceAtLeast(usage.cachedTokens))
+    return "${(rate * 100).roundToInt()}%（$cached / $total）"
+}

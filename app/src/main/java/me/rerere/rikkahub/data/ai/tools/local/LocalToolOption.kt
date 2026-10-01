@@ -32,4 +32,9 @@ sealed class LocalToolOption {
     @Serializable
     @SerialName("calendar")
     data object Calendar : LocalToolOption()
+
+    // 画图子 agent：按应用级生图模型配置出图，默认开启（未配置生图模型时不会注入该能力）
+    @Serializable
+    @SerialName("image_generation")
+    data object ImageGeneration : LocalToolOption()
 }
