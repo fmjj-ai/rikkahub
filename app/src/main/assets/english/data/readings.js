@@ -61,7 +61,7 @@ const READINGS = [
         "answer": "B"
       }
     ],
-        "answers": [
+    "answers": [
       "B",
       "A",
       "D",
@@ -131,7 +131,7 @@ const READINGS = [
         "answer": "A"
       }
     ],
-        "answers": [
+    "answers": [
       "C",
       "D",
       "C",
@@ -143,7 +143,7 @@ const READINGS = [
     "year": 2010,
     "type": "英语一",
     "textNum": 3,
-    "content": "In his book The Tipping Point, Malcolm Gladwell argues that “social epidemics” are driven in large part by the actions of a tiny minority of special individuals, often called influentials, who are unusually informed, persuasive, or well connected. The idea is intuitively compelling, but it doesn't’t explain how ideas actually spread.\n\nThe supposed importance of influentials derives from a plausible-sounding but largely untested theory called the “two-step flow of communication”: Information flows from the media to the influentials and from them to everyone else. Marketers have embraced the two-step flow because it suggests that if they can just find and influence the influentials, those select people will do most of the work for them. The theory also seems to explain the sudden and unexpected popularity of certain looks, brands, or neighborhoods. In many such cases, a cursory search for causes finds that some small group of people was wearing, promoting, or developing whatever it is before anyone else paid attention. Anecdotal evidence of this kind fits nicely with the idea that only certain special people can drive trends.\n\nIn their recent work, however, some researchers have come up with the finding that influentials have far less impact on social epidemics than is generally supposed. In fact, they don’t seem to be required at all.\n\nThe researchers’ argument stems from a simple observation about social influence: With the exception of a few celebrities like Oprah Winfrey – whose outsize presence is primarily a function of media, not interpersonal, influence – even the most influential members of a population simply don’t interact with that many others. Yet it is precisely these non-celebrity influentials who, according to the two-step-flow theory, are supposed to drive social epidemics, by influencing their friends and colleagues directly. For a social epidemic to occur, however, each person so affected must then influence his or her own acquaintances, who must in turn influence theirs, and so on; and just how many others pay attention to each of these people has little to do with the initial influential. If people in the network just two degrees removed from the initial influential prove resistant, for example, the cascade of change won’t propagate very far or affect many people.\n\nBuilding on this basic truth about interpersonal influence, the researchers studied the dynamics of social influence by conducting thousands of computer simulations of populations, manipulating a number of variables relating to people’s ability to influence others and their tendency to be influenced. They found that the principal requirement for what is called “global cascades” – the widespread propagation of influence through networks – is the presence not of a few influentials but, rather, of a critical mass of easily influenced people.",
+    "content": "In his book The Tipping Point, Malcolm Gladwell argues that “social epidemics” are driven in large part by the actions of a tiny minority of special individuals, often called influentials, who are unusually informed, persuasive, or well connected. The idea is intuitively compelling, but it doesn't explain how ideas actually spread.\n\nThe supposed importance of influentials derives from a plausible-sounding but largely untested theory called the “two-step flow of communication”: Information flows from the media to the influentials and from them to everyone else. Marketers have embraced the two-step flow because it suggests that if they can just find and influence the influentials, those select people will do most of the work for them. The theory also seems to explain the sudden and unexpected popularity of certain looks, brands, or neighborhoods. In many such cases, a cursory search for causes finds that some small group of people was wearing, promoting, or developing whatever it is before anyone else paid attention. Anecdotal evidence of this kind fits nicely with the idea that only certain special people can drive trends.\n\nIn their recent work, however, some researchers have come up with the finding that influentials have far less impact on social epidemics than is generally supposed. In fact, they don’t seem to be required at all.\n\nThe researchers’ argument stems from a simple observation about social influence: With the exception of a few celebrities like Oprah Winfrey – whose outsize presence is primarily a function of media, not interpersonal, influence – even the most influential members of a population simply don’t interact with that many others. Yet it is precisely these non-celebrity influentials who, according to the two-step-flow theory, are supposed to drive social epidemics, by influencing their friends and colleagues directly. For a social epidemic to occur, however, each person so affected must then influence his or her own acquaintances, who must in turn influence theirs, and so on; and just how many others pay attention to each of these people has little to do with the initial influential. If people in the network just two degrees removed from the initial influential prove resistant, for example, the cascade of change won’t propagate very far or affect many people.\n\nBuilding on this basic truth about interpersonal influence, the researchers studied the dynamics of social influence by conducting thousands of computer simulations of populations, manipulating a number of variables relating to people’s ability to influence others and their tendency to be influenced. They found that the principal requirement for what is called “global cascades” – the widespread propagation of influence through networks – is the presence not of a few influentials but, rather, of a critical mass of easily influenced people.",
     "questions": [
       {
         "num": 31,
@@ -201,7 +201,7 @@ const READINGS = [
         "answer": "C"
       }
     ],
-        "answers": [
+    "answers": [
       "B",
       "D",
       "A",
@@ -271,7 +271,7 @@ const READINGS = [
         "answer": "D"
       }
     ],
-        "answers": [
+    "answers": [
       "A",
       "D",
       "C",
@@ -341,7 +341,7 @@ const READINGS = [
         "answer": "A"
       }
     ],
-        "answers": [
+    "answers": [
       "C",
       "B",
       "D",
@@ -353,7 +353,7 @@ const READINGS = [
     "year": 2011,
     "type": "英语一",
     "textNum": 2,
-    "content": "When Liam McGee departed as president of Bank of America in August, his explanation was surprisingly straight up. Rather than cloaking his exit in the usual vague excuses, he came right out and said he was leaving “to pursue my goal of running a company.” Broadcasting his ambition was “very much my decision,” McGee says. Within two weeks, he was talking for the first time with the board of Hartford Financial Services Group, which named him CEO and chairman on September 29.\n\nMcGee says leaving without a position lined up gave him time to reflect on what kind of company he wanted to run. It also sent a clear message to the outside world about his aspirations. And McGee isn't’t alone. In recent weeks the No.2 executives at Avon and American Express quit with the explanation that they were looking for a CEO post. As boards scrutinize succession plans in response to shareholder pressure, executives who don’t get the nod also may wish to move on. A turbulent business environment also has senior managers cautious of letting vague pronouncements cloud their reputations.\n\nAs the first signs of recovery begin to take hold, deputy chiefs may be more willing to make the jump without a net. In the third quarter, CEO turnover was down 23% from a year ago as nervous boards stuck with the leaders they had, according to Liberum Research. As the economy picks up, opportunities will abound for aspiring leaders.\n\nThe decision to quit a senior position to look for a better one is unconventional. For years executives and headhunters have adhered to the rule that the most attractive CEO candidates are the ones who must be poached. Says Korn/Ferry senior partner Dennis Carey: “I can’t think of a single search I’ve done where a board has not instructed me to look at sitting CEOs first.”\n\nThose who jumped without a job haven’t always landed in top positions quickly. Ellen Marram quit as chief of Tropicana a decade ago, saying she wanted to be a CEO. It was a year before she became head of a tiny Internet-based commodities exchange. Robert Willumstad left Citigroup in 2005 with ambitions to be a CEO. He finally took that post at a major financial institution three years later.\n\nMany recruiters say the old disgrace is fading for top performers. The financial crisis has made it more acceptable to be between jobs or to leave a bad one. “The traditional rule was it’s safer to stay where you are, but that’s been fundamentally inverted,” says one headhunter. “The people who’ve been hurt the worst are those who’ve stayed too long.”",
+    "content": "When Liam McGee departed as president of Bank of America in August, his explanation was surprisingly straight up. Rather than cloaking his exit in the usual vague excuses, he came right out and said he was leaving “to pursue my goal of running a company.” Broadcasting his ambition was “very much my decision,” McGee says. Within two weeks, he was talking for the first time with the board of Hartford Financial Services Group, which named him CEO and chairman on September 29.\n\nMcGee says leaving without a position lined up gave him time to reflect on what kind of company he wanted to run. It also sent a clear message to the outside world about his aspirations. And McGee isn't alone. In recent weeks the No.2 executives at Avon and American Express quit with the explanation that they were looking for a CEO post. As boards scrutinize succession plans in response to shareholder pressure, executives who don’t get the nod also may wish to move on. A turbulent business environment also has senior managers cautious of letting vague pronouncements cloud their reputations.\n\nAs the first signs of recovery begin to take hold, deputy chiefs may be more willing to make the jump without a net. In the third quarter, CEO turnover was down 23% from a year ago as nervous boards stuck with the leaders they had, according to Liberum Research. As the economy picks up, opportunities will abound for aspiring leaders.\n\nThe decision to quit a senior position to look for a better one is unconventional. For years executives and headhunters have adhered to the rule that the most attractive CEO candidates are the ones who must be poached. Says Korn/Ferry senior partner Dennis Carey: “I can’t think of a single search I’ve done where a board has not instructed me to look at sitting CEOs first.”\n\nThose who jumped without a job haven’t always landed in top positions quickly. Ellen Marram quit as chief of Tropicana a decade ago, saying she wanted to be a CEO. It was a year before she became head of a tiny Internet-based commodities exchange. Robert Willumstad left Citigroup in 2005 with ambitions to be a CEO. He finally took that post at a major financial institution three years later.\n\nMany recruiters say the old disgrace is fading for top performers. The financial crisis has made it more acceptable to be between jobs or to leave a bad one. “The traditional rule was it’s safer to stay where you are, but that’s been fundamentally inverted,” says one headhunter. “The people who’ve been hurt the worst are those who’ve stayed too long.”",
     "questions": [
       {
         "num": 26,
@@ -411,7 +411,7 @@ const READINGS = [
         "answer": "C"
       }
     ],
-        "answers": [
+    "answers": [
       "B",
       "D",
       "C",
@@ -481,7 +481,7 @@ const READINGS = [
         "answer": "A"
       }
     ],
-        "answers": [
+    "answers": [
       "D",
       "C",
       "B",
@@ -493,7 +493,7 @@ const READINGS = [
     "year": 2011,
     "type": "英语一",
     "textNum": 4,
-    "content": "It’s no surprise that Jennifer Senior’s insightful, provocative magazine cover story, “I love My Children, I Hate My Life, ” is arousing much chatter – nothing gets people talking like the suggestion that child rearing is anything less than a completely fulfilling, life-enriching experience. Rather than concluding that children make parents either happy or miserable, Senior suggests we need to redefine happiness: instead of thinking of it as something that can be measured by moment-to-moment joy, we should consider being happy as a past-tense condition. Even though the day-to-day experience of raising kids can be soul-crushingly hard, Senior writes that “the very things that in the moment dampen our moods can later be sources of intense gratification and delight.”\n\nThe magazine cover showing an attractive mother holding a cute baby is hardly the only Madonna-and-child image on newsstands this week. There are also stories about newly adoptive – and newly single – mom Sandra Bullock, as well as the usual “Jennifer Aniston is pregnant” news. Practically every week features at least one celebrity mom, or mom-to-be, smiling on the newsstands.\n\nIn a society that so persistently celebrates procreation, is it any wonder that admitting you regret having children is equivalent to admitting you support kitten-killing? It doesn't’t seem quite fair, then, to compare the regrets of parents to the regrets of the childless. Unhappy parents rarely are provoked to wonder if they shouldn't’t have had kids, but unhappy childless folks are bothered with the message that children are the single most important thing in the world: obviously their misery must be a direct result of the gaping baby-size holes in their lives.\n\nOf course, the image of parenthood that celebrity magazines like Us Weekly and People present is hugely unrealistic, especially when the parents are single mothers like Bullock. According to several studies concluding that parents are less happy than childless couples, single parents are the least happy of all. No shock there, considering how much work it is to raise a kid without a partner to lean on; yet to hear Sandra and Britney tell it, raising a kid on their “own” (read: with round-the-clock help) is a piece of cake.\n\nIt’s hard to imagine that many people are dumb enough to want children just because Reese and Angelina make it look so glamorous: most adults understand that a baby is not a haircut. But it’s interesting to wonder if the images we see every week of stress-free, happiness-enhancing parenthood aren't’t in some small, subconscious way contributing to our own dissatisfactions with the actual experience, in the same way that a small part of us hoped getting “the Rachel” might make us look just a little bit like Jennifer Aniston.",
+    "content": "It’s no surprise that Jennifer Senior’s insightful, provocative magazine cover story, “I love My Children, I Hate My Life, ” is arousing much chatter – nothing gets people talking like the suggestion that child rearing is anything less than a completely fulfilling, life-enriching experience. Rather than concluding that children make parents either happy or miserable, Senior suggests we need to redefine happiness: instead of thinking of it as something that can be measured by moment-to-moment joy, we should consider being happy as a past-tense condition. Even though the day-to-day experience of raising kids can be soul-crushingly hard, Senior writes that “the very things that in the moment dampen our moods can later be sources of intense gratification and delight.”\n\nThe magazine cover showing an attractive mother holding a cute baby is hardly the only Madonna-and-child image on newsstands this week. There are also stories about newly adoptive – and newly single – mom Sandra Bullock, as well as the usual “Jennifer Aniston is pregnant” news. Practically every week features at least one celebrity mom, or mom-to-be, smiling on the newsstands.\n\nIn a society that so persistently celebrates procreation, is it any wonder that admitting you regret having children is equivalent to admitting you support kitten-killing? It doesn't seem quite fair, then, to compare the regrets of parents to the regrets of the childless. Unhappy parents rarely are provoked to wonder if they shouldn't have had kids, but unhappy childless folks are bothered with the message that children are the single most important thing in the world: obviously their misery must be a direct result of the gaping baby-size holes in their lives.\n\nOf course, the image of parenthood that celebrity magazines like Us Weekly and People present is hugely unrealistic, especially when the parents are single mothers like Bullock. According to several studies concluding that parents are less happy than childless couples, single parents are the least happy of all. No shock there, considering how much work it is to raise a kid without a partner to lean on; yet to hear Sandra and Britney tell it, raising a kid on their “own” (read: with round-the-clock help) is a piece of cake.\n\nIt’s hard to imagine that many people are dumb enough to want children just because Reese and Angelina make it look so glamorous: most adults understand that a baby is not a haircut. But it’s interesting to wonder if the images we see every week of stress-free, happiness-enhancing parenthood aren't in some small, subconscious way contributing to our own dissatisfactions with the actual experience, in the same way that a small part of us hoped getting “the Rachel” might make us look just a little bit like Jennifer Aniston.",
     "questions": [
       {
         "num": 36,
@@ -551,7 +551,7 @@ const READINGS = [
         "answer": "B"
       }
     ],
-        "answers": [
+    "answers": [
       "C",
       "D",
       "A",
@@ -563,7 +563,7 @@ const READINGS = [
     "year": 2012,
     "type": "英语一",
     "textNum": 1,
-    "content": "Come on – Everybody’s doing it. That whispered message, half invitation and half forcing, is what most of us think of when we hear the words peer pressure. It usually leads to no good – drinking, drugs and casual sex. But in her new book Join the Club, Tina Rosenberg contends that peer pressure can also be a positive force through what she calls the social cure, in which organizations and officials use the power of group dynamics to help individuals improve their lives and possibly the world.\n\nRosenberg, the recipient of a Pulitzer Prize, offers a host of examples of the social cure in action: In South Carolina, a state-sponsored antismoking program called Rage Against the Haze sets out to make cigarettes uncool. In South Africa, an HIV-prevention initiative known as loveLife recruits young people to promote safe sex among their peers.\n\nThe idea seems promising, and Rosenberg is a perceptive observer. Her critique of the lameness of many public-health campaigns is spot-on: they fail to mobilize peer pressure for healthy habits, and they demonstrate a seriously flawed understanding of psychology. “Dare to be different, please don’t smoke!” pleads one billboard campaign aimed at reducing smoking among teenagers – teenagers, who desire nothing more than fitting in. Rosenberg argues convincingly that public-health advocates ought to take a page from advertisers, so skilled at applying peer pressure.\n\nBut on the general effectiveness of the social cure, Rosenberg is less persuasive. Join the Club is filled with too much irrelevant detail and not enough exploration of the social and biological factors that make peer pressure so powerful. The most glaring flaw of the social cure as it’s presented here is that it doesn't’t work very well for very long. Rage Against the Haze failed once state funding was cut. Evidence that the loveLife program produces lasting changes is limited and mixed.\n\nThere’s no doubt that our peer groups exert enormous influence on our behavior. An emerging body of research shows that positive health habits – as well as negative ones – spread through networks of friends via social communication. This is a subtle form of peer pressure: we unconsciously imitate the behavior we see every day.\n\nFar less certain, however, is how successfully experts and bureaucrats can select our peer groups and steer their activities in virtuous directions. It’s like the teacher who breaks up the troublemakers in the back row by pairing them with better-behaved classmates. The tactic never really works. And that’s the problem with a social cure engineered from the outside: in the real world, as in school, we insist on choosing our own friends.",
+    "content": "Come on – Everybody’s doing it. That whispered message, half invitation and half forcing, is what most of us think of when we hear the words peer pressure. It usually leads to no good – drinking, drugs and casual sex. But in her new book Join the Club, Tina Rosenberg contends that peer pressure can also be a positive force through what she calls the social cure, in which organizations and officials use the power of group dynamics to help individuals improve their lives and possibly the world.\n\nRosenberg, the recipient of a Pulitzer Prize, offers a host of examples of the social cure in action: In South Carolina, a state-sponsored antismoking program called Rage Against the Haze sets out to make cigarettes uncool. In South Africa, an HIV-prevention initiative known as loveLife recruits young people to promote safe sex among their peers.\n\nThe idea seems promising, and Rosenberg is a perceptive observer. Her critique of the lameness of many public-health campaigns is spot-on: they fail to mobilize peer pressure for healthy habits, and they demonstrate a seriously flawed understanding of psychology. “Dare to be different, please don’t smoke!” pleads one billboard campaign aimed at reducing smoking among teenagers – teenagers, who desire nothing more than fitting in. Rosenberg argues convincingly that public-health advocates ought to take a page from advertisers, so skilled at applying peer pressure.\n\nBut on the general effectiveness of the social cure, Rosenberg is less persuasive. Join the Club is filled with too much irrelevant detail and not enough exploration of the social and biological factors that make peer pressure so powerful. The most glaring flaw of the social cure as it’s presented here is that it doesn't work very well for very long. Rage Against the Haze failed once state funding was cut. Evidence that the loveLife program produces lasting changes is limited and mixed.\n\nThere’s no doubt that our peer groups exert enormous influence on our behavior. An emerging body of research shows that positive health habits – as well as negative ones – spread through networks of friends via social communication. This is a subtle form of peer pressure: we unconsciously imitate the behavior we see every day.\n\nFar less certain, however, is how successfully experts and bureaucrats can select our peer groups and steer their activities in virtuous directions. It’s like the teacher who breaks up the troublemakers in the back row by pairing them with better-behaved classmates. The tactic never really works. And that’s the problem with a social cure engineered from the outside: in the real world, as in school, we insist on choosing our own friends.",
     "questions": [
       {
         "num": 21,
@@ -621,7 +621,7 @@ const READINGS = [
         "answer": "D"
       }
     ],
-        "answers": [
+    "answers": [
       "D",
       "B",
       "A",
@@ -633,7 +633,7 @@ const READINGS = [
     "year": 2012,
     "type": "英语一",
     "textNum": 2,
-    "content": "A deal is a deal – except, apparently, when Entergy is involved. The company, a major energy supplier in New England, provoked justified outrage in Vermont last week when it announced it was reneging on a longstanding commitment to abide by the state’s strict nuclear regulations.\n\nInstead, the company has done precisely what it had long promised it would not: challenge the constitutionality of Vermont’s rules in the federal court, as part of a desperate effort to keep its Vermont Yankee nuclear power plant running. It’s a stunning move.\n\nThe conflict has been surfacing since 2002, when the corporation bought Vermont’s only nuclear power plant, an aging reactor in Vernon. As a condition of receiving state approval for the sale, the company agreed to seek permission from state regulators to operate past 2012. In 2006, the state went a step further, requiring that any extension of the plant’s license be subject to the Vermont legislature’s approval. Then, too, the company went along.\n\nEither Entergy never really intended to live by those commitments, or it simply didn't’t foresee what would happen next. A string of accidents, including the partial collapse of a cooling tower in 2007 and the discovery of an underground pipe system leakage, raised serious questions about both Vermont Yankee’s safety and Entergy’s management – especially after the company made misleading statements about the pipe. Enraged by Entergy’s behavior, the Vermont Senate voted 26 to 4 last year against allowing an extension.\n\nNow the company is suddenly claiming that the 2002 agreement is invalid because of the 2006 legislation, and that only the federal government has regulatory power over nuclear issues. The legal issues in the case are obscure: whereas the Supreme Court has ruled that states do have some regulatory authority over nuclear power, legal scholars say that Vermont case will offer a precedent-setting test of how far those powers extend. Certainly, there are valid concerns about the patchwork regulations that could result if every state sets its own rules. But had Entergy kept its word, that debate would be beside the point.\n\nThe company seems to have concluded that its reputation in Vermont is already so damaged that it has nothing left to lose by going to war with the state. But there should be consequences. Permission to run a nuclear plant is a public trust. Entergy runs 11 other reactors in the United States, including Pilgrim Nuclear station in Plymouth. Pledging to run Pilgrim safely, the company has applied for federal permission to keep it open for another 20 years. But as the Nuclear Regulatory Commission (NRC) reviews the company’s application, it should keep in mind what promises from Entergy are worth.",
+    "content": "A deal is a deal – except, apparently, when Entergy is involved. The company, a major energy supplier in New England, provoked justified outrage in Vermont last week when it announced it was reneging on a longstanding commitment to abide by the state’s strict nuclear regulations.\n\nInstead, the company has done precisely what it had long promised it would not: challenge the constitutionality of Vermont’s rules in the federal court, as part of a desperate effort to keep its Vermont Yankee nuclear power plant running. It’s a stunning move.\n\nThe conflict has been surfacing since 2002, when the corporation bought Vermont’s only nuclear power plant, an aging reactor in Vernon. As a condition of receiving state approval for the sale, the company agreed to seek permission from state regulators to operate past 2012. In 2006, the state went a step further, requiring that any extension of the plant’s license be subject to the Vermont legislature’s approval. Then, too, the company went along.\n\nEither Entergy never really intended to live by those commitments, or it simply didn't foresee what would happen next. A string of accidents, including the partial collapse of a cooling tower in 2007 and the discovery of an underground pipe system leakage, raised serious questions about both Vermont Yankee’s safety and Entergy’s management – especially after the company made misleading statements about the pipe. Enraged by Entergy’s behavior, the Vermont Senate voted 26 to 4 last year against allowing an extension.\n\nNow the company is suddenly claiming that the 2002 agreement is invalid because of the 2006 legislation, and that only the federal government has regulatory power over nuclear issues. The legal issues in the case are obscure: whereas the Supreme Court has ruled that states do have some regulatory authority over nuclear power, legal scholars say that Vermont case will offer a precedent-setting test of how far those powers extend. Certainly, there are valid concerns about the patchwork regulations that could result if every state sets its own rules. But had Entergy kept its word, that debate would be beside the point.\n\nThe company seems to have concluded that its reputation in Vermont is already so damaged that it has nothing left to lose by going to war with the state. But there should be consequences. Permission to run a nuclear plant is a public trust. Entergy runs 11 other reactors in the United States, including Pilgrim Nuclear station in Plymouth. Pledging to run Pilgrim safely, the company has applied for federal permission to keep it open for another 20 years. But as the Nuclear Regulatory Commission (NRC) reviews the company’s application, it should keep in mind what promises from Entergy are worth.",
     "questions": [
       {
         "num": 26,
@@ -691,7 +691,7 @@ const READINGS = [
         "answer": "A"
       }
     ],
-        "answers": [
+    "answers": [
       "C",
       "D",
       "A",
@@ -761,7 +761,7 @@ const READINGS = [
         "answer": "C"
       }
     ],
-        "answers": [
+    "answers": [
       "A",
       "B",
       "B",
@@ -831,7 +831,7 @@ const READINGS = [
         "answer": "A"
       }
     ],
-        "answers": [
+    "answers": [
       "C",
       "D",
       "B",
@@ -843,7 +843,7 @@ const READINGS = [
     "year": 2013,
     "type": "英语一",
     "textNum": 1,
-    "content": "In the 2006 film version of The Devil Wears Prada, Miranda Priestly, played by Meryl Streep, scolds her unattractive assistant for imagining that high fashion doesn't’t affect her. Priestly explains how the deep blue color of the assistant’s sweater descended over the years from fashion shows to department stores and to the bargain bin in which the poor girl doubtless found her garment.\n\nThis top-down conception of the fashion business couldn't’t be more out of date or at odds with the feverish world described in Overdressed, Elizabeth Cline’s three-year indictment of “fast fashion”. In the last decade or so, advances in technology have allowed mass-market labels such as Zara, H&M, and Uniqlo to react to trends more quickly and anticipate demand more precisely. Quicker turnarounds mean less wasted inventory, more frequent releases, and more profit. These labels encourage style-conscious consumers to see clothes as disposable – meant to last only a wash or two, although they don’t advertise that – and to renew their wardrobe every few weeks. By offering on-trend items at dirt-cheap prices, Cline argues, these brands have hijacked fashion cycles, shaking an industry long accustomed to a seasonal pace.\n\nThe victims of this revolution, of course, are not limited to designers. For H&M to offer a $5.95 knit miniskirt in all its 2,300-plus stores around the world, it must rely on low-wage overseas labor, order in volumes that strain natural resources, and use massive amounts of harmful chemicals.\n\nOverdressed is the fashion world’s answer to consumer-activist bestsellers like Michael Pollan’s The Omnivore’s Dilemma. “Mass-produced clothing, like fast food, fills a hunger and need, yet is non-durable and wasteful,” Cline argues. Americans, she finds, buy roughly 20 billion garments a year – about 64 items per person – and no matter how much they give away, this excess leads to waste.\n\nTowards the end of Overdressed, Cline introduced her ideal, a Brooklyn woman named Sarah Kate Beaumont, who since 2008 has made all of her own clothes – and beautifully. But as Cline is the first to note, it took Beaumont decades to perfect her craft; her example can’t be knocked off.\n\nThough several fast-fashion companies have made efforts to curb their impact on labor and the environment – including H&M, with its green Conscious Collection line – Cline believes lasting change can only be effected by the customer. She exhibits the idealism common to many advocates of sustainability, be it in food or in energy. Vanity is a constant; people will only start shopping more sustainably when they can’t afford not to.",
+    "content": "In the 2006 film version of The Devil Wears Prada, Miranda Priestly, played by Meryl Streep, scolds her unattractive assistant for imagining that high fashion doesn't affect her. Priestly explains how the deep blue color of the assistant’s sweater descended over the years from fashion shows to department stores and to the bargain bin in which the poor girl doubtless found her garment.\n\nThis top-down conception of the fashion business couldn't be more out of date or at odds with the feverish world described in Overdressed, Elizabeth Cline’s three-year indictment of “fast fashion”. In the last decade or so, advances in technology have allowed mass-market labels such as Zara, H&M, and Uniqlo to react to trends more quickly and anticipate demand more precisely. Quicker turnarounds mean less wasted inventory, more frequent releases, and more profit. These labels encourage style-conscious consumers to see clothes as disposable – meant to last only a wash or two, although they don’t advertise that – and to renew their wardrobe every few weeks. By offering on-trend items at dirt-cheap prices, Cline argues, these brands have hijacked fashion cycles, shaking an industry long accustomed to a seasonal pace.\n\nThe victims of this revolution, of course, are not limited to designers. For H&M to offer a $5.95 knit miniskirt in all its 2,300-plus stores around the world, it must rely on low-wage overseas labor, order in volumes that strain natural resources, and use massive amounts of harmful chemicals.\n\nOverdressed is the fashion world’s answer to consumer-activist bestsellers like Michael Pollan’s The Omnivore’s Dilemma. “Mass-produced clothing, like fast food, fills a hunger and need, yet is non-durable and wasteful,” Cline argues. Americans, she finds, buy roughly 20 billion garments a year – about 64 items per person – and no matter how much they give away, this excess leads to waste.\n\nTowards the end of Overdressed, Cline introduced her ideal, a Brooklyn woman named Sarah Kate Beaumont, who since 2008 has made all of her own clothes – and beautifully. But as Cline is the first to note, it took Beaumont decades to perfect her craft; her example can’t be knocked off.\n\nThough several fast-fashion companies have made efforts to curb their impact on labor and the environment – including H&M, with its green Conscious Collection line – Cline believes lasting change can only be effected by the customer. She exhibits the idealism common to many advocates of sustainability, be it in food or in energy. Vanity is a constant; people will only start shopping more sustainably when they can’t afford not to.",
     "questions": [
       {
         "num": 21,
@@ -901,7 +901,7 @@ const READINGS = [
         "answer": "C"
       }
     ],
-        "answers": [
+    "answers": [
       "A",
       "B",
       "D",
@@ -971,7 +971,7 @@ const READINGS = [
         "answer": "D"
       }
     ],
-        "answers": [
+    "answers": [
       "D",
       "A",
       "C",
@@ -983,7 +983,7 @@ const READINGS = [
     "year": 2013,
     "type": "英语一",
     "textNum": 3,
-    "content": "Up until a few decades ago, our visions of the future were largely – though by no means uniformly – glowingly positive. Science and technology would cure all the ills of humanity, leading to lives of fulfilment and opportunity for all.\n\nNow utopia has grown unfashionable, as we have gained a deeper appreciation of the range of threats facing us, from asteroid strike to epidemic flu and to climate change. You might even be tempted to assume that humanity has little future to look forward to.\n\nBut such gloominess is misplaced. The fossil record shows that many species have endured for millions of years – so why shouldn't’t we? Take a broader look at our species’ place in the universe, and it becomes clear that we have an excellent chance of surviving for tens, if not hundreds, of thousands of years. Look up Homo sapiens in the “Red List” of threatened species of the International Union for the Conservation of Nature (IUCN) and you will read: “Listed as Least Concern as the species is very widely distributed, adaptable, currently increasing, and there are no major threats resulting in an overall population decline.”\n\nSo what does our deep future hold? A growing number of researchers and organisations are now thinking seriously about that question. For example, the Long Now Foundation has as its flagship project a mechanical clock that is designed to still be marking time thousands of years hence.\n\nPerhaps willfully, it may be easier to think about such lengthy timescales than about the more immediate future. The potential evolution of today’s technology, and its social consequences, is dazzlingly complicated, and it’s perhaps best left to science fiction writers and futurologists to explore the many possibilities we can envisage. That’s one reason why we have launched Arc, a new publication dedicated to the near future.\n\nBut take a longer view and there is a surprising amount that we can say with considerable assurance. As so often, the past holds the key to the future: we have now identified enough of the long-term patterns shaping the history of the planet, and our species, to make evidence-based forecasts about the situations in which our descendants will find themselves.\n\nThis long perspective makes the pessimistic view of our prospects seem more likely to be a passing fad. To be sure, the future is not all rosy. But we are now knowledgeable enough to reduce many of the risks that threatened the existence of earlier humans, and to improve the lot of those to come.",
+    "content": "Up until a few decades ago, our visions of the future were largely – though by no means uniformly – glowingly positive. Science and technology would cure all the ills of humanity, leading to lives of fulfilment and opportunity for all.\n\nNow utopia has grown unfashionable, as we have gained a deeper appreciation of the range of threats facing us, from asteroid strike to epidemic flu and to climate change. You might even be tempted to assume that humanity has little future to look forward to.\n\nBut such gloominess is misplaced. The fossil record shows that many species have endured for millions of years – so why shouldn't we? Take a broader look at our species’ place in the universe, and it becomes clear that we have an excellent chance of surviving for tens, if not hundreds, of thousands of years. Look up Homo sapiens in the “Red List” of threatened species of the International Union for the Conservation of Nature (IUCN) and you will read: “Listed as Least Concern as the species is very widely distributed, adaptable, currently increasing, and there are no major threats resulting in an overall population decline.”\n\nSo what does our deep future hold? A growing number of researchers and organisations are now thinking seriously about that question. For example, the Long Now Foundation has as its flagship project a mechanical clock that is designed to still be marking time thousands of years hence.\n\nPerhaps willfully, it may be easier to think about such lengthy timescales than about the more immediate future. The potential evolution of today’s technology, and its social consequences, is dazzlingly complicated, and it’s perhaps best left to science fiction writers and futurologists to explore the many possibilities we can envisage. That’s one reason why we have launched Arc, a new publication dedicated to the near future.\n\nBut take a longer view and there is a surprising amount that we can say with considerable assurance. As so often, the past holds the key to the future: we have now identified enough of the long-term patterns shaping the history of the planet, and our species, to make evidence-based forecasts about the situations in which our descendants will find themselves.\n\nThis long perspective makes the pessimistic view of our prospects seem more likely to be a passing fad. To be sure, the future is not all rosy. But we are now knowledgeable enough to reduce many of the risks that threatened the existence of earlier humans, and to improve the lot of those to come.",
     "questions": [
       {
         "num": 31,
@@ -1041,7 +1041,7 @@ const READINGS = [
         "answer": "A"
       }
     ],
-        "answers": [
+    "answers": [
       "B",
       "A",
       "D",
@@ -1053,7 +1053,7 @@ const READINGS = [
     "year": 2013,
     "type": "英语一",
     "textNum": 4,
-    "content": "On a five to three vote, the Supreme Court knocked out much of Arizona’s immigration law Monday – a modest policy victory for the Obama Administration. But on the more important matter of the Constitution, the decision was an 8-0 defeat for the Administration’s effort to upset the balance of power between the federal government and the states.\n\nIn Arizona v. United States, the majority overturned three of the four contested provisions of Arizona’s controversial plan to have state and local police enforce federal immigration law. The Constitutional principles that Washington alone has the power to “establish a uniform Rule of Naturalization” and that federal laws precede state laws are noncontroversial. Arizona had attempted to fashion state policies that ran parallel to the existing federal ones.\n\nJustice Anthony Kennedy, joined by Chief Justice John Roberts and the Court’s liberals, ruled that the state flew too close to the federal sun. On the overturned provisions the majority held Congress had deliberately “occupied the field” and Arizona had thus intruded on the federal’s privileged powers.\n\nHowever, the Justices said that Arizona police would be allowed to verify the legal status of people who come in contact with law enforcement. That’s because Congress has always envisioned joint federal-state immigration enforcement and explicitly encourages state officers to share information and cooperate with federal colleagues.\n\nTwo of the three objecting Justices – Samuel Alito and Clarence Thomas – agreed with this Constitutional logic but disagreed about which Arizona rules conflicted with the federal statute. The only major objection came from Justice Antonin Scalia, who offered an even more robust defense of state privileges going back to the Alien and Sedition Acts.\n\nThe 8-0 objection to President Obama turns on what Justice Samuel Alito describes in his objection as “a shocking assertion of federal executive power”. The White House argued that Arizona’s laws conflicted with its enforcement priorities, even if state laws complied with federal statutes to the letter. In effect, the White House claimed that it could invalidate any otherwise legitimate state law that it disagrees with.\n\nSome powers do belong exclusively to the federal government, and control of citizenship and the borders is among them. But if Congress wanted to prevent states from using their own resources to check immigration status, it could. It never did so. The Administration was in essence asserting that because it didn't’t want to carry out Congress’s immigration wishes, no state should be allowed to do so either. Every Justice rightly rejected this remarkable claim.",
+    "content": "On a five to three vote, the Supreme Court knocked out much of Arizona’s immigration law Monday – a modest policy victory for the Obama Administration. But on the more important matter of the Constitution, the decision was an 8-0 defeat for the Administration’s effort to upset the balance of power between the federal government and the states.\n\nIn Arizona v. United States, the majority overturned three of the four contested provisions of Arizona’s controversial plan to have state and local police enforce federal immigration law. The Constitutional principles that Washington alone has the power to “establish a uniform Rule of Naturalization” and that federal laws precede state laws are noncontroversial. Arizona had attempted to fashion state policies that ran parallel to the existing federal ones.\n\nJustice Anthony Kennedy, joined by Chief Justice John Roberts and the Court’s liberals, ruled that the state flew too close to the federal sun. On the overturned provisions the majority held Congress had deliberately “occupied the field” and Arizona had thus intruded on the federal’s privileged powers.\n\nHowever, the Justices said that Arizona police would be allowed to verify the legal status of people who come in contact with law enforcement. That’s because Congress has always envisioned joint federal-state immigration enforcement and explicitly encourages state officers to share information and cooperate with federal colleagues.\n\nTwo of the three objecting Justices – Samuel Alito and Clarence Thomas – agreed with this Constitutional logic but disagreed about which Arizona rules conflicted with the federal statute. The only major objection came from Justice Antonin Scalia, who offered an even more robust defense of state privileges going back to the Alien and Sedition Acts.\n\nThe 8-0 objection to President Obama turns on what Justice Samuel Alito describes in his objection as “a shocking assertion of federal executive power”. The White House argued that Arizona’s laws conflicted with its enforcement priorities, even if state laws complied with federal statutes to the letter. In effect, the White House claimed that it could invalidate any otherwise legitimate state law that it disagrees with.\n\nSome powers do belong exclusively to the federal government, and control of citizenship and the borders is among them. But if Congress wanted to prevent states from using their own resources to check immigration status, it could. It never did so. The Administration was in essence asserting that because it didn't want to carry out Congress’s immigration wishes, no state should be allowed to do so either. Every Justice rightly rejected this remarkable claim.",
     "questions": [
       {
         "num": 36,
@@ -1111,7 +1111,7 @@ const READINGS = [
         "answer": "D"
       }
     ],
-        "answers": [
+    "answers": [
       "B",
       "C",
       "A",
@@ -1181,7 +1181,7 @@ const READINGS = [
         "answer": "A"
       }
     ],
-        "answers": [
+    "answers": [
       "A",
       "C",
       "D",
@@ -1251,7 +1251,7 @@ const READINGS = [
         "answer": "B"
       }
     ],
-        "answers": [
+    "answers": [
       "D",
       "D",
       "A",
@@ -1263,7 +1263,7 @@ const READINGS = [
     "year": 2014,
     "type": "英语一",
     "textNum": 3,
-    "content": "The US$3-million Fundamental Physics Prize is indeed an interesting experiment, as Alexander Polyakov said when he accepted this year’s award in March. And it is far from the only one of its type. As a News Feature article in Nature discusses, a string of lucrative awards for researchers have joined the Nobel Prizes in recent years. Many, like the Fundamental Physics Prize, are funded from the telephone-number-sized bank accounts of Internet entrepreneurs.These benefactors have succeeded in their chosen fields, they say, and they want to use their wealth to draw attention to those who have succeeded in science.\n\nWhat’s not to like? Quite a lot, according to a handful of scientists quoted in the News Feature. You cannot buy class, as the old saying goes, and these upstart entrepreneurs cannot buy their prizes the prestige of the Nobels. The new awards are an exercise in self-promotion for those behind them, say scientists. They could distort the achievement-based system of peer-review-led research. They could cement the status quo of peer-reviewed research. They do not fund peer-reviewed research. They perpetuate the myth of the lone genius.\n\nThe goals of the prize-givers seem as scattered as the criticism. Some want to shock, others to draw people into science, or to better reward those who have made their careers in research.\n\nAs Nature has pointed out before, there are some legitimate concerns about how science prizes – both new and old – are distributed. The Breakthrough Prize in Life Sciences, launched this year, takes an unrepresentative view of what the life sciences include. But the Nobel Foundation’s limit of three recipients per prize, each of whom must still be living, has long been outgrown by the collaborative nature of modern research – as will be demonstrated by the inevitable row over who is ignored when it comes to acknowledging the discovery of the Higgs boson. The Nobels were, of course, themselves set up by a very rich individual who had decided what he wanted to do with his own money. Time, rather than intention, has given them legitimacy.\n\nAs much as some scientists may complain about the new awards, two things seem clear. First, most researchers would accept such a prize if they were offered one. Second, it is surely a good thing that the money and attention come to science rather than go elsewhere. It is fair to criticize and question the mechanism– that is the culture of research, after all – but it is the prize-givers’ money to do with as they please. It is wise to take such gifts with gratitude and grace.",
+    "content": "The US$3-million Fundamental Physics Prize is indeed an interesting experiment, as Alexander Polyakov said when he accepted this year’s award in March. And it is far from the only one of its type. As a News Feature article in Nature discusses, a string of lucrative awards for researchers have joined the Nobel Prizes in recent years. Many, like the Fundamental Physics Prize, are funded from the telephone-number-sized bank accounts of Internet entrepreneurs. These benefactors have succeeded in their chosen fields, they say, and they want to use their wealth to draw attention to those who have succeeded in science.\n\nWhat’s not to like? Quite a lot, according to a handful of scientists quoted in the News Feature. You cannot buy class, as the old saying goes, and these upstart entrepreneurs cannot buy their prizes the prestige of the Nobels. The new awards are an exercise in self-promotion for those behind them, say scientists. They could distort the achievement-based system of peer-review-led research. They could cement the status quo of peer-reviewed research. They do not fund peer-reviewed research. They perpetuate the myth of the lone genius.\n\nThe goals of the prize-givers seem as scattered as the criticism. Some want to shock, others to draw people into science, or to better reward those who have made their careers in research.\n\nAs Nature has pointed out before, there are some legitimate concerns about how science prizes – both new and old – are distributed. The Breakthrough Prize in Life Sciences, launched this year, takes an unrepresentative view of what the life sciences include. But the Nobel Foundation’s limit of three recipients per prize, each of whom must still be living, has long been outgrown by the collaborative nature of modern research – as will be demonstrated by the inevitable row over who is ignored when it comes to acknowledging the discovery of the Higgs boson. The Nobels were, of course, themselves set up by a very rich individual who had decided what he wanted to do with his own money. Time, rather than intention, has given them legitimacy.\n\nAs much as some scientists may complain about the new awards, two things seem clear. First, most researchers would accept such a prize if they were offered one. Second, it is surely a good thing that the money and attention come to science rather than go elsewhere. It is fair to criticize and question the mechanism – that is the culture of research, after all – but it is the prize-givers’ money to do with as they please. It is wise to take such gifts with gratitude and grace.",
     "questions": [
       {
         "num": 31,
@@ -1321,7 +1321,7 @@ const READINGS = [
         "answer": "D"
       }
     ],
-        "answers": [
+    "answers": [
       "B",
       "C",
       "C",
@@ -1391,7 +1391,7 @@ const READINGS = [
         "answer": "B"
       }
     ],
-        "answers": [
+    "answers": [
       "A",
       "D",
       "C",
@@ -1403,11 +1403,11 @@ const READINGS = [
     "year": 2015,
     "type": "英语一",
     "textNum": 1,
-    "content": "King Juan Carlos of Spain once insisted “kings don’t abdicate, they die in their sleep.” But embarrassing scandals and the popularity of the republican left in the recent Euro-elections have forced him to eat his words and stand down. So, does the Spanish crisis suggest that monarchy is seeing its last days? Does that mean the writing is on the wall for all European royals, with their magnificent uniforms and majestic lifestyles?\n\nThe Spanish case provides arguments both for and against monarchy. When public opinion is particularly polarised, as it was following the end of the Franco regime, monarchs can rise above “mere” politics and “embody” a spirit of national unity.\n\nIt is this apparent transcendence of politics that explains monarchs’ continuing popularity as heads of state. And so, the Middle East excepted, Europe is the most monarch-infested region in the world, with 10 kingdoms (not counting Vatican city and Andorra). But unlike their absolutist counterparts in the Gulf and Asia, most royal families have survived because they allow voters to avoid the difficult search for a non-controversial but respected public figure.\n\nEven so, kings and queens undoubtedly have a downside. Symbolic of national unity as they claim to be, their very history – and sometimes the way they behave today – embodies outdated and indefensible privileges and inequalities. At a time when Thomas Piketty and other economists are warning of rising inequality and the increasing power of inherited wealth, it is bizarre that wealthy aristocratic families should still be the symbolic heart of modern democratic states.\n\nThe most successful monarchies strive to abandon or hide their old aristocratic ways. Princes and princesses have day-jobs and ride bicycles, not horses (or helicopters). Even so, these are wealthy families who party with the international 1%, and media intrusiveness makes it increasingly difficult to maintain the right image.\n\nWhile Europe’s monarchies will no doubt be smart enough to survive for some time to come, it is the British royals who have most to fear from the Spanish example.\n\nIt is only the Queen who has preserved the monarchy’s reputation with her rather ordinary (if well-heeled) granny style. The danger will come with Charles, who has both an expensive taste of lifestyle and a pretty hierarchical view of the world. He has failed to understand that monarchies have largely survived because they provide a service –as non-controversial and non-political heads of state. Charles ought to know that as English history shows, it is kings, not republicans, who are the monarchy’s worst enemies.",
+    "content": "King Juan Carlos of Spain once insisted “kings don’t abdicate, they die in their sleep.” But embarrassing scandals and the popularity of the republican left in the recent Euro-elections have forced him to eat his words and stand down. So, does the Spanish crisis suggest that monarchy is seeing its last days? Does that mean the writing is on the wall for all European royals, with their magnificent uniforms and majestic lifestyles?\n\nThe Spanish case provides arguments both for and against monarchy. When public opinion is particularly polarised, as it was following the end of the Franco regime, monarchs can rise above “mere” politics and “embody” a spirit of national unity.\n\nIt is this apparent transcendence of politics that explains monarchs’ continuing popularity as heads of state. And so, the Middle East excepted, Europe is the most monarch-infested region in the world, with 10 kingdoms (not counting Vatican city and Andorra). But unlike their absolutist counterparts in the Gulf and Asia, most royal families have survived because they allow voters to avoid the difficult search for a non-controversial but respected public figure.\n\nEven so, kings and queens undoubtedly have a downside. Symbolic of national unity as they claim to be, their very history – and sometimes the way they behave today – embodies outdated and indefensible privileges and inequalities. At a time when Thomas Piketty and other economists are warning of rising inequality and the increasing power of inherited wealth, it is bizarre that wealthy aristocratic families should still be the symbolic heart of modern democratic states.\n\nThe most successful monarchies strive to abandon or hide their old aristocratic ways. Princes and princesses have day-jobs and ride bicycles, not horses (or helicopters). Even so, these are wealthy families who party with the international 1%, and media intrusiveness makes it increasingly difficult to maintain the right image.\n\nWhile Europe’s monarchies will no doubt be smart enough to survive for some time to come, it is the British royals who have most to fear from the Spanish example.\n\nIt is only the Queen who has preserved the monarchy’s reputation with her rather ordinary (if well-heeled) granny style. The danger will come with Charles, who has both an expensive taste of lifestyle and a pretty hierarchical view of the world. He has failed to understand that monarchies have largely survived because they provide a service – as non-controversial and non-political heads of state. Charles ought to know that as English history shows, it is kings, not republicans, who are the monarchy’s worst enemies.",
     "questions": [
       {
         "num": 21,
-        "stem": "According to the first two paragraphs, King Juan Carl of Spain",
+        "stem": "According to the first two paragraphs, King Juan Carlos of Spain",
         "options": [
           "A. eased his relationship with his rivals.",
           "B. used to enjoy high public support.",
@@ -1461,7 +1461,7 @@ const READINGS = [
         "answer": "C"
       }
     ],
-        "answers": [
+    "answers": [
       "D",
       "C",
       "B",
@@ -1473,7 +1473,7 @@ const READINGS = [
     "year": 2015,
     "type": "英语一",
     "textNum": 2,
-    "content": "Just how much does the Constitution protect your digital data? The Supreme Court will now consider whether police can search the contents of a mobile phone without a warrant if the phone is on or around a person during an arrest.\n\nCalifornia has asked the justices to refrain from a sweeping ruling, particularly one that upsets the old assumption that authorities may search through the possessions of suspects at the time of their arrest. It is hard, the state argues, for judges to assess the implications of new and rapidly changing technologies.\n\nThe court would be recklessly modest if it followed California’s advice. Enough of the implications are discernable, even obvious, so that the justices can and should provide updated guidelines to police, lawyers and defendants.\n\nThey should start by discarding California’s lame argument that exploring the contents of a smartphone – a vast storehouse of digital information – is similar to, say, going through a suspect’s purse. The court has ruled that police don’t violate the Fourth Amendment when they go through the wallet or pocketbook of an arrestee without a warrant. But exploring one’s smartphone is more like entering his or her home. A smartphone may contain an arrestee’s reading history, financial history, medical history and comprehensive records of recent correspondence. The development of “cloud computing”, meanwhile, has made that exploration so much the easier.\n\nAmericans should take steps to protect their digital privacy. But keeping sensitive information on these devices is increasingly a requirement of normal life. Citizens still have a right to expect private documents to remain private and protected by the Constitution’s prohibition on unreasonable searches.\n\nAs so often is the case, stating that principle doesn't’t ease the challenge of line-drawing. In many cases, it would not be overly burdensome for authorities to obtain a warrant to search through phone contents. They could still invalidate Fourth Amendment protections when facing severe, urgent circumstances, and they could take reasonable measures to ensure that phone data are not erased or altered while waiting for a warrant. The court, though, may want to allow room for police to cite situations where they are entitled to more freedom.\n\nBut the justices should not swallow California’s argument whole. New, disruptive technology sometimes demands novel applications of the Constitution’s protections. Orin Kerr, a law professor, compares the explosion and accessibility of digital information in the 21st century with the establishment of automobile use as a virtual necessity of life in the 20th: The justices had to specify novel rules for the new personal domain of the passenger car then; they must sort out how the Fourth Amendment applies to digital information now.",
+    "content": "Just how much does the Constitution protect your digital data? The Supreme Court will now consider whether police can search the contents of a mobile phone without a warrant if the phone is on or around a person during an arrest.\n\nCalifornia has asked the justices to refrain from a sweeping ruling, particularly one that upsets the old assumption that authorities may search through the possessions of suspects at the time of their arrest. It is hard, the state argues, for judges to assess the implications of new and rapidly changing technologies.\n\nThe court would be recklessly modest if it followed California’s advice. Enough of the implications are discernable, even obvious, so that the justices can and should provide updated guidelines to police, lawyers and defendants.\n\nThey should start by discarding California’s lame argument that exploring the contents of a smartphone – a vast storehouse of digital information – is similar to, say, going through a suspect’s purse. The court has ruled that police don’t violate the Fourth Amendment when they go through the wallet or pocketbook of an arrestee without a warrant. But exploring one’s smartphone is more like entering his or her home. A smartphone may contain an arrestee’s reading history, financial history, medical history and comprehensive records of recent correspondence. The development of “cloud computing”, meanwhile, has made that exploration so much the easier.\n\nAmericans should take steps to protect their digital privacy. But keeping sensitive information on these devices is increasingly a requirement of normal life. Citizens still have a right to expect private documents to remain private and protected by the Constitution’s prohibition on unreasonable searches.\n\nAs so often is the case, stating that principle doesn’t ease the challenge of line-drawing. In many cases, it would not be overly burdensome for authorities to obtain a warrant to search through phone contents. They could still invalidate Fourth Amendment protections when facing severe, urgent circumstances, and they could take reasonable measures to ensure that phone data are not erased or altered while waiting for a warrant. The court, though, may want to allow room for police to cite situations where they are entitled to more freedom.\n\nBut the justices should not swallow California’s argument whole. New, disruptive technology sometimes demands novel applications of the Constitution’s protections. Orin Kerr, a law professor, compares the explosion and accessibility of digital information in the 21st century with the establishment of automobile use as a virtual necessity of life in the 20th: The justices had to specify novel rules for the new personal domain of the passenger car then; they must sort out how the Fourth Amendment applies to digital information now.",
     "questions": [
       {
         "num": 26,
@@ -1531,7 +1531,7 @@ const READINGS = [
         "answer": "D"
       }
     ],
-        "answers": [
+    "answers": [
       "C",
       "A",
       "D",
@@ -1601,7 +1601,7 @@ const READINGS = [
         "answer": "A"
       }
     ],
-        "answers": [
+    "answers": [
       "B",
       "C",
       "D",
@@ -1671,7 +1671,7 @@ const READINGS = [
         "answer": "B"
       }
     ],
-        "answers": [
+    "answers": [
       "A",
       "B",
       "A",
@@ -1741,7 +1741,7 @@ const READINGS = [
         "answer": "D"
       }
     ],
-        "answers": [
+    "answers": [
       "A",
       "D",
       "D",
@@ -1753,7 +1753,7 @@ const READINGS = [
     "year": 2016,
     "type": "英语一",
     "textNum": 2,
-    "content": "For the first time in history more people live in towns than in the country. In Britain this has had a curious result.While polls show Britons rate “the countryside” alongside the royal family, Shakespeare and the National Health Service (NHS) as what makes them proudest of their country, this has limited political support.\n\nA century ago Octavia Hill launched the National Trust not to rescue stylish houses but to save “the beauty of natural places for everyone forever.” It was specifically to provide city dwellers with spaces for leisure where they could experience “a refreshing air.” Hill’s pressure later led to the creation of national parks and green belts. They don’t make countryside any more, and every year concrete consumes more of it. It needs constant guardianship.\n\nAt the next election none of the big parties seem likely to endorse this sentiment. The Conservatives’ planning reform explicitly gives rural development priority over conservation, even authorising “off-plan” building where local people might object. The concept of sustainable development has been defined as profitable. Labour likewise wants to discontinue local planning where councils oppose development. The Liberal Democrats are silent. Only Ukip, sensing its chance, has sided with those pleading for a more considered approach to using green land. Its Campaign to Protect Rural England struck terror into many local Conservative parties.\n\nThe sensible place to build new houses, factories and offices is where people are, in cities and towns where infrastructure is in place. The London agents Stirling Ackroyd recently identified enough sites for half a million houses in the London area alone, with no intrusion on green belt. What is true of London is even truer of the provinces.\n\nThe idea that “housing crisis” equals “concreted meadows” is pure lobby talk. The issue is not the need for more houses but, as always, where to put them. Under lobby pressure, George Osborne favours rural new-build against urban renovation and renewal. He favours out-of-town shopping sites against high streets. This is not a free market but a biased one. Rural towns and villages have grown and will always grow. They do so best where building sticks to their edges and respects their character. We do not ruin urban conservation areas. Why ruin rural ones?\n\nDevelopment should be planned, not let rip. After the Netherlands, Britain is Europe’s most crowded country. Half a century of town and country planning has enabled it to retain an enviable rural coherence, while still permitting low-density urban living. There is no doubt of the alternative – the corrupted landscapes of southern Portugal, Spain or Ireland. Avoiding this rather than promoting it should unite the left and right of the political spectrum.",
+    "content": "For the first time in history more people live in towns than in the country. In Britain this has had a curious result. While polls show Britons rate “the countryside” alongside the royal family, Shakespeare and the National Health Service (NHS) as what makes them proudest of their country, this has limited political support.\n\nA century ago Octavia Hill launched the National Trust not to rescue stylish houses but to save “the beauty of natural places for everyone forever.” It was specifically to provide city dwellers with spaces for leisure where they could experience “a refreshing air.” Hill’s pressure later led to the creation of national parks and green belts. They don’t make countryside any more, and every year concrete consumes more of it. It needs constant guardianship.\n\nAt the next election none of the big parties seem likely to endorse this sentiment. The Conservatives’ planning reform explicitly gives rural development priority over conservation, even authorising “off-plan” building where local people might object. The concept of sustainable development has been defined as profitable. Labour likewise wants to discontinue local planning where councils oppose development. The Liberal Democrats are silent. Only Ukip, sensing its chance, has sided with those pleading for a more considered approach to using green land. Its Campaign to Protect Rural England struck terror into many local Conservative parties.\n\nThe sensible place to build new houses, factories and offices is where people are, in cities and towns where infrastructure is in place. The London agents Stirling Ackroyd recently identified enough sites for half a million houses in the London area alone, with no intrusion on green belt. What is true of London is even truer of the provinces.\n\nThe idea that “housing crisis” equals “concreted meadows” is pure lobby talk. The issue is not the need for more houses but, as always, where to put them. Under lobby pressure, George Osborne favours rural new-build against urban renovation and renewal. He favours out-of-town shopping sites against high streets. This is not a free market but a biased one. Rural towns and villages have grown and will always grow. They do so best where building sticks to their edges and respects their character. We do not ruin urban conservation areas. Why ruin rural ones?\n\nDevelopment should be planned, not let rip. After the Netherlands, Britain is Europe’s most crowded country. Half a century of town and country planning has enabled it to retain an enviable rural coherence, while still permitting low-density urban living. There is no doubt of the alternative – the corrupted landscapes of southern Portugal, Spain or Ireland. Avoiding this rather than promoting it should unite the left and right of the political spectrum.",
     "questions": [
       {
         "num": 26,
@@ -1811,7 +1811,7 @@ const READINGS = [
         "answer": "C"
       }
     ],
-        "answers": [
+    "answers": [
       "A",
       "D",
       "C",
@@ -1849,7 +1849,7 @@ const READINGS = [
       },
       {
         "num": 33,
-        "stem": "The expression “more lenient” (Para.4) is closest in meaning to",
+        "stem": "The expression “more lenient” (Para. 4) is closest in meaning to",
         "options": [
           "A. less controversial.",
           "B. more effective.",
@@ -1881,7 +1881,7 @@ const READINGS = [
         "answer": "B"
       }
     ],
-        "answers": [
+    "answers": [
       "B",
       "C",
       "D",
@@ -1893,7 +1893,7 @@ const READINGS = [
     "year": 2016,
     "type": "英语一",
     "textNum": 4,
-    "content": "There will eventually come a day when The New York Times ceases to publish stories on newsprint. Exactly when that day will be is a matter of debate. “Sometime in the future,” the paper’s publisher said back in 2010.\n\nNostalgia for ink on paper and the rustle of pages aside, there’s plenty of incentive to ditch print. The infrastructure required to make a physical newspaper– printing presses, delivery trucks – isn't’t just expensive; it’s excessive at a time when online-only competitors don’t have the same set of financial constraints. Readers are migrating away from print anyway. And though print ad sales still dwarf their online and mobile counterparts, revenue from print is still declining.\n\nOverhead may be high and circulation lower, but rushing to eliminate its print edition would be a mistake, says BuzzFeed CEO Jonah Peretti.\n\nPeretti says the Times shouldn't’t waste time getting out of the print business, but only if they go about doing it the right way. “Figuring out a way to accelerate that transition would make sense for them,” he said, “but if you discontinue it, you’re going to have your most loyal customers really upset with you.”\n\nSometimes that’s worth making a change anyway. Peretti gives the example of Netflix discontinuing its DVD-mailing service to focus on streaming. “It was seen as a blunder,” he said. The move turned out to be foresighted. And if Peretti were in charge at the Times? “I wouldn't’t pick a year to end print,” he said. “I would raise prices and make it into more of a legacy product.”\n\nThe most loyal customers would still get the product they favor, the idea goes, and they’d feel like they were helping sustain the quality of something they believe in. “So if you’re overpaying for print, you could feel like you were helping,” Peretti said. “Then increase it at a higher rate each year and essentially try to generate additional revenue.” In other words, if you’re going to make a print product, make it for the people who are already obsessed with it. Which may be what the Times is doing already. Getting the print edition seven days a week costs nearly $500 a year – more than twice as much as a digital-only subscription.\n\n“It’s a really hard thing to do and it’s a tremendous luxury that BuzzFeed doesn't’t have a legacy business,” Peretti remarked. “But we’re going to have questions like that where we have things we’re doing that don’t make sense when the market changes and the world changes. In those situations, it’s better to be more aggressive than less aggressive.”",
+    "content": "There will eventually come a day when The New York Times ceases to publish stories on newsprint. Exactly when that day will be is a matter of debate. “Sometime in the future,” the paper’s publisher said back in 2010.\n\nNostalgia for ink on paper and the rustle of pages aside, there’s plenty of incentive to ditch print. The infrastructure required to make a physical newspaper – printing presses, delivery trucks – isn’t just expensive; it’s excessive at a time when online-only competitors don’t have the same set of financial constraints. Readers are migrating away from print anyway. And though print ad sales still dwarf their online and mobile counterparts, revenue from print is still declining.\n\nOverhead may be high and circulation lower, but rushing to eliminate its print edition would be a mistake, says BuzzFeed CEO Jonah Peretti.\n\nPeretti says the Times shouldn’t waste time getting out of the print business, but only if they go about doing it the right way. “Figuring out a way to accelerate that transition would make sense for them,” he said, “but if you discontinue it, you’re going to have your most loyal customers really upset with you.”\n\nSometimes that’s worth making a change anyway. Peretti gives the example of Netflix discontinuing its DVD-mailing service to focus on streaming. “It was seen as a blunder,” he said. The move turned out to be foresighted. And if Peretti were in charge at the Times? “I wouldn’t pick a year to end print,” he said. “I would raise prices and make it into more of a legacy product.”\n\nThe most loyal customers would still get the product they favor, the idea goes, and they’d feel like they were helping sustain the quality of something they believe in. “So if you’re overpaying for print, you could feel like you were helping,” Peretti said. “Then increase it at a higher rate each year and essentially try to generate additional revenue.” In other words, if you’re going to make a print product, make it for the people who are already obsessed with it. Which may be what the Times is doing already. Getting the print edition seven days a week costs nearly $500 a year – more than twice as much as a digital-only subscription.\n\n“It’s a really hard thing to do and it’s a tremendous luxury that BuzzFeed doesn’t have a legacy business,” Peretti remarked. “But we’re going to have questions like that where we have things we’re doing that don’t make sense when the market changes and the world changes. In those situations, it’s better to be more aggressive than less aggressive.”",
     "questions": [
       {
         "num": 36,
@@ -1951,7 +1951,7 @@ const READINGS = [
         "answer": "B"
       }
     ],
-        "answers": [
+    "answers": [
       "A",
       "B",
       "B",
@@ -2021,7 +2021,7 @@ const READINGS = [
         "answer": "C"
       }
     ],
-        "answers": [
+    "answers": [
       "A",
       "C",
       "D",
@@ -2091,7 +2091,7 @@ const READINGS = [
         "answer": "D"
       }
     ],
-        "answers": [
+    "answers": [
       "B",
       "A",
       "B",
@@ -2103,7 +2103,7 @@ const READINGS = [
     "year": 2017,
     "type": "英语一",
     "textNum": 3,
-    "content": "Robert F. Kennedy once said that a country’s GDP measures “everything except that which makes life worthwhile.” With Britain voting to leave the European Union, and GDP already predicted to slow as a result, it is now a timely moment to assess what he was referring to.\n\nThe question of GDP and its usefulness has annoyed policymakers for over half a century. Many argue that it is a flawed concept. It measures things that do not matter and misses things that do. By most recent measures, the UK’s GDP has been the envy of the Western world, with record low unemployment and high growth figures. If everything was going so well, then why did over 17 million people vote for Brexit, despite the warnings about what it could do to their country’s economic prospects?\n\nA recent annual study of countries and their ability to convert growth into well-being sheds some light on that question. Across the 163 countries measured, the UK is one of the poorest performers in ensuring that economic growth is translated into meaningful improvements for its citizens. Rather than just focusing on GDP, over 40 different sets of criteria from health, education and civil society engagement have been measured to get a more rounded assessment of how countries are performing.\n\nWhile all of these countries face their own challenges, there are a number of consistent themes. Yes, there has been a budding economic recovery since the 2008 global crash, but in key indicators in areas such as health and education, major economies have continued to decline. Yet this isn't’t the case with all countries. Some relatively poor European countries have seen huge improvements across measures including civil society, income equality and the environment.\n\nThis is a lesson that rich countries can learn: When GDP is no longer regarded as the sole measure of a country’s success, the world looks very different.\n\nSo, what Kennedy was referring to was that while GDP has been the most common method for measuring the economic activity of nations, as a measure, it is no longer enough. It does not include important factors such as environmental quality or education outcomes – all things that contribute to a person’s sense of well-being.\n\nThe sharp hit to growth predicted around the world and in the UK could lead to a decline in the everyday services we depend on for our well-being and for growth. But policymakers who refocus efforts on improving well-being rather than simply worrying about GDP figures could avoid the forecasted doom and may even see progress.",
+    "content": "Robert F. Kennedy once said that a country’s GDP measures “everything except that which makes life worthwhile.” With Britain voting to leave the European Union, and GDP already predicted to slow as a result, it is now a timely moment to assess what he was referring to.\n\nThe question of GDP and its usefulness has annoyed policymakers for over half a century. Many argue that it is a flawed concept. It measures things that do not matter and misses things that do. By most recent measures, the UK’s GDP has been the envy of the Western world, with record low unemployment and high growth figures. If everything was going so well, then why did over 17 million people vote for Brexit, despite the warnings about what it could do to their country’s economic prospects?\n\nA recent annual study of countries and their ability to convert growth into well-being sheds some light on that question. Across the 163 countries measured, the UK is one of the poorest performers in ensuring that economic growth is translated into meaningful improvements for its citizens. Rather than just focusing on GDP, over 40 different sets of criteria from health, education and civil society engagement have been measured to get a more rounded assessment of how countries are performing.\n\nWhile all of these countries face their own challenges, there are a number of consistent themes. Yes, there has been a budding economic recovery since the 2008 global crash, but in key indicators in areas such as health and education, major economies have continued to decline. Yet this isn’t the case with all countries. Some relatively poor European countries have seen huge improvements across measures including civil society, income equality and the environment.\n\nThis is a lesson that rich countries can learn: When GDP is no longer regarded as the sole measure of a country’s success, the world looks very different.\n\nSo, what Kennedy was referring to was that while GDP has been the most common method for measuring the economic activity of nations, as a measure, it is no longer enough. It does not include important factors such as environmental quality or education outcomes – all things that contribute to a person’s sense of well-being.\n\nThe sharp hit to growth predicted around the world and in the UK could lead to a decline in the everyday services we depend on for our well-being and for growth. But policymakers who refocus efforts on improving well-being rather than simply worrying about GDP figures could avoid the forecasted doom and may even see progress.",
     "questions": [
       {
         "num": 31,
@@ -2161,7 +2161,7 @@ const READINGS = [
         "answer": "A"
       }
     ],
-        "answers": [
+    "answers": [
       "D",
       "B",
       "D",
@@ -2177,7 +2177,7 @@ const READINGS = [
     "questions": [
       {
         "num": 36,
-        "stem": "The underlined sentence (Para.1) most probably shows that the court",
+        "stem": "The underlined sentence (Para. 1) most probably shows that the court",
         "options": [
           "A. avoided defining the extent of McDonnell’s duties.",
           "B. made no compromise in convicting McDonnell.",
@@ -2231,7 +2231,7 @@ const READINGS = [
         "answer": "D"
       }
     ],
-        "answers": [
+    "answers": [
       "C",
       "C",
       "A",
@@ -2243,7 +2243,7 @@ const READINGS = [
     "year": 2018,
     "type": "英语一",
     "textNum": 1,
-    "content": "Among the annoying challenges facing the middle class is one that will probably go unmentioned in the next presidential campaign: What happens when the robots come for their jobs?\n\nDon’t dismiss that possibility entirely. About half of U.S. jobs are at high risk of being automated, according to a University of Oxford study, with the middle class disproportionately squeezed. Lower-income jobs like gardening or day care don’t appeal to robots. But many middle-class occupations – trucking, financial advice, software engineering – have aroused their interest, or soon will. The rich own the robots, so they will be fine.\n\nThis isn't’t to be alarmist. Optimists point out that technological upheaval has benefited workers in the past. The Industrial Revolution didn't’t go so well for Luddites whose jobs were displaced by mechanized looms, but it eventually raised living standards and created more jobs than it destroyed. Likewise, automation should eventually boost productivity, stimulate demand by driving down prices, and free workers from hard, boring work. But in the medium term, middle-class workers may need a lot of help adjusting.\n\nThe first step, as Erik Brynjolfsson and Andrew McAfee argue in The Second Machine Age, should be rethinking education and job training. Curriculums – from grammar school to college – should evolve to focus less on memorizing facts and more on creativity and complex communication. Vocational schools should do a better job of fostering problem-solving skills and helping students work alongside robots. Online education can supplement the traditional kind. It could make extra training and instruction affordable. Professionals trying to acquire new skills will be able to do so without going into debt.\n\nThe challenge of coping with automation underlines the need for the U.S. to revive its fading business dynamism: Starting new companies must be made easier. In previous eras of drastic technological change, entrepreneurs smoothed the transition by dreaming up ways to combine labor and machines. The best uses of 3D printers and virtual reality haven’t been invented yet. The U.S. needs the new companies that will invent them.\n\nFinally, because automation threatens to widen the gap between capital income and labor income, taxes and the safety net will have to be rethought. Taxes on low-wage labor need to be cut, and wage subsidies such as the earned income tax credit should be expanded: This would boost incomes, encourage work, reward companies for job creation, and reduce inequality.\n\nTechnology will improve society in ways big and small over the next few years, yet this will be little comfort to those who find their lives and careers upended by automation. Destroying the machines that are coming for our jobs would be nuts. But policies to help workers adapt will be indispensable.",
+    "content": "Among the annoying challenges facing the middle class is one that will probably go unmentioned in the next presidential campaign: What happens when the robots come for their jobs?\n\nDon’t dismiss that possibility entirely. About half of U.S. jobs are at high risk of being automated, according to a University of Oxford study, with the middle class disproportionately squeezed. Lower-income jobs like gardening or day care don’t appeal to robots. But many middle-class occupations – trucking, financial advice, software engineering – have aroused their interest, or soon will. The rich own the robots, so they will be fine.\n\nThis isn’t to be alarmist. Optimists point out that technological upheaval has benefited workers in the past. The Industrial Revolution didn’t go so well for Luddites whose jobs were displaced by mechanized looms, but it eventually raised living standards and created more jobs than it destroyed. Likewise, automation should eventually boost productivity, stimulate demand by driving down prices, and free workers from hard, boring work. But in the medium term, middle-class workers may need a lot of help adjusting.\n\nThe first step, as Erik Brynjolfsson and Andrew McAfee argue in The Second Machine Age, should be rethinking education and job training. Curriculums – from grammar school to college – should evolve to focus less on memorizing facts and more on creativity and complex communication. Vocational schools should do a better job of fostering problem-solving skills and helping students work alongside robots. Online education can supplement the traditional kind. It could make extra training and instruction affordable. Professionals trying to acquire new skills will be able to do so without going into debt.\n\nThe challenge of coping with automation underlines the need for the U.S. to revive its fading business dynamism: Starting new companies must be made easier. In previous eras of drastic technological change, entrepreneurs smoothed the transition by dreaming up ways to combine labor and machines. The best uses of 3D printers and virtual reality haven’t been invented yet. The U.S. needs the new companies that will invent them.\n\nFinally, because automation threatens to widen the gap between capital income and labor income, taxes and the safety net will have to be rethought. Taxes on low-wage labor need to be cut, and wage subsidies such as the earned income tax credit should be expanded: This would boost incomes, encourage work, reward companies for job creation, and reduce inequality.\n\nTechnology will improve society in ways big and small over the next few years, yet this will be little comfort to those who find their lives and careers upended by automation. Destroying the machines that are coming for our jobs would be nuts. But policies to help workers adapt will be indispensable.",
     "questions": [
       {
         "num": 21,
@@ -2301,7 +2301,7 @@ const READINGS = [
         "answer": "B"
       }
     ],
-        "answers": [
+    "answers": [
       "D",
       "C",
       "A",
@@ -2371,7 +2371,7 @@ const READINGS = [
         "answer": "A"
       }
     ],
-        "answers": [
+    "answers": [
       "D",
       "A",
       "B",
@@ -2441,7 +2441,7 @@ const READINGS = [
         "answer": "B"
       }
     ],
-        "answers": [
+    "answers": [
       "B",
       "C",
       "D",
@@ -2511,7 +2511,7 @@ const READINGS = [
         "answer": "D"
       }
     ],
-        "answers": [
+    "answers": [
       "B",
       "A",
       "A",
@@ -2581,7 +2581,7 @@ const READINGS = [
         "answer": "B"
       }
     ],
-        "answers": [
+    "answers": [
       "A",
       "D",
       "B",
@@ -2651,7 +2651,7 @@ const READINGS = [
         "answer": "B"
       }
     ],
-        "answers": [
+    "answers": [
       "D",
       "A",
       "A",
@@ -2663,7 +2663,7 @@ const READINGS = [
     "year": 2019,
     "type": "英语一",
     "textNum": 3,
-    "content": "This year marks exactly two centuries since the publication of “Frankenstein; or, The Modern Prometheus,” by Mary Shelley. Even before the invention of the electric light bulb, the author produced a remarkable work of speculative fiction that would foreshadow many ethical questions to be raised by technologies yet to come.\n\nToday the rapid growth of artificial intelligence (AI) raises fundamental questions: “What is intelligence, identity, or consciousness? What makes humans humans? ”\n\nWhat is being called artificial general intelligence, machines that would imitate the way humans think, continues to evade scientists. Yet humans remain fascinated by the idea of robots that would look, move, and respond like humans, similar to those recently depicted on popular sci-fi TV series such as “Westworld” and “Humans.”\n\nJust how people think is still far too complex to be understood, let alone reproduced, says David Eagleman, a Stanford University neuroscientist. “We are just in a situation where there are no good theories explaining what consciousness actually is and how you could ever build a machine to get there.”\n\nBut that doesn't’t mean crucial ethical issues involving AI aren't’t at hand. The coming use of autonomous vehicles, for example, poses thorny ethical questions. Human drivers sometimes must make split-second decisions. Their reactions may be a complex combination of instant reflexes, input from past driving experiences, and what their eyes and ears tell them in that moment. AI “vision” today is not nearly as sophisticated as that of humans. And to anticipate every imaginable driving situation is a difficult programming problem.\n\nWhenever decisions are based on masses of data, “you quickly get into a lot of ethical questions,” notes Tan Kiat How, chief executive of a Singapore-based agency that is helping the government develop a voluntary code for the ethical use of AI. Along with Singapore, other governments and mega-corporations are beginning to establish their own guidelines. Britain is setting up a data ethics center. India released its AI ethics strategy this spring.\n\nOn June 7 Google pledged not to “design or deploy AI” that would cause “overall harm,” or to develop AI-directed weapons or use AI for surveillance that would violate international norms. It also pledged not to deploy AI whose use would violate international laws or human rights.\n\nWhile the statement is vague, it represents one starting point. So does the idea that decisions made by AI systems should be explainable, transparent, and fair.\n\nTo put it another way: How can we make sure that the thinking of intelligent machines reflects humanity’s highest values? Only then will they be useful servants and not Frankenstein’s out-of-control monster.",
+    "content": "This year marks exactly two centuries since the publication of “Frankenstein; or, The Modern Prometheus,” by Mary Shelley. Even before the invention of the electric light bulb, the author produced a remarkable work of speculative fiction that would foreshadow many ethical questions to be raised by technologies yet to come.\n\nToday the rapid growth of artificial intelligence (AI) raises fundamental questions: “What is intelligence, identity, or consciousness? What makes humans humans? ”\n\nWhat is being called artificial general intelligence, machines that would imitate the way humans think, continues to evade scientists. Yet humans remain fascinated by the idea of robots that would look, move, and respond like humans, similar to those recently depicted on popular sci-fi TV series such as “Westworld” and “Humans.”\n\nJust how people think is still far too complex to be understood, let alone reproduced, says David Eagleman, a Stanford University neuroscientist. “We are just in a situation where there are no good theories explaining what consciousness actually is and how you could ever build a machine to get there.”\n\nBut that doesn’t mean crucial ethical issues involving AI aren’t at hand. The coming use of autonomous vehicles, for example, poses thorny ethical questions. Human drivers sometimes must make split-second decisions. Their reactions may be a complex combination of instant reflexes, input from past driving experiences, and what their eyes and ears tell them in that moment. AI “vision” today is not nearly as sophisticated as that of humans. And to anticipate every imaginable driving situation is a difficult programming problem.\n\nWhenever decisions are based on masses of data, “you quickly get into a lot of ethical questions,” notes Tan Kiat How, chief executive of a Singapore-based agency that is helping the government develop a voluntary code for the ethical use of AI. Along with Singapore, other governments and mega-corporations are beginning to establish their own guidelines. Britain is setting up a data ethics center. India released its AI ethics strategy this spring.\n\nOn June 7 Google pledged not to “design or deploy AI” that would cause “overall harm,” or to develop AI-directed weapons or use AI for surveillance that would violate international norms. It also pledged not to deploy AI whose use would violate international laws or human rights.\n\nWhile the statement is vague, it represents one starting point. So does the idea that decisions made by AI systems should be explainable, transparent, and fair.\n\nTo put it another way: How can we make sure that the thinking of intelligent machines reflects humanity’s highest values? Only then will they be useful servants and not Frankenstein’s out-of-control monster.",
     "questions": [
       {
         "num": 31,
@@ -2721,7 +2721,7 @@ const READINGS = [
         "answer": "C"
       }
     ],
-        "answers": [
+    "answers": [
       "C",
       "D",
       "B",
@@ -2733,7 +2733,7 @@ const READINGS = [
     "year": 2019,
     "type": "英语一",
     "textNum": 4,
-    "content": "States will be able to force more people to pay sales tax when they make online purchases under a Supreme Court decision Thursday that will leave shoppers with lighter wallets but is a big financial win for states.\n\nThe Supreme Court’s opinion Thursday overruled a pair of decades-old decisions that states said cost them billions of dollars in lost revenue annually. The decisions made it more difficult for states to collect sales tax on certain online purchases.\n\nThe cases the court overturned said that if a business was shipping a customer’s purchase to a state where the business didn't’t have a physical presence such as a warehouse or office, the business didn't’t have to collect sales tax for the state. Customers were generally responsible for paying the sales tax to the state themselves if they weren't’t charged it, but most didn't’t realize they owed it and few paid.\n\nJustice Anthony Kennedy wrote that the previous decisions were flawed. “Each year the physical presence rule becomes further removed from economic reality and results in significant revenue losses to the States,” he wrote in an opinion joined by four other justices. Kennedy wrote that the rule “limited states’ ability to seek long-term prosperity and has prevented market participants from competing on an even playing field.”\n\nThe ruling is a victory for big chains with a presence in many states, since they usually collect sales tax on online purchases already. Now, rivals will be charging sales tax where they hadn't’t before. Big chains have been collecting sales tax nationwide because they typically have physical stores in whatever state a purchase is being shipped to. Amazon.com, with its network of warehouses, also collects sales tax in every state that charges it, though third-party sellers who use the site don’t have to.\n\nUntil now, many sellers that have a physical presence in only a single state or a few states have been able to avoid charging sales taxes when they ship to addresses outside those states. Sellers that use eBay and Etsy, which provide platforms for smaller sellers, also haven’t been collecting sales tax nationwide. Under the ruling Thursday, states can pass laws requiring out-of-state sellers to collect the state’s sales tax from customers and send it to the state.\n\nRetail trade groups praised the ruling, saying it levels the playing field for local and online businesses. The losers, said retail analyst Neil Saunders, are online-only retailers, especially smaller ones. Those retailers may face headaches complying with various state sales tax laws. The Small Business & Entrepreneurship Council advocacy group said in a statement, “Small businesses and internet entrepreneurs are not well served at all by this decision.”",
+    "content": "States will be able to force more people to pay sales tax when they make online purchases under a Supreme Court decision Thursday that will leave shoppers with lighter wallets but is a big financial win for states.\n\nThe Supreme Court’s opinion Thursday overruled a pair of decades-old decisions that states said cost them billions of dollars in lost revenue annually. The decisions made it more difficult for states to collect sales tax on certain online purchases.\n\nThe cases the court overturned said that if a business was shipping a customer’s purchase to a state where the business didn’t have a physical presence such as a warehouse or office, the business didn’t have to collect sales tax for the state. Customers were generally responsible for paying the sales tax to the state themselves if they weren’t charged it, but most didn’t realize they owed it and few paid.\n\nJustice Anthony Kennedy wrote that the previous decisions were flawed. “Each year the physical presence rule becomes further removed from economic reality and results in significant revenue losses to the States,” he wrote in an opinion joined by four other justices. Kennedy wrote that the rule “limited states’ ability to seek long-term prosperity and has prevented market participants from competing on an even playing field.”\n\nThe ruling is a victory for big chains with a presence in many states, since they usually collect sales tax on online purchases already. Now, rivals will be charging sales tax where they hadn’t before. Big chains have been collecting sales tax nationwide because they typically have physical stores in whatever state a purchase is being shipped to. Amazon.com, with its network of warehouses, also collects sales tax in every state that charges it, though third-party sellers who use the site don’t have to.\n\nUntil now, many sellers that have a physical presence in only a single state or a few states have been able to avoid charging sales taxes when they ship to addresses outside those states. Sellers that use eBay and Etsy, which provide platforms for smaller sellers, also haven’t been collecting sales tax nationwide. Under the ruling Thursday, states can pass laws requiring out-of-state sellers to collect the state’s sales tax from customers and send it to the state.\n\nRetail trade groups praised the ruling, saying it levels the playing field for local and online businesses. The losers, said retail analyst Neil Saunders, are online-only retailers, especially smaller ones. Those retailers may face headaches complying with various state sales tax laws. The Small Business & Entrepreneurship Council advocacy group said in a statement, “Small businesses and internet entrepreneurs are not well served at all by this decision.”",
     "questions": [
       {
         "num": 36,
@@ -2791,7 +2791,7 @@ const READINGS = [
         "answer": "D"
       }
     ],
-        "answers": [
+    "answers": [
       "C",
       "D",
       "C",
@@ -2803,38 +2803,38 @@ const READINGS = [
     "year": 2020,
     "type": "英语一",
     "textNum": 1,
-    "content": "A group of Labour MPs, among them Yvette Cooper, are bringing in the new year with a call to institute a UK “town of culture” award. The proposal is that it should sit alongside the existing city of culture title, which was held by Hull in 2017, and has been awarded to Coventry for 2021. Cooper and her colleagues argue that the success of the crown for Hull, where it brought in £220m of investment and an avalanche of arts, ought not to be confined to cities. Britain’s towns, it is true, are not prevented from applying, but they generally lack the resources to put together a bid to beat their bigger competitors. A town of culture award could, it is argued, become an annual event, attracting funding and creating jobs.\n\nSome might see the proposal as a booby prize for the fact that Britain is no longer able to apply for the much more prestigious title of European capital of culture, a sought-after award bagged by Glasgow in 1990 and Liverpool in 2008. A cynic might speculate that the UK is on the verge of disappearing into an endless fever of self-celebration in its desperation to reinvent itself for the post-Brexit world: after town of culture, who knows what will follow-village of culture? Suburb of culture? Hamlet of culture?\n\nIt is also wise to recall that such titles are not a cure-all. A badly run “year of culture” washes in and out of a place like the tide, bringing prominence for a spell but leaving no lasting benefits to the community. The really successful holders of such titles are those that do a great deal more than fill hotel bedrooms and bring in high-profile arts events and good press for a year. They transform the aspirations of the people who live there; they nudge the self-image of the city into a bolder and more optimistic light. It is hard to get right, and requires a remarkable degree of vision, as well as cooperation between city authorities, the private sector, community groups and cultural organisations. But it can be done: Glasgow's year as European capital of culture can certainly be seen as one of a complex series of factors that have turned the city into the powerhouse of art, music and theatre that it remains today.\n\nA “town of culture” could be not just about the arts but about honouring a town’s peculiarities—helping sustain its high street, supporting local facilities and above all celebrating its people. Jeremy Wright, the culture secretary, should welcome this positive, hope-filled proposal, and tum it into action.",
+    "content": "A group of Labour MPs, among them Yvette Cooper, are bringing in the new year with a call to institute a UK “town of culture” award. The proposal is that it should sit alongside the existing city of culture title, which was held by Hull in 2017, and has been awarded to Coventry for 2021. Cooper and her colleagues argue that the success of the crown for Hull, where it brought in £220m of investment and an avalanche of arts, ought not to be confined to cities. Britain’s towns, it is true, are not prevented from applying, but they generally lack the resources to put together a bid to beat their bigger competitors. A town of culture award could, it is argued, become an annual event, attracting funding and creating jobs.\n\nSome might see the proposal as a booby prize for the fact that Britain is no longer able to apply for the much more prestigious title of European capital of culture, a sought-after award bagged by Glasgow in 1990 and Liverpool in 2008. A cynic might speculate that the UK is on the verge of disappearing into an endless fever of self-celebration in its desperation to reinvent itself for the post-Brexit world: after town of culture, who knows what will follow—village of culture? Suburb of culture? Hamlet of culture?\n\nIt is also wise to recall that such titles are not a cure-all. A badly run “year of culture” washes in and out of a place like the tide, bringing prominence for a spell but leaving no lasting benefits to the community. The really successful holders of such titles are those that do a great deal more than fill hotel bedrooms and bring in high-profile arts events and good press for a year. They transform the aspirations of the people who live there; they nudge the self-image of the city into a bolder and more optimistic light. It is hard to get right, and requires a remarkable degree of vision, as well as cooperation between city authorities, the private sector, community groups and cultural organisations. But it can be done: Glasgow's year as European capital of culture can certainly be seen as one of a complex series of factors that have turned the city into the powerhouse of art, music and theatre that it remains today.\n\nA “town of culture” could be not just about the arts but about honouring a town’s peculiarities—helping sustain its high street, supporting local facilities and above all celebrating its people. Jeremy Wright, the culture secretary, should welcome this positive, hope-filled proposal, and turn it into action.",
     "questions": [
       {
         "num": 21,
         "stem": "Cooper and her colleagues argue that a \"town of culture\" award could",
         "options": [
-          "A. consolidate the town-cit ties in Britain.",
-          "B. J promote cooperation-among Britain's towns.",
-          "C. J increase the economic strength of Britain's towns.",
-          "D. J focus Britain's limited resources on cultural events."
+          "A. consolidate the town-city ties in Britain.",
+          "B. promote cooperation among Britain's towns.",
+          "C. increase the economic strength of Britain's towns.",
+          "D. focus Britain's limited resources on cultural events."
         ],
         "answer": "C"
       },
       {
         "num": 22,
-        "stem": "According to Paragraph 2, the proposal might be regarded b some as",
+        "stem": "According to Paragraph 2, the proposal might be regarded by some as",
         "options": [
           "A. a sensible compromise.",
           "B. a self-deceiving attempt.",
           "C. an eye-catching bonus.",
-          "D. J an inaccessible target."
+          "D. an inaccessible target."
         ],
         "answer": "B"
       },
       {
         "num": 23,
-        "stem": "The author suggests that a title holder is successful onl if it",
+        "stem": "The author suggests that a title holder is successful only if it",
         "options": [
           "A. endeavours to maintain its image.",
           "B. meets the aspiration of its people.",
           "C. brings its local arts to prominence.",
-          "D. J commits to its long-term growth."
+          "D. commits to its long-term growth."
         ],
         "answer": "D"
       },
@@ -2861,7 +2861,7 @@ const READINGS = [
         "answer": "C"
       }
     ],
-        "answers": [
+    "answers": [
       "C",
       "B",
       "D",
@@ -2931,7 +2931,7 @@ const READINGS = [
         "answer": "D"
       }
     ],
-        "answers": [
+    "answers": [
       "D",
       "A",
       "C",
@@ -2958,7 +2958,7 @@ const READINGS = [
       },
       {
         "num": 32,
-        "stem": "Which of the following is true of the Califormia measure?",
+        "stem": "Which of the following is true of the California measure?",
         "options": [
           "A. It has irritated private business owners.",
           "B. It is welcomed by the Supreme Court.",
@@ -2972,7 +2972,7 @@ const READINGS = [
         "stem": "The author mentions the study by Catalyst to illustrate",
         "options": [
           "A. the harm from arbitrary board decision.",
-          "B. the i ortance of constitutional guarantees.",
+          "B. the importance of constitutional guarantees.",
           "C. the pressure on women in global corporations.",
           "D. the needlessness of government interventions."
         ],
@@ -3001,7 +3001,7 @@ const READINGS = [
         "answer": "B"
       }
     ],
-        "answers": [
+    "answers": [
       "A",
       "C",
       "D",
@@ -3013,7 +3013,7 @@ const READINGS = [
     "year": 2020,
     "type": "英语一",
     "textNum": 4,
-    "content": "Last Thursday, the French Senate passed a digital services tax, which would impose an entirely new tax on large multinationals that provide digital services to consumers or users in France. Digital services include everything from providing a platform for selling goods and services online to targeting advertising based on user data, and the tax applies to gross revenue from such services. Many French politicians and media outlets have referred to this as a “ GAFA tax,” meaning that it is designed to apply primarily to companies such as Google, Apple, Facebook and Amazon—in other words, multinational tech companies based in the United States.\n\nThe digital services tax now awaits the signature of President Emmanuel Macron, who has expressed support for the measure, and it could go into effect within the next few weeks. But it has already sparked significant controversy, with the United States trade representative opening an investigation into whether the tax discriminates against American companies, which in tum could lead to trade sanctions against France.\n\nThe French tax is not just a unilateral move by one country in need of revenue.\n\nInstead, the digital services tax is part of a much larger trend, with countries over the past few years proposing or putting in place an alphabet soup of new international tax provisions. These have included Britain’s DPT (diverted profits tax), Australia’s MAAL (multinational antiavoidance law), and India’s SEP (significant economic presence) test, to name but a few. At the same time, the European Union, Spain, Britain and several other countries have all seriously contemplated digital services taxes.\n\nThese unilateral developments differ in their specifics, but they are all designed to tax multinationals on income and revenue that countries believe they should have a right to tax, even if international tax rules do not grant them that right. In other words, they all share a view that the international tax system has failed to keep up with the current economy.\n\nIn response to these many unilateral measures, the Organization for Economic Cooperation and Development (OECD) is currently working with 131 countries to reach a consensus by the end of 2020 on an international solution. Both France and the United States are involved in the organization's work, but France's digital services tax and the American response raise questions about what the future holds for the international tax system.\n\nFrance’s planned tax is a clear warning: Unless a broad consensus can be reached on reforming the international tax system, other nations are likely to follow suit, and American companies will face a cascade of different taxes from dozens of nations that will prove burdensome and costly.",
+    "content": "Last Thursday, the French Senate passed a digital services tax, which would impose an entirely new tax on large multinationals that provide digital services to consumers or users in France. Digital services include everything from providing a platform for selling goods and services online to targeting advertising based on user data, and the tax applies to gross revenue from such services. Many French politicians and media outlets have referred to this as a “ GAFA tax,” meaning that it is designed to apply primarily to companies such as Google, Apple, Facebook and Amazon—in other words, multinational tech companies based in the United States.\n\nThe digital services tax now awaits the signature of President Emmanuel Macron, who has expressed support for the measure, and it could go into effect within the next few weeks. But it has already sparked significant controversy, with the United States trade representative opening an investigation into whether the tax discriminates against American companies, which in turn could lead to trade sanctions against France.\n\nThe French tax is not just a unilateral move by one country in need of revenue.\n\nInstead, the digital services tax is part of a much larger trend, with countries over the past few years proposing or putting in place an alphabet soup of new international tax provisions. These have included Britain’s DPT (diverted profits tax), Australia’s MAAL (multinational anti-avoidance law), and India’s SEP (significant economic presence) test, to name but a few. At the same time, the European Union, Spain, Britain and several other countries have all seriously contemplated digital services taxes.\n\nThese unilateral developments differ in their specifics, but they are all designed to tax multinationals on income and revenue that countries believe they should have a right to tax, even if international tax rules do not grant them that right. In other words, they all share a view that the international tax system has failed to keep up with the current economy.\n\nIn response to these many unilateral measures, the Organization for Economic Cooperation and Development (OECD) is currently working with 131 countries to reach a consensus by the end of 2020 on an international solution. Both France and the United States are involved in the organization's work, but France's digital services tax and the American response raise questions about what the future holds for the international tax system.\n\nFrance’s planned tax is a clear warning: Unless a broad consensus can be reached on reforming the international tax system, other nations are likely to follow suit, and American companies will face a cascade of different taxes from dozens of nations that will prove burdensome and costly.",
     "questions": [
       {
         "num": 36,
@@ -3024,7 +3024,7 @@ const READINGS = [
           "C. protect French companies’ interests.",
           "D. curb the influence of advertising."
         ],
-        "answer": "C"
+        "answer": "B"
       },
       {
         "num": 37,
@@ -3035,7 +3035,7 @@ const READINGS = [
           "C. is apt to arouse criticism at home and abroad.",
           "D. may trigger countermeasures against France."
         ],
-        "answer": "A"
+        "answer": "D"
       },
       {
         "num": 38,
@@ -3046,7 +3046,7 @@ const READINGS = [
           "C. tech multinationals’ monopoly should be prevented.",
           "D. all countries ought to enjoy equal taxing rights."
         ],
-        "answer": "B"
+        "answer": "A"
       },
       {
         "num": 39,
@@ -3057,7 +3057,7 @@ const READINGS = [
           "C. needs to be readjusted immediately.",
           "D. needs to involve more countries."
         ],
-        "answer": "C"
+        "answer": "B"
       },
       {
         "num": 40,
@@ -3068,37 +3068,37 @@ const READINGS = [
           "C. France Demands a Role in the Digital Economy",
           "D. France Says “NO” to Tech Multinationals"
         ],
-        "answer": "B"
+        "answer": "A"
       }
     ],
-        "answers": [
-      "C",
+    "answers": [
+      "B",
+      "D",
       "A",
       "B",
-      "C",
-      "B"
+      "A"
     ]
   },
   {
     "year": 2021,
     "type": "英语一",
     "textNum": 1,
-    "content": "How can Britain’s train operators possibly justify yet another increase to rail passenger fares? It has become a grimly reliable annual ritual: every January the cost of travelling by train rises, imposing a significant extra burden on those who have no option but to use the rail network to get to work or otherwise. This year’s rise, an average of 2.7 per cent, may be a fraction lower than last year’s, but it is still well above the official Consumer Price Index (CPI) measure of inflation.\n\nSuccessive governments have permitted such increases on the grounds that the cost of investing in and running the rail network should be borne by those who use it, rather than the general taxpayer. Why, the argument goes, should a car-driving pensioner from Lincolnshire have to subsidise the daily commute of a stockbroker from Surrey? Equally, there is a sense that the travails of commuters in the South East, many of whom will face among the biggest rises, have received too much attention compared to those who must endure the relatively poor infrastructure of the Midlands and the North.\n\nHowever, over the past 12 months, those commuters have also experienced some of the worst rail strikes in years. It is all very well train operators trumpeting the improvements they are making to the network, but passengers should be able to expect a basic level of service for the substantial sums they are now paying to travel. The responsibility for the latest wave of strikes rests on the unions. However, there is a strong case that those who have been worst affected by industrial action should receive compensation for the disruption they have suffered.\n\nThe Government has pledged to change the law to introduce a minimum service requirement so that, even when strikes occur, services can continue to operate.This should form part of a wider package of measures to address the long-running problems on Britain’s railways.Yes, more investment is needed, but passengers will not be willing to pay more indefinitely if they must also endure cramped, unreliable services, interrupted by regular chaos when timetables are changed,or planned maintenance is managed incompetently. The threat of nationalisation may have been seen off for now, but it will return with a vengeance if the justified anger of passengers is not addressed in short order.",
+    "content": "How can Britain’s train operators possibly justify yet another increase to rail passenger fares? It has become a grimly reliable annual ritual: every January the cost of travelling by train rises, imposing a significant extra burden on those who have no option but to use the rail network to get to work or otherwise. This year’s rise, an average of 2.7 per cent, may be a fraction lower than last year’s, but it is still well above the official Consumer Price Index (CPI) measure of inflation.\n\nSuccessive governments have permitted such increases on the grounds that the cost of investing in and running the rail network should be borne by those who use it, rather than the general taxpayer. Why, the argument goes, should a car-driving pensioner from Lincolnshire have to subsidise the daily commute of a stockbroker from Surrey? Equally, there is a sense that the travails of commuters in the South East, many of whom will face among the biggest rises, have received too much attention compared to those who must endure the relatively poor infrastructure of the Midlands and the North.\n\nHowever, over the past 12 months, those commuters have also experienced some of the worst rail strikes in years. It is all very well train operators trumpeting the improvements they are making to the network, but passengers should be able to expect a basic level of service for the substantial sums they are now paying to travel. The responsibility for the latest wave of strikes rests on the unions. However, there is a strong case that those who have been worst affected by industrial action should receive compensation for the disruption they have suffered.\n\nThe Government has pledged to change the law to introduce a minimum service requirement so that, even when strikes occur, services can continue to operate. This should form part of a wider package of measures to address the long-running problems on Britain’s railways. Yes, more investment is needed, but passengers will not be willing to pay more indefinitely if they must also endure cramped, unreliable services, punctuated by regular chaos when timetables are changed, or planned maintenance is managed incompetently. The threat of nationalisation may have been seen off for now, but it will return with a vengeance if the justified anger of passengers is not addressed in short order.",
     "questions": [
       {
-        "stem": "The author holds that this year's increase in rail passenger fares",
         "num": 21,
+        "stem": "The author holds that this year's increase in rail passenger fares",
         "options": [
           "A. will ease train operators' burden.",
           "B. has kept pace with inflation.",
           "C. is a big surprise to commuters.",
           "D. remains an unreasonable measure."
         ],
-        "answer": "C"
+        "answer": "D"
       },
       {
-        "stem": "The stockbroker in Paragraph 2 is used to stand for",
         "num": 22,
+        "stem": "The stockbroker in Paragraph 2 is used to stand for",
         "options": [
           "A. car drivers",
           "B. rail travellers",
@@ -3108,8 +3108,8 @@ const READINGS = [
         "answer": "B"
       },
       {
-        "stem": "It is indicated in Paragraph 3 that train operators",
         "num": 23,
+        "stem": "It is indicated in Paragraph 3 that train operators",
         "options": [
           "A. are offering compensation to commuters.",
           "B. are trying to repair relations with the unions.",
@@ -3119,41 +3119,41 @@ const READINGS = [
         "answer": "C"
       },
       {
-        "stem": "If unable to calm down passengers, the railways may have to face",
         "num": 24,
+        "stem": "If unable to calm down passengers, the railways may have to face",
         "options": [
           "A. a change of ownership.",
           "B. a reduction of revenue.",
           "C. the loss of investment.",
           "D. the collapse of operations."
         ],
-        "answer": "D"
+        "answer": "A"
       },
       {
-        "stem": "Which of the following would be the best title for the text?",
         "num": 25,
+        "stem": "Which of the following would be the best title for the text?",
         "options": [
           "A. Ever-rising Fares Aren't Sustainable",
           "B. Who Are to Blame for the Strikes?",
           "C. Constant Complaining Doesn't Work",
           "D. Can Nationalisation Bring Hope?"
         ],
-        "answer": "D"
+        "answer": "A"
       }
     ],
-        "answers": [
-      "C",
+    "answers": [
+      "D",
       "B",
       "C",
-      "D",
-      "D"
+      "A",
+      "A"
     ]
   },
   {
     "year": 2021,
     "type": "英语一",
     "textNum": 2,
-    "content": "Last year marked the third year in a row that Indonesia’s bleak rate of deforestation has slowed in pace. One reason for the turnaround may be the country’s antipoverty program.\n\nIn 2007, Indonesia started phasing in a program that gives money to its poorest residents under certain conditions, such as requiring people to keep kids in school or get regular medical care. Called conditional cash transfers or CCTs, these social assistance programs are designed to reduce inequality and break the cycle of poverty.They’re already used in dozens of countries worldwide. In Indonesia, the program has provided enough food and medicine to substantially reduce severe growth problems among children.\n\nBut CCT programs don’t generally consider effects on the environment. In fact, poverty alleviation and environmental protection are often viewed as conflicting goals, says Paul Ferraro , an economist at Johns Hopkins University.\n\nThat’s because economic growth can be correlated with environmental degradation, while protecting the environment is sometimes correlated with greater poverty.However, those correlations don’t prove cause and effect. The only previous study analyzing causality, based on an area in Mexico that had instituted CCTs, supported the traditional view. There, as people got more money, some of them may have more cleared land for cattle to raise for meat,Ferraro says.\n\nSuch programs do not have to negatively affect the environment, though. Ferraro wanted to see if Indonesia’s poverty-alleviation program was affecting deforestation. Indonesia has the third-largest area of tropical forest in the world and one of the highest deforestation rates.\n\nFerraro analyzed satellite data showing annual forest loss from 2008 to 2012—including during Indonesia’s phase-in of the antipoverty program—in 7,468 forested villages across 15 provinces. “We see that the program is associated with a 30 percent reduction in deforestation,” Ferraro says.\n\nThat’s likely because the rural poor are using the money as makeshift insurance policies against inclement weather, Ferraro says. Typically, if rains are delayed, people may clear land to plant more rice to supplement their harvests.With the CCTs, individuals instead can use the money to supplement their harvests.\n\nWhether this research translates elsewhere is anybody’s guess.Ferraro suggests the results may transfer to other parts of Asia, due to commonalities such as the importance of growing rice and market access.And regardless of transferability, the study shows that what’s good for people may also be good for the environment. Even if this program didn't’t reduce poverty, Ferraro says, “the value of the avoided deforestation just for carbon dioxide emissions alone is more than the program costs.”",
+    "content": "Last year marked the third year in a row that Indonesia’s bleak rate of deforestation has slowed in pace. One reason for the turnaround may be the country’s antipoverty program.\n\nIn 2007, Indonesia started phasing in a program that gives money to its poorest residents under certain conditions, such as requiring people to keep kids in school or get regular medical care. Called conditional cash transfers or CCTs, these social assistance programs are designed to reduce inequality and break the cycle of poverty. They’re already used in dozens of countries worldwide. In Indonesia, the program has provided enough food and medicine to substantially reduce severe growth problems among children.\n\nBut CCT programs don’t generally consider effects on the environment. In fact, poverty alleviation and environmental protection are often viewed as conflicting goals, says Paul Ferraro, an economist at Johns Hopkins University.\n\nThat’s because economic growth can be correlated with environmental degradation, while protecting the environment is sometimes correlated with greater poverty. However, those correlations don’t prove cause and effect. The only previous study analyzing causality, based on an area in Mexico that had instituted CCTs, supported the traditional view. There, as people got more money, some of them may have more cleared land for cattle to raise for meat, Ferraro says.\n\nSuch programs do not have to negatively affect the environment, though. Ferraro wanted to see if Indonesia’s poverty-alleviation program was affecting deforestation. Indonesia has the third-largest area of tropical forest in the world and one of the highest deforestation rates.\n\nFerraro analyzed satellite data showing annual forest loss from 2008 to 2012—including during Indonesia’s phase-in of the antipoverty program—in 7,468 forested villages across 15 provinces. “We see that the program is associated with a 30 percent reduction in deforestation,” Ferraro says.\n\nThat’s likely because the rural poor are using the money as makeshift insurance policies against inclement weather, Ferraro says. Typically, if rains are delayed, people may clear land to plant more rice to supplement their harvests. With the CCTs, individuals instead can use the money to supplement their harvests.\n\nWhether this research translates elsewhere is anybody’s guess. Ferraro suggests the results may transfer to other parts of Asia, due to commonalities such as the importance of growing rice and market access. And regardless of transferability, the study shows that what’s good for people may also be good for the environment. Even if this program didn’t reduce poverty, Ferraro says, “the value of the avoided deforestation just for carbon dioxide emissions alone is more than the program costs.”",
     "questions": [
       {
         "num": 26,
@@ -3164,7 +3164,7 @@ const READINGS = [
           "C. help poor families get better off.",
           "D. facilitate healthcare reform."
         ],
-        "answer": "B"
+        "answer": "C"
       },
       {
         "num": 27,
@@ -3175,7 +3175,7 @@ const READINGS = [
           "C. CCT programs have helped preserve traditional lifestyles.",
           "D. antipoverty efforts require the participation of local farmers."
         ],
-        "answer": "D"
+        "answer": "A"
       },
       {
         "num": 28,
@@ -3186,7 +3186,7 @@ const READINGS = [
           "C. the role of its forests in climate change.",
           "D. the relation of CCTs to its forest loss."
         ],
-        "answer": "C"
+        "answer": "D"
       },
       {
         "num": 29,
@@ -3197,7 +3197,7 @@ const READINGS = [
           "C. it can boost grain production.",
           "D. it can protect the environment."
         ],
-        "answer": "C"
+        "answer": "D"
       },
       {
         "num": 30,
@@ -3208,22 +3208,22 @@ const READINGS = [
           "C. The transferability of a study.",
           "D. The process of a study."
         ],
-        "answer": "A"
+        "answer": "B"
       }
     ],
-        "answers": [
-      "B",
+    "answers": [
+      "C",
+      "A",
       "D",
-      "C",
-      "C",
-      "A"
+      "D",
+      "B"
     ]
   },
   {
     "year": 2021,
     "type": "英语一",
     "textNum": 3,
-    "content": "As a historian who’s always searching for the text or the image that makes us re-evaluate the past,I’ve become preoccupied with looking for photographs that show our Victorian ancestors smiling ( what better way to shatter the image of 19th-century prudery?). I’ve found quite a few, and—since I started posting them on Twitter—they have been causing quite a stir. People have been surprised to see evidence that Victorians had fun and could,and did, laugh. They are noting that the Victorians suddenly seem to become more human as the hundred-or-so years that separate us fade away through our common experience of laughter.\n\nOf course, I need to concede that my collection of ‘Smiling Victorians’ makes up only a tiny percentage of the vast catalogue of photographic portraiture created between 1840 and 1900, the majority of which show sitters posing miserably and stiffly in front of painted backdrops, or staring absently into the middle distance.How do we explain this trend?\n\nDuring the 1840s and 1850s, in the early days of photography, exposure times were notoriously long: the daguerreotype photographic method (producing an image on a silvered copper plate) could take several minutes to complete, resulting in blurred images as sitters shifted position or adjusted their limbs. The thought of holding a fixed grin as the camera performed its magical duties was too much to contemplate, and so anon-committal blank stare became the norm.\n\nBut exposure times were much quicker by the 1880s, and the introduction of the Box Brownie and other portable cameras meant that, though slow by today’s digital standards, the exposure was almost instantaneous.Spontaneous smiles were relatively easy to capture by the 1890s, so we must look elsewhere for an explanation of why Victorians still hesitated to smile.\n\nOne explanation might be the loss of dignity displayed through a cheesy grin. “Nature gave us lips to conceal our teeth,” ran one popular Victorian saying, alluding to the fact that before the birth of proper dentistry, mouths were often in a shocking state of hygiene. A flashing set of healthy and clean, regular ‘pearly whites’ was a rare sight in Victorian society, the preserve of the super-rich (and even then,dental hygiene was not guaranteed).\n\nA toothy grin ( especially when there were gaps or blackened teeth) lacked class: drunks,tramps and music hall performers might gurn and grin with a smile as wide as Lewis Carroll’s gum-exposing Cheshire Cat, but it was not a becoming look for properly bred persons. Even Mark Twain, a man who enjoyed a hearty laugh, said that when it came to photographic portraits there could be “nothing more damning than a silly, foolish smile fixed forever”.",
+    "content": "As a historian who’s always searching for the text or the image that makes us re-evaluate the past, I’ve become preoccupied with looking for photographs that show our Victorian ancestors smiling (what better way to shatter the image of 19th-century prudery?). I’ve found quite a few, and—since I started posting them on Twitter—they have been causing quite a stir. People have been surprised to see evidence that Victorians had fun and could, and did, laugh. They are noting that the Victorians suddenly seem to become more human as the hundred-or-so years that separate us fade away through our common experience of laughter.\n\nOf course, I need to concede that my collection of ‘Smiling Victorians’ makes up only a tiny percentage of the vast catalogue of photographic portraiture created between 1840 and 1900, the majority of which show sitters posing miserably and stiffly in front of painted backdrops, or staring absently into the middle distance. How do we explain this trend?\n\nDuring the 1840s and 1850s, in the early days of photography, exposure times were notoriously long: the daguerreotype photographic method (producing an image on a silvered copper plate) could take several minutes to complete, resulting in blurred images as sitters shifted position or adjusted their limbs. The thought of holding a fixed grin as the camera performed its magical duties was too much to contemplate, and so a non-committal blank stare became the norm.\n\nBut exposure times were much quicker by the 1880s, and the introduction of the Box Brownie and other portable cameras meant that, though slow by today’s digital standards, the exposure was almost instantaneous. Spontaneous smiles were relatively easy to capture by the 1890s, so we must look elsewhere for an explanation of why Victorians still hesitated to smile.\n\nOne explanation might be the loss of dignity displayed through a cheesy grin. “Nature gave us lips to conceal our teeth,” ran one popular Victorian maxim, alluding to the fact that before the birth of proper dentistry, mouths were often in a shocking state of hygiene. A flashing set of healthy and clean, regular ‘pearly whites’ was a rare sight in Victorian society, the preserve of the super-rich (and even then, dental hygiene was not guaranteed).\n\nA toothy grin (especially when there were gaps or blackened gnashers) lacked class: drunks, tramps and music hall performers might gurn and grin with a smile as wide as Lewis Carroll’s gum-exposing Cheshire Cat, but it was not a becoming look for properly bred persons. Even Mark Twain, a man who enjoyed a hearty laugh, said that when it came to photographic portraits there could be “nothing more damning than a silly, foolish smile fixed forever”.",
     "questions": [
       {
         "num": 31,
@@ -3234,7 +3234,7 @@ const READINGS = [
           "C. highlighted social media’s role in Victorian studies.",
           "D. re-evaluated the Victorians’ notion of public image."
         ],
-        "answer": "A"
+        "answer": "B"
       },
       {
         "num": 32,
@@ -3245,7 +3245,7 @@ const READINGS = [
           "C. They are rare among photographs of that age.",
           "D. They mirror 19th-century social conventions."
         ],
-        "answer": "B"
+        "answer": "C"
       },
       {
         "num": 33,
@@ -3256,7 +3256,7 @@ const READINGS = [
           "C. Their tension before the camera.",
           "D. Their distrust of new inventions."
         ],
-        "answer": "D"
+        "answer": "A"
       },
       {
         "num": 34,
@@ -3267,7 +3267,7 @@ const READINGS = [
           "C. a misguided attitude.",
           "D. a controversial view."
         ],
-        "answer": "A"
+        "answer": "B"
       },
       {
         "num": 35,
@@ -3275,25 +3275,25 @@ const READINGS = [
         "options": [
           "A. When did the Victorians start to view photography differently?",
           "B. What made photography develop slowly in the Victorian period?",
-          "C. Why did most Victorians look stem in photographs?",
+          "C. Why did most Victorians look stern in photographs?",
           "D. How did smiling in photographs become a post-Victorian norm?"
         ],
-        "answer": "A"
+        "answer": "C"
       }
     ],
-        "answers": [
+    "answers": [
+      "B",
+      "C",
       "A",
       "B",
-      "D",
-      "A",
-      "A"
+      "C"
     ]
   },
   {
     "year": 2021,
     "type": "英语一",
     "textNum": 4,
-    "content": "From the early days of broadband, advocates for consumers and web-based companies worried that the cable and phone companies selling broadband connections had the power and incentive to favor affiliated websites over their rivals’. That’s why there has been such a strong demand for rules that would prevent broadband providers from picking winners and losers online, preserving the freedom and innovation that have been the lifeblood of the Internet.\n\nYet that demand has been almost impossible to fill—in part because of pushback from broadband providers, anti-regulatory conservatives and the courts. A federal appeals court weighed in again Tuesday, but instead of providing a badly needed resolution, it only prolonged the fight. At issue before the U.S. Court of Appeals for the District of Columbia Circuit was the latest take of the Federal Communications Commission (FCC) on net neutrality, adopted on a party-line vote in 2017. The Republican-penned order not only eliminated the strict net neutrality rules the FCC had adopted when it had a Democratic majority in 2015, but rejected the commission’s authority to require broadband providers to do much of anything. The order also declared that state and local governments couldn't’t regulate broadband providers either.\n\nThe commission argued that other agencies would protect against anti-competitive behavior, such as a broadband-providing conglomerate like AT&amp;T favoring its own video-streaming service at the expense of Netflix and Apple TV.Yet the FCC also ended the investigations of broadband providers that imposed data caps on their rivals’ streaming services but not their own.\n\nOn Tuesday, the appeals court unanimously upheld the 2017 order deregulating broadband providers, citing a Supreme Court ruling from 2005 that upheld a similarly deregulatory move.But Judge Patricia Millett rightly argued in a concurring opinion that “the result is unhinged from the realities of modern broadband service,” and said Congress or the Supreme Court could intervene to “ avoid trapping Internet regulation in technological anachronism.”\n\nIn the meantime, the court threw out the FCC’s attempt to block all state rules on net neutrality, while preserving the commission’s power to preempt individual state laws that undermine its order. That means more battles like the one now going on between the Justice Department and California, which enacted a tough net neutrality law in the wake of the FCC’s abdication.\n\nThe endless legal battles and back-and-forth at the FCC cry out for Congress to act. It needs to give the commission explicit authority once and for all to bar broadband providers from meddling in the traffic on their network and to create clear rules protecting openness and innovation online.",
+    "content": "From the early days of broadband, advocates for consumers and web-based companies worried that the cable and phone companies selling broadband connections had the power and incentive to favor affiliated websites over their rivals’. That’s why there has been such a strong demand for rules that would prevent broadband providers from picking winners and losers online, preserving the freedom and innovation that have been the lifeblood of the Internet.\n\nYet that demand has been almost impossible to fill—in part because of pushback from broadband providers, anti-regulatory conservatives and the courts. A federal appeals court weighed in again Tuesday, but instead of providing a badly needed resolution, it only prolonged the fight. At issue before the U.S. Court of Appeals for the District of Columbia Circuit was the latest take of the Federal Communications Commission (FCC) on net neutrality, adopted on a party-line vote in 2017. The Republican-penned order not only eliminated the strict net neutrality rules the FCC had adopted when it had a Democratic majority in 2015, but rejected the commission’s authority to require broadband providers to do much of anything. The order also declared that state and local governments couldn’t regulate broadband providers either.\n\nThe commission argued that other agencies would protect against anti-competitive behavior, such as a broadband-providing conglomerate like AT&T favoring its own video-streaming service at the expense of Netflix and Apple TV. Yet the FCC also ended the investigations of broadband providers that imposed data caps on their rivals’ streaming services but not their own.\n\nOn Tuesday, the appeals court unanimously upheld the 2017 order deregulating broadband providers, citing a Supreme Court ruling from 2005 that upheld a similarly deregulatory move. But Judge Patricia Millett rightly argued in a concurring opinion that “the result is unhinged from the realities of modern broadband service,” and said Congress or the Supreme Court could intervene to “ avoid trapping Internet regulation in technological anachronism.”\n\nIn the meantime, the court threw out the FCC’s attempt to block all state rules on net neutrality, while preserving the commission’s power to preempt individual state laws that undermine its order. That means more battles like the one now going on between the Justice Department and California, which enacted a tough net neutrality law in the wake of the FCC’s abdication.\n\nThe endless legal battles and back-and-forth at the FCC cry out for Congress to act. It needs to give the commission explicit authority once and for all to bar broadband providers from meddling in the traffic on their network and to create clear rules protecting openness and innovation online.",
     "questions": [
       {
         "num": 36,
@@ -3304,7 +3304,7 @@ const READINGS = [
           "C. slow down the traffic on their network.",
           "D. intensify competition with their rivals."
         ],
-        "answer": "C"
+        "answer": "A"
       },
       {
         "num": 37,
@@ -3315,18 +3315,18 @@ const READINGS = [
           "C. has issued a special resolution.",
           "D. takes an anti-regulatory stance."
         ],
-        "answer": "B"
+        "answer": "D"
       },
       {
         "num": 38,
-        "stem": "What can be learned about AT&amp;T from Paragraph 3?",
+        "stem": "What can be learned about AT&T from Paragraph 3?",
         "options": [
           "A. It is in pursuit of quality service.",
           "B. It is under the FCC’s investigation.",
           "C. It protects against unfair competition.",
           "D. It engages in anti-competitive practices."
         ],
-        "answer": "B"
+        "answer": "D"
       },
       {
         "num": 39,
@@ -3337,37 +3337,37 @@ const READINGS = [
           "C. is at odds with its earlier rulings.",
           "D. focuses on trivialities."
         ],
-        "answer": "D"
+        "answer": "B"
       },
       {
         "num": 40,
         "stem": "What does the author argue in the last paragraph?",
         "options": [
-          "A. Broadband providers’rights should be protected.",
+          "A. Broadband providers’ rights should be protected.",
           "B. The FCC should be put under strict supervision.",
           "C. Congress needs to take action to ensure net neutrality.",
           "D. Rules need to be set to diversify online services."
         ],
-        "answer": "A"
+        "answer": "C"
       }
     ],
-        "answers": [
-      "C",
-      "B",
-      "B",
+    "answers": [
+      "A",
       "D",
-      "A"
+      "D",
+      "B",
+      "C"
     ]
   },
   {
     "year": 2022,
     "type": "英语一",
     "textNum": 1,
-    "content": "People often complain that plastics are too durable. Water bottles, shopping bags, and other trash litter the planet, from Mount Everest to the Mariana Trench, because plastics are everywhere and don't break down easily. But some plastic materials change over time. They crack and frizzle. They \"weep\" out additives. They melt into sludge.\n\nAll of which creates huge headaches for institutions, such as museums, trying to preserve culturally important objects. The variety of plastic objects at risk is dizzying: early radios, avant-garde sculptures, celluloid animation stills from Disney films, the first artificial heart.\n\nCertain artifacts are especially vulnerable because some pioneers in plastic art didn't always know how to mix ingredients properly, says Thea van Oosten, a polymer chemist who, until retiring a few years ago, worked for decades at the Cultural Heritage Agency of the Netherlands (RCE). \"It's like baking a cake: If you don't have exact amounts, it goes wrong,“ she says. \"The object you make is already a time bomb.^^ And sometimes, it's not the artist's fault. In thes, the Italian artist Piero Gilardi began to create hundreds of bright, colorful fbam pieces. Thosepieces included small beds of roses and other items as well as a few dozen “ nature carpets ” — large rectangles decorated with fbam pumpkins, cabbages, and watermelons. He wanted viewers to walk around on the carpets—which meant they had to be durable.\n\nUnfortunately, the polyurethane fbam he used is inherently unstable. It's especially vulnerable to light damage, and by the mid-1990s, Gilardi's pumpkins, roses, and other figures were splitting and crumbling. Museums locked some of them away in the dark.\n\nSo van Oosten and colleagues worked to preserve Gilardi's sculptures. They infused some with stabilizing and consolidating chemicals. Van Oosten calls those chemicals sunscreens because their goal was to prevent further light damage and rebuild worn polymer fibers. She is proud that several sculptures have even gone on display again, albeit sometimes beneath protective cases.\n\nDespite success stories like van Oosten's, preservation of plastics will likely get harder. Old objects continue to deteriorate. Worse, biodegradable plastics,designed to disintegrate, are increasingly common.\n\nAnd more is at stake here than individual objects. Joana Lia Ferreira, an assistant professor of conservation and restoration at the NOVA School of Science and Technology, notes that archaeologists first defined the great material ages of human history — Stone Age, Iron Age, and so on — after examining artifacts in museums. We now live in an age of plastic, she says, “and what we decide to collect today, what we decide to preserve...will have a strong impact on how in the future we911 be seen.^^",
+    "content": "People often complain that plastics are too durable. Water bottles, shopping bags, and other trash litter the planet, from Mount Everest to the Mariana Trench, because plastics are everywhere and don't break down easily. But some plastic materials change over time. They crack and frizzle. They \"weep\" out additives. They melt into sludge.\n\nAll of which creates huge headaches for institutions, such as museums, trying to preserve culturally important objects. The variety of plastic objects at risk is dizzying: early radios, avant-garde sculptures, celluloid animation stills from Disney films, the first artificial heart.\n\nCertain artifacts are especially vulnerable because some pioneers in plastic art didn't always know how to mix ingredients properly, says Thea van Oosten, a polymer chemist who, until retiring a few years ago, worked for decades at the Cultural Heritage Agency of the Netherlands (RCE). \"It's like baking a cake: If you don't have exact amounts, it goes wrong,\" she says. \"The object you make is already a time bomb.\"\n\nAnd sometimes, it's not the artist's fault. In the 1960s, the Italian artist Piero Gilardi began to create hundreds of bright, colorful foam pieces. Those pieces included small beds of roses and other items as well as a few dozen \"nature carpets\"—large rectangles decorated with foam pumpkins, cabbages, and watermelons. He wanted viewers to walk around on the carpets—which meant they had to be durable.\n\nUnfortunately, the polyurethane foam he used is inherently unstable. It's especially vulnerable to light damage, and by the mid-1990s, Gilardi's pumpkins, roses, and other figures were splitting and crumbling. Museums locked some of them away in the dark.\n\nSo van Oosten and colleagues worked to preserve Gilardi's sculptures. They infused some with stabilizing and consolidating chemicals. Van Oosten calls those chemicals \"sunscreens\" because their goal was to prevent further light damage and rebuild worn polymer fibers. She is proud that several sculptures have even gone on display again, albeit sometimes beneath protective cases.\n\nDespite success stories like van Oosten's, preservation of plastics will likely get harder. Old objects continue to deteriorate. Worse, biodegradable plastics, designed to disintegrate, are increasingly common.\n\nAnd more is at stake here than individual objects. Joana Lia Ferreira, an assistant professor of conservation and restoration at the NOVA School of Science and Technology, notes that archaeologists first defined the great material ages of human history — Stone Age, Iron Age, and so on — after examining artifacts in museums. We now live in an age of plastic, she says, \"and what we decide to collect today, what we decide to preserve...will have a strong impact on how in the future we'll be seen.\"",
     "questions": [
       {
         "num": 21,
-        "stem": "According to Paragraph 1, museums are faced with difficulties in",
+        "stem": "According to Paragraph 1, museums are faced with difficulties in ____",
         "options": [
           "A. maintaining their plastic items.",
           "B. obtaining durable plastic artifacts.",
@@ -3378,7 +3378,7 @@ const READINGS = [
       },
       {
         "num": 22,
-        "stem": "Van Oosten believes that certain plastic objects are",
+        "stem": "Van Oosten believes that certain plastic objects are ____",
         "options": [
           "A. immune to decay.",
           "B. improperly shaped.",
@@ -3389,7 +3389,7 @@ const READINGS = [
       },
       {
         "num": 23,
-        "stem": "Museums stopped exhibiting some of Gilardi's artworks to_",
+        "stem": "Museums stopped exhibiting some of Gilardi's artworks to ____",
         "options": [
           "A. keep them from hurting visitors.",
           "B. duplicate them for future display.",
@@ -3400,7 +3400,7 @@ const READINGS = [
       },
       {
         "num": 24,
-        "stem": "The author thinks that preservation of plastics is",
+        "stem": "The author thinks that preservation of plastics is ____",
         "options": [
           "A. costly.",
           "B. unworthy.",
@@ -3411,17 +3411,17 @@ const READINGS = [
       },
       {
         "num": 25,
-        "stem": "In Ferreira9 s opinion, preservation of plastic artifacts,",
+        "stem": "In Ferreira's opinion, preservation of plastic artifacts ____",
         "options": [
           "A. will inspire future scientific research.",
           "B. has profound historical significance.",
           "C. will help us separate the material ages.",
-          "D. has an impact on today9s cultural life."
+          "D. has an impact on today's cultural life."
         ],
         "answer": "B"
       }
     ],
-        "answers": [
+    "answers": [
       "A",
       "C",
       "D",
@@ -3433,11 +3433,11 @@ const READINGS = [
     "year": 2022,
     "type": "英语一",
     "textNum": 2,
-    "content": "As the latest crop of students pen their undergraduate application form and weigh up their options, it may be worth considering just how the point, purpose and value of a degree has changed and what Generationz need to consider as they start the third stage of their educational journey.\n\nMillennials were told that if you did well in school, got a decent degree, you would be set up for life. But that promise has been found wanting. As degrees became universal, they became devalued. Education was no longer a secure route of social mobility. Today, 28 per cent of graduates in the UK are in non-graduate roles, a percentage which is double the average among the OECD countries.\n\nThis is not to say that there is no point in getting a degree, but rather stress that a degree is not for everyone, that the switch from classroom to lecture hall is not an inevitable one and that other options are available.\n\nThankfully, there are signs that this is already happening, with Generationz seeking to learn from their millennial predecessors, even if parents and teachers tend to be still set in the degree mindset. Employers have long seen the advantages of hiring school leavers who often prove themselves to be more committed and loyal employees than graduates. Many too are seeing the advantages of scrapping a degree requirement for certain roles.\n\nFor those for whom a degree is the desired route, consider that this may well be the first of many. In this age of generalists, it pays to have specific knowledge or skills.\n\nPostgraduates now earn 40 per cent more than graduates. When more and more of us have a degree, it makes sense to have two.\n\nIt is unlikely that Generationz will be done with education at 18 or 21; they will need to be constantly upskilling throughout their career to stay employable. It has been estimated that this generation, due to the pressures of technology, the wish for personal fulfilment and desire for diversity, will work for 17 different employers over the course of their working life and have five different careers. Education, and not just knowledge gained on campus, will be a core part of Generation Z's career trajectory.\n\nOlder generations often talk about their degree in the present and personal tense: 61 am a geographer9 or 'I am a classicist9. Their sons or daughters would never say such a thing; it's as if they already know that their degree won't define them in the same way.",
+    "content": "As the latest crop of students pen their undergraduate application form and weigh up their options, it may be worth considering just how the point, purpose and value of a degree has changed and what Generation Z need to consider as they start the third stage of their educational journey.\n\nMillennials were told that if you did well in school, got a decent degree, you would be set up for life. But that promise has been found wanting. As degrees became universal, they became devalued. Education was no longer a secure route of social mobility. Today, 28 per cent of graduates in the UK are in non-graduate roles, a percentage which is double the average among the OECD countries.\n\nThis is not to say that there is no point in getting a degree, but rather stress that a degree is not for everyone, that the switch from classroom to lecture hall is not an inevitable one and that other options are available.\n\nThankfully, there are signs that this is already happening, with Generation Z seeking to learn from their millennial predecessors, even if parents and teachers tend to be still set in the degree mindset. Employers have long seen the advantages of hiring school leavers who often prove themselves to be more committed and loyal employees than graduates. Many too are seeing the advantages of scrapping a degree requirement for certain roles.\n\nFor those for whom a degree is the desired route, consider that this may well be the first of many. In this age of generalists, it pays to have specific knowledge or skills.\n\nPostgraduates now earn 40 per cent more than graduates. When more and more of us have a degree, it makes sense to have two.\n\nIt is unlikely that Generation Z will be done with education at 18 or 21; they will need to be constantly upskilling throughout their career to stay employable. It has been estimated that this generation, due to the pressures of technology, the wish for personal fulfilment and desire for diversity, will work for 17 different employers over the course of their working life and have five different careers. Education, and not just knowledge gained on campus, will be a core part of Generation Z's career trajectory.\n\nOlder generations often talk about their degree in the present and personal tense: 'I am a geographer' or 'I am a classicist'. Their sons or daughters would never say such a thing; it's as if they already know that their degree won't define them in the same way.",
     "questions": [
       {
         "num": 26,
-        "stem": "The author suggests that Generation Z should",
+        "stem": "The author suggests that Generation Z should ____",
         "options": [
           "A. be careful in choosing a college.",
           "B. be diligent at each educational stage.",
@@ -3448,9 +3448,9 @@ const READINGS = [
       },
       {
         "num": 27,
-        "stem": "The percentage of UK graduates in non-graduate roles reflects",
+        "stem": "The percentage of UK graduates in non-graduate roles reflects ____",
         "options": [
-          "A. MillenniaFs opinion about work.",
+          "A. Millennial's opinion about work.",
           "B. the shrinking value of a degree.",
           "C. public discontent with education.",
           "D. the desired route of social mobility."
@@ -3459,7 +3459,7 @@ const READINGS = [
       },
       {
         "num": 28,
-        "stem": "The author considers it a good sign that",
+        "stem": "The author considers it a good sign that ____",
         "options": [
           "A. Generation Z are seeking to earn a decent degree.",
           "B. school leavers are willing to be skilled workers.",
@@ -3470,7 +3470,7 @@ const READINGS = [
       },
       {
         "num": 29,
-        "stem": "It is advised in Paragraph 5 that those with one degree should",
+        "stem": "It is advised in Paragraph 5 that those with one degree should ____",
         "options": [
           "A. make an early decision on their career.",
           "B. attend on-the-job training programs.",
@@ -3491,7 +3491,7 @@ const READINGS = [
         "answer": "A"
       }
     ],
-        "answers": [
+    "answers": [
       "C",
       "B",
       "C",
@@ -3503,11 +3503,11 @@ const READINGS = [
     "year": 2022,
     "type": "英语一",
     "textNum": 3,
-    "content": "Enlightening, challenging, stimulating, fun. These were some of the words that Nature readers used to describe their experience of art-science collaborations in a series of articles on partnerships between artists and researchers. Nearly 40% of the roughly 350 people who responded to an accompanying poll said, they had collaborated with artists; and almost all said they would consider doing so in future.\n\nSuch an encouraging result is not surprising. Scientists are increasingly seeking out visual artists to help them communicate their work to new audiences. “Artists help scientists reach a broader audience and make emotional connections that enhance learning,one respondent said.\n\nOne example of how artists and scientists have together rocked the scenes came last month when the Sydney Symphony Orchestra performed a reworked version of Antonio Vivaldi's The Four Seasons. They reimagined the 300-year-old score by injecting the latest climate prediction data for each season—provided by Monash University's Climate Change Communication Research Hub. The performance was a creative call to action ahead of November's United Nations Climate Change Conference in Glasgow, UK.\n\nBut a genuine partnership must be a two-way street. Fewer artists than scientists responded to the Nature poll, however, several respondents noted that artists do not simply assist scientists with their communication requirements. Nor should their work be considered only as an object of study. The alliances are most valuable when scientists and artists have a shared stake in a project, are able to jointly design it and can critique each other's work. Such an approach can both prompt new research as well as result in powerful art.\n\nMore than half a century ago, the Massachusetts Institute of Technology opened its Center for Advanced Visual Studies (CAVS) to explore the role of technology in culture.\n\nThe founders deliberately focused their projects around light — hence the \"visual studies“ in the name. Light was a something that both artists and scientists had an interest in, and therefore could form the basis of collaboration. As science and technology progressed, and divided into more sub-disciplines, the centre was simultaneously looking to a time when leading researchers could also be artists, writers and poets, and vice versa.\n\nNature's poll findings suggest that this trend is as strong as ever, but, to make a collaboration work, both sides need to invest time, and embrace surprise and challenge.\n\nThe reach of art-science tie-ups needs to go beyond the necessary purpose of research communication, and participants must not fall into the trap of stereotyping each other.\n\nArtists and scientists alike are immersed in discovery and invention, and challenge and critique are core to both, too.",
+    "content": "Enlightening, challenging, stimulating, fun. These were some of the words that Nature readers used to describe their experience of art-science collaborations in a series of articles on partnerships between artists and researchers. Nearly 40% of the roughly 350 people who responded to an accompanying poll said, they had collaborated with artists; and almost all said they would consider doing so in future.\n\nSuch an encouraging result is not surprising. Scientists are increasingly seeking out visual artists to help them communicate their work to new audiences. \"Artists help scientists reach a broader audience and make emotional connections that enhance learning,\" one respondent said.\n\nOne example of how artists and scientists have together rocked the scenes came last month when the Sydney Symphony Orchestra performed a reworked version of Antonio Vivaldi's The Four Seasons. They reimagined the 300-year-old score by injecting the latest climate prediction data for each season—provided by Monash University's Climate Change Communication Research Hub. The performance was a creative call to action ahead of November's United Nations Climate Change Conference in Glasgow, UK.\n\nBut a genuine partnership must be a two-way street. Fewer artists than scientists responded to the Nature poll, however, several respondents noted that artists do not simply assist scientists with their communication requirements. Nor should their work be considered only as an object of study. The alliances are most valuable when scientists and artists have a shared stake in a project, are able to jointly design it and can critique each other's work. Such an approach can both prompt new research as well as result in powerful art.\n\nMore than half a century ago, the Massachusetts Institute of Technology opened its Center for Advanced Visual Studies (CAVS) to explore the role of technology in culture.\n\nThe founders deliberately focused their projects around light — hence the \"visual studies\" in the name. Light was a something that both artists and scientists had an interest in, and therefore could form the basis of collaboration. As science and technology progressed, and divided into more sub-disciplines, the centre was simultaneously looking to a time when leading researchers could also be artists, writers and poets, and vice versa.\n\nNature's poll findings suggest that this trend is as strong as ever, but, to make a collaboration work, both sides need to invest time, and embrace surprise and challenge.\n\nThe reach of art-science tie-ups needs to go beyond the necessary purpose of research communication, and participants must not fall into the trap of stereotyping each other.\n\nArtists and scientists alike are immersed in discovery and invention, and challenge and critique are core to both, too.",
     "questions": [
       {
         "num": 31,
-        "stem": "According to Paragraph 1, art-science collaborations have",
+        "stem": "According to Paragraph 1, art-science collaborations have ____",
         "options": [
           "A. caught the attention of critics.",
           "B. received favorable responses.",
@@ -3518,10 +3518,10 @@ const READINGS = [
       },
       {
         "num": 32,
-        "stem": "The reworked version of The Four Seasons is mentioned to show that",
+        "stem": "The reworked version of The Four Seasons is mentioned to show that ____",
         "options": [
-          "A. art can off er audiences easy access to science.",
-          "B. science can help with the expression of emoti ons.",
+          "A. art can offer audiences easy access to science.",
+          "B. science can help with the expression of emotions.",
           "C. public participation in science has a promising future.",
           "D. art is effective in facilitating scientific innovations."
         ],
@@ -3529,12 +3529,12 @@ const READINGS = [
       },
       {
         "num": 33,
-        "stem": "Some artists seem to worry about in the art-science partnership",
+        "stem": "Some artists seem to worry about in the art-science partnership ____",
         "options": [
           "A. their role may be underestimated.",
           "B. their reputation may be impaired.",
           "C. their creativity may be inhibited.",
-          "D. ] their work may be misguided."
+          "D. their work may be misguided."
         ],
         "answer": "A"
       },
@@ -3551,17 +3551,17 @@ const READINGS = [
       },
       {
         "num": 35,
-        "stem": "In the last paragraph, the author holds that art-science collaborations",
+        "stem": "In the last paragraph, the author holds that art-science collaborations ____",
         "options": [
           "A. are likely to go beyond public expectations.",
-          "B. will intensify interdisciplinary competi tion.",
+          "B. will intensify interdisciplinary competition.",
           "C. should do more than communicating science.",
-          "D. ] are becoming more popular than before."
+          "D. are becoming more popular than before."
         ],
         "answer": "C"
       }
     ],
-        "answers": [
+    "answers": [
       "B",
       "A",
       "A",
@@ -3573,11 +3573,11 @@ const READINGS = [
     "year": 2022,
     "type": "英语一",
     "textNum": 4,
-    "content": "The personal grievance provisions of New Zealand's Employment Relations Act 2000 (ERA) prevent an employer from firing an employee without good cause. Instead, dismissals must be justified. Employers must both show cause and act in a procedurally fair way.\n\nPersonal grievance procedures were designed to guard the jobs of ordinary workers from \"unjustified dismissals^^. The premise was that the common law of contract lacked sufficient safeguards for workers against arbitrary conduct by management. Long gone are the days when a boss could simply give an employee contractual notice.\n\nBut these provisions create difficulties for businesses when applied to highly paid managers and executives. As countless boards and business owners will attest, constraining firms from firing poorly performing, high-earning managers is a handbrake on boosting productivity and overall performance. The difference between C-grade and A-grade managers may very well be the difference between business success or failure.\n\nBetween preserving the jobs of ordinary workers or losing them. Yet mediocrity is no longer enough to justify a dismissal.\n\nConsequently—and paradoxically—laws introduced to protect the jobs of ordinary workers may be placing those jobs at risk.\n\nIf not placing jobs at risk, to the extent employment protection laws constrain business owners from dismissing under-performing managers, those laws act as a constraint on firm productivity and therefore on workers9 wages. Indeed, in “An International Perspective on New Zealand9s Productivity Paradox” (2014), the Productivity Commission singled out the low quality of managerial capabilities as a cause of the country's poor productivity growth record.\n\nNor are highly paid managers themselves immune from the harm caused by the ERA'S unjustified dismissal procedures. Because employment protection laws make it costlier to fire an employee, employers are more cautious about hiring new staff. This makes it harder for the marginal manager to gain employment. And firms pay staff less because firms carry the burden of the employment arrangement going wrong.\n\nSociety also suffers from excessive employment protections. Stringent job dismissal regulations adversely affect productivity growth and hamper both prosperity and overall well-being.\n\nAcross the Tasman Sea, Australia deals with the unjustified dismissal paradox by excluding employees earning above a specified \"high-income threshold^^ from the protection of its unfair dismissal laws. In New Zealand, a 2016 private members9 Bill tried to permit firms and high-income employees to contract out of the unjustified dismissal regime. However, the mechanisms proposed were unwieldy and the Bill was voted down following the change in government later that year.",
+    "content": "The personal grievance provisions of New Zealand's Employment Relations Act 2000 (ERA) prevent an employer from firing an employee without good cause. Instead, dismissals must be justified. Employers must both show cause and act in a procedurally fair way.\n\nPersonal grievance procedures were designed to guard the jobs of ordinary workers from \"unjustified dismissals\". The premise was that the common law of contract lacked sufficient safeguards for workers against arbitrary conduct by management. Long gone are the days when a boss could simply give an employee contractual notice.\n\nBut these provisions create difficulties for businesses when applied to highly paid managers and executives. As countless boards and business owners will attest, constraining firms from firing poorly performing, high-earning managers is a handbrake on boosting productivity and overall performance. The difference between C-grade and A-grade managers may very well be the difference between business success or failure. Between preserving the jobs of ordinary workers or losing them. Yet mediocrity is no longer enough to justify a dismissal.\n\nConsequently—and paradoxically—laws introduced to protect the jobs of ordinary workers may be placing those jobs at risk.\n\nIf not placing jobs at risk, to the extent employment protection laws constrain business owners from dismissing under-performing managers, those laws act as a constraint on firm productivity and therefore on workers' wages. Indeed, in “An International Perspective on New Zealand's Productivity Paradox” (2014), the Productivity Commission singled out the low quality of managerial capabilities as a cause of the country's poor productivity growth record.\n\nNor are highly paid managers themselves immune from the harm caused by the ERA's unjustified dismissal procedures. Because employment protection laws make it costlier to fire an employee, employers are more cautious about hiring new staff. This makes it harder for the marginal manager to gain employment. And firms pay staff less because firms carry the burden of the employment arrangement going wrong.\n\nSociety also suffers from excessive employment protections. Stringent job dismissal regulations adversely affect productivity growth and hamper both prosperity and overall well-being.\n\nAcross the Tasman Sea, Australia deals with the unjustified dismissal paradox by excluding employees earning above a specified \"high-income threshold\" from the protection of its unfair dismissal laws. In New Zealand, a 2016 private members' Bill tried to permit firms and high-income employees to contract out of the unjustified dismissal regime. However, the mechanisms proposed were unwieldy and the Bill was voted down following the change in government later that year.",
     "questions": [
       {
         "num": 36,
-        "stem": "The personal grievance provisions of the ERA are intended to",
+        "stem": "The personal grievance provisions of the ERA are intended to ____",
         "options": [
           "A. punish dubious corporate practices.",
           "B. improve traditional hiring procedures.",
@@ -3588,18 +3588,18 @@ const READINGS = [
       },
       {
         "num": 37,
-        "stem": "It can be learned from Paragraph 3 that the provisions may",
+        "stem": "It can be learned from Paragraph 3 that the provisions may ____",
         "options": [
           "A. hinder business development.",
-          "B. undermine managers9 authority.",
+          "B. undermine managers' authority.",
           "C. affect the public image of the firms.",
-          "D. ] worsen labor-management relations."
+          "D. worsen labor-management relations."
         ],
         "answer": "A"
       },
       {
         "num": 38,
-        "stem": "Which of the following measures would the Productivity Commissionsupport?",
+        "stem": "Which of the following measures would the Productivity Commission support?",
         "options": [
           "A. Imposing reasonable wage restraints.",
           "B. Enforcing employment protection laws.",
@@ -3610,28 +3610,28 @@ const READINGS = [
       },
       {
         "num": 39,
-        "stem": "What might be an effect of ERA'S unjustified dismissal procedures?",
+        "stem": "What might be an effect of ERA's unjustified dismissal procedures?",
         "options": [
           "A. Highly paid managers lose their jobs.",
           "B. Employees suffer from salary cuts.",
           "C. Society sees a rise in overall well-being.",
-          "D. Employers need to hire new staff"
+          "D. Employers need to hire new staff."
         ],
         "answer": "B"
       },
       {
         "num": 40,
-        "stem": "It can be inferred that the high-income threshold “ in Australia",
+        "stem": "It can be inferred that the \"high-income threshold\" in Australia ____",
         "options": [
-          "A. has secured managers9 earnings.",
+          "A. has secured managers' earnings.",
           "B. has produced undesired results.",
           "C. is beneficial to business owners.",
-          "D. ] is difficult to put into practice"
+          "D. is difficult to put into practice"
         ],
         "answer": "C"
       }
     ],
-        "answers": [
+    "answers": [
       "D",
       "A",
       "D",
@@ -3680,7 +3680,7 @@ const READINGS = [
       },
       {
         "num": 24,
-        "stem": "According to Branch, state-level science standards in the US",
+        "stem": "According to Branch, state-level science standards in the US ____",
         "options": [
           "A. call for regular revision.",
           "B. require urgent application.",
@@ -3691,7 +3691,7 @@ const READINGS = [
       },
       {
         "num": 25,
-        "stem": "It is implied in the last paragraph that climate change teaching in some schools",
+        "stem": "It is implied in the last paragraph that climate change teaching in some schools ____",
         "options": [
           "A. agrees to major public demands.",
           "B. reflects teachers’ personal bias.",
@@ -3701,7 +3701,7 @@ const READINGS = [
         "answer": "D"
       }
     ],
-        "answers": [
+    "answers": [
       "C",
       "B",
       "A",
@@ -3713,7 +3713,7 @@ const READINGS = [
     "year": 2023,
     "type": "英语一",
     "textNum": 2,
-    "content": "Communities throughout New England have been attempting to regulate short-term rentals since sites like Airbnb took off in the 2010s. Now, with record-high home prices and historically low inventory, there’s an increased urgency in such regulation, particularly among those who worry that developers will come in and buy up swaths of housing to flip for a fortune on the short-term rental market.\n\nIn New Hampshire, where the rental vacancy rate has dropped below 1 percent, housing advocates fear unchecked short-term rentals will put further pressure on an already strained market. The state Legislature recently voted against a bill that would’ve made it illegal for towns to create legislation restricting short-term rentals.\n\n“We are at a crisis level on the supply of rental housing,” said Nick Taylor, executive director of the Workforce Housing Coalition of the Greater Seacoast. Without enough affordable housing in southern New Hampshire towns, “employers are having a hard time attracting employees, and workers are having a hard time finding a place to live,” Taylor said.\n\nHowever, short-term rentals also provide housing for tourists, pointed out Ryan Castle, CEO of a local association of realtors. “A lot of workers are servicing the tourist industry, and the tourism industry is serviced by those people coming in short term,” Castle said, “and so it’s a cyclical effect.”\n\nShort-term rentals themselves are not the crux of the issue, said Keren Hom, an expert on affordable housing policy. “I think individuals being able to rent out their second home is a good thing. If it’s their vacation home anyway, and it’s just empty, why can’t you make money off it?” Hom said. Issues arise, however, when developers attempt to create large-scale short-term rental facilities—de facto hotels—to bypass taxes and regulations. “I think the question is, shouldn't’t a developer who’s really building a hotel, but disguising it as not a hotel, be treated and taxed and regulated like a hotel?” Hom said.\n\nAt the end of 2018, Governor Charlie Baker of Massachusetts signed a bill to rein in those potential investor-buyers. The bill requires every rental host to register with the state, mandates they carry insurance, and opens the potential for local taxes on top of a new state levy. Boston took things even further, requiring renters to register with the city’s Inspectional Services Department.\n\nHom said similar registration requirements could benefit struggling cities and towns, but “if we want to make a change in the housing market, the main one is we have to build a lot more.”",
+    "content": "Communities throughout New England have been attempting to regulate short-term rentals since sites like Airbnb took off in the 2010s. Now, with record-high home prices and historically low inventory, there’s an increased urgency in such regulation, particularly among those who worry that developers will come in and buy up swaths of housing to flip for a fortune on the short-term rental market.\n\nIn New Hampshire, where the rental vacancy rate has dropped below 1 percent, housing advocates fear unchecked short-term rentals will put further pressure on an already strained market. The state Legislature recently voted against a bill that would’ve made it illegal for towns to create legislation restricting short-term rentals.\n\n“We are at a crisis level on the supply of rental housing,” said Nick Taylor, executive director of the Workforce Housing Coalition of the Greater Seacoast. Without enough affordable housing in southern New Hampshire towns, “employers are having a hard time attracting employees, and workers are having a hard time finding a place to live,” Taylor said.\n\nHowever, short-term rentals also provide housing for tourists, pointed out Ryan Castle, CEO of a local association of realtors. “A lot of workers are servicing the tourist industry, and the tourism industry is serviced by those people coming in short term,” Castle said, “and so it’s a cyclical effect.”\n\nShort-term rentals themselves are not the crux of the issue, said Keren Hom, an expert on affordable housing policy. “I think individuals being able to rent out their second home is a good thing. If it’s their vacation home anyway, and it’s just empty, why can’t you make money off it?” Hom said. Issues arise, however, when developers attempt to create large-scale short-term rental facilities—de facto hotels—to bypass taxes and regulations. “I think the question is, shouldn't a developer who’s really building a hotel, but disguising it as not a hotel, be treated and taxed and regulated like a hotel?” Hom said.\n\nAt the end of 2018, Governor Charlie Baker of Massachusetts signed a bill to rein in those potential investor-buyers. The bill requires every rental host to register with the state, mandates they carry insurance, and opens the potential for local taxes on top of a new state levy. Boston took things even further, requiring renters to register with the city’s Inspectional Services Department.\n\nHom said similar registration requirements could benefit struggling cities and towns, but “if we want to make a change in the housing market, the main one is we have to build a lot more.”",
     "questions": [
       {
         "num": 26,
@@ -3728,7 +3728,7 @@ const READINGS = [
       },
       {
         "num": 27,
-        "stem": "The bill mentioned in Paragraph 2 was intended to",
+        "stem": "The bill mentioned in Paragraph 2 was intended to ____",
         "options": [
           "A. curb short-term rental speculation.",
           "B. ensure the supply of cheap housing.",
@@ -3739,7 +3739,7 @@ const READINGS = [
       },
       {
         "num": 28,
-        "stem": "Compared with Castle, Taylor is more likely to support",
+        "stem": "Compared with Castle, Taylor is more likely to support ____",
         "options": [
           "A. further investment in local tourism.",
           "B. an increase in affordable housing.",
@@ -3761,7 +3761,7 @@ const READINGS = [
       },
       {
         "num": 30,
-        "stem": "Hom holds that imposing registration requirements is",
+        "stem": "Hom holds that imposing registration requirements is ____",
         "options": [
           "A. an irrational decision.",
           "B. an unfeasible proposal.",
@@ -3771,7 +3771,7 @@ const READINGS = [
         "answer": "D"
       }
     ],
-        "answers": [
+    "answers": [
       "A",
       "D",
       "B",
@@ -3787,7 +3787,7 @@ const READINGS = [
     "questions": [
       {
         "num": 31,
-        "stem": "The author mentions two books in Paragraph 1 to present",
+        "stem": "The author mentions two books in Paragraph 1 to present ____",
         "options": [
           "A. an ongoing conflict.",
           "B. an intellectual concept.",
@@ -3841,7 +3841,7 @@ const READINGS = [
         "answer": "D"
       }
     ],
-        "answers": [
+    "answers": [
       "A",
       "C",
       "A",
@@ -3857,7 +3857,7 @@ const READINGS = [
     "questions": [
       {
         "num": 36,
-        "stem": "According to Paragraph 1, the careers of scientists can be determined by",
+        "stem": "According to Paragraph 1, the careers of scientists can be determined by ____",
         "options": [
           "A. how many citations their works contain.",
           "B. how many times their papers are cited.",
@@ -3868,7 +3868,7 @@ const READINGS = [
       },
       {
         "num": 37,
-        "stem": "The support service consultancies tend to",
+        "stem": "The support service consultancies tend to ____",
         "options": [
           "A. recommend journals to their clients.",
           "B. list citation patterns for their clients.",
@@ -3879,7 +3879,7 @@ const READINGS = [
       },
       {
         "num": 38,
-        "stem": "The function of the “milk cow” journals is to",
+        "stem": "The function of the “milk cow” journals is to ____",
         "options": [
           "A. boost citation counts for certain authors.",
           "B. help scholars publish articles at low cost.",
@@ -3911,7 +3911,7 @@ const READINGS = [
         "answer": "D"
       }
     ],
-        "answers": [
+    "answers": [
       "B",
       "C",
       "A",
@@ -3923,7 +3923,7 @@ const READINGS = [
     "year": 2024,
     "type": "英语一",
     "textNum": 1,
-    "content": "Nearly 2,000 years ago, as the Romans began to pull out of Scotland, they left behind a curious treasure: 10 tons of nails, nearly a million of the things. The nail hoard was discovered in 1960 in a four-metre-deep pit covered by two metres of gravel.\n\nWhy had the Romans buried a million nails? The likely explanation is that the withdrawal was rushed, and they didn't’t want the local Caledonians getting their hands on 10 tons of weapon-grade iron. The Romans buried the nails so deep that they would not be discovered for almost two millennia.\n\nLater civilisations would value the skilled blacksmith’s labour in a nail even more than the raw material. As Roma Agrawal explains in her new delightful book Nuts and Bolts, early 17th-century Virginians would sometimes bum down their homes if they were planning to relocate. This was an attempt to recover the valuable nails, which could be reused after sifting the ashes. The idea that one might bum down an entire house just to reclaim the nails underlines how scarce, costly and valuable the simple-seeming technology was.\n\nThe price of nails fell by 90% between the late 1700s and mid-1900s, as economist Daniel Sichel points out in a research paper. According to Sichel, although the falling price of nails was driven partly by cheaper iron and cheaper energy, most of the credit goes to nail manufacturers who simply found more efficient ways to turn steel into nails.\n\nNails themselves have changed over the years, but Sichel studied them because they haven’t changed much. Roman lamps and Roman chariots are very different from LED strips and sports cars, but Roman nails are still clearly nails. It would be absurd to try to track the changing price of sports cars since 1695, but to ask the same question of nails makes perfect sense.\n\nI make no apology for being obsessed by a particular feature of these objects: their price. I am an economist, after all. After writing two books about the history of inventions, one thing I’ve learnt is that while it is the enchantingly sophisticated technologies that get all the hype, it’s the cheap technologies that change the world.\n\nThe Gutenberg printing press transformed civilisation not by changing the nature of writing but by changing its cost—and it would have achieved little without a parallel collapse in the price of surfaces to write on, thanks to an often-overlooked technology called paper. Solar panels had few niche uses until they became cheap; now they are transforming the global energy system.",
+    "content": "Nearly 2,000 years ago, as the Romans began to pull out of Scotland, they left behind a curious treasure: 10 tons of nails, nearly a million of the things. The nail hoard was discovered in 1960 in a four-metre-deep pit covered by two metres of gravel.\n\nWhy had the Romans buried a million nails? The likely explanation is that the withdrawal was rushed, and they didn't want the local Caledonians getting their hands on 10 tons of weapon-grade iron. The Romans buried the nails so deep that they would not be discovered for almost two millennia.\n\nLater civilisations would value the skilled blacksmith’s labour in a nail even more than the raw material. As Roma Agrawal explains in her new delightful book Nuts and Bolts, early 17th-century Virginians would sometimes bum down their homes if they were planning to relocate. This was an attempt to recover the valuable nails, which could be reused after sifting the ashes. The idea that one might bum down an entire house just to reclaim the nails underlines how scarce, costly and valuable the simple-seeming technology was.\n\nThe price of nails fell by 90% between the late 1700s and mid-1900s, as economist Daniel Sichel points out in a research paper. According to Sichel, although the falling price of nails was driven partly by cheaper iron and cheaper energy, most of the credit goes to nail manufacturers who simply found more efficient ways to turn steel into nails.\n\nNails themselves have changed over the years, but Sichel studied them because they haven’t changed much. Roman lamps and Roman chariots are very different from LED strips and sports cars, but Roman nails are still clearly nails. It would be absurd to try to track the changing price of sports cars since 1695, but to ask the same question of nails makes perfect sense.\n\nI make no apology for being obsessed by a particular feature of these objects: their price. I am an economist, after all. After writing two books about the history of inventions, one thing I’ve learnt is that while it is the enchantingly sophisticated technologies that get all the hype, it’s the cheap technologies that change the world.\n\nThe Gutenberg printing press transformed civilisation not by changing the nature of writing but by changing its cost—and it would have achieved little without a parallel collapse in the price of surfaces to write on, thanks to an often-overlooked technology called paper. Solar panels had few niche uses until they became cheap; now they are transforming the global energy system.",
     "questions": [
       {
         "num": 21,
@@ -3981,7 +3981,7 @@ const READINGS = [
         "answer": "A"
       }
     ],
-        "answers": [
+    "answers": [
       "D",
       "D",
       "A",
@@ -4051,7 +4051,7 @@ const READINGS = [
         "answer": "B"
       }
     ],
-        "answers": [
+    "answers": [
       "A",
       "B",
       "D",
@@ -4063,7 +4063,7 @@ const READINGS = [
     "year": 2024,
     "type": "英语一",
     "textNum": 3,
-    "content": "A Polish digital artist who uses classical painting styles to create dreamy fantasy landscapes, Greg Rutkowski has made illustrations for games such as Dungeons & Dragons and Magic: The Gathering. And he’s become a sudden hit in the new world of text-to-image AI generation.\n\nHis distinctive style is now one of the most commonly used prompts in the new open-source AI art generator Stable Diffusion.The tool, along with other popular image-generation AI models, allows anyone to create impressive images based on text prompts. For example, type in “Wizard with sword and a glowing orb of magic fire fights a fierce dragon Greg Rutkowski,” and the system will produce something that looks not a million miles away from works in Rutkowski’s style.\n\nBut these open-source programs are built by scraping images from the internet, often without permission and proper attribution to artists. As a result, they are raising tricky questions about ethics and copyright. And artists like Rutkowski have had enough.\n\nAccording to the website Lexica, which tracks over 10 million images and prompts generated by Stable Diffusion, Rutkowski’s name has been used as a prompt around 93,000 times. Rutkowski was initially surprised but thought it might be a good way to reach new audiences. Then he tried searching for his name to see if a piece he had worked on had been published. The online search brought back work that had his name attached to it but wasn't’t his.\n\n“It’s been just a month.What about in a year? I probably won’t be able to find my work out there because the internet will be flooded with AI art,” Rutkowski says. “That’s concerning.”\n\nOther artists besides Rutkowski have been surprised by the apparent popularity of their work in text-to-image generators—and some are now fighting back. Karla Ortiz, an illustrator based in San Francisco who found her work in Stable Diffusion’s data set, has been raising awareness about the issues around AI art and copyright.\n\nArtists say they risk losing income as people start using AI-generated images based on copyrighted material for commercial purposes. But it’s also a lot more personal, Ortiz says, arguing that because art is so closely linked to a person, it could raise data protection and privacy problems.\n\n“There is a coalition growing within artist industries to figure out how to tackle or mitigate this,” says Ortiz. The group is in its early days of mobilization, which could involve pushing for new policies or regulation. One suggestion is that AI models could be trained on images in the public domain, and AI companies could forge partnerships with museums and artists, Ortiz says. 31.What can be learned about Rutkowski from the first two paragraphs?",
+    "content": "A Polish digital artist who uses classical painting styles to create dreamy fantasy landscapes, Greg Rutkowski has made illustrations for games such as Dungeons & Dragons and Magic: The Gathering. And he’s become a sudden hit in the new world of text-to-image AI generation.\n\nHis distinctive style is now one of the most commonly used prompts in the new open-source AI art generator Stable Diffusion. The tool, along with other popular image-generation AI models, allows anyone to create impressive images based on text prompts. For example, type in “Wizard with sword and a glowing orb of magic fire fights a fierce dragon Greg Rutkowski,” and the system will produce something that looks not a million miles away from works in Rutkowski’s style.\n\nBut these open-source programs are built by scraping images from the internet, often without permission and proper attribution to artists. As a result, they are raising tricky questions about ethics and copyright. And artists like Rutkowski have had enough.\n\nAccording to the website Lexica, which tracks over 10 million images and prompts generated by Stable Diffusion, Rutkowski’s name has been used as a prompt around 93,000 times. Rutkowski was initially surprised but thought it might be a good way to reach new audiences. Then he tried searching for his name to see if a piece he had worked on had been published. The online search brought back work that had his name attached to it but wasn't his.\n\n“It’s been just a month. What about in a year? I probably won’t be able to find my work out there because the internet will be flooded with AI art,” Rutkowski says. “That’s concerning.”\n\nOther artists besides Rutkowski have been surprised by the apparent popularity of their work in text-to-image generators—and some are now fighting back. Karla Ortiz, an illustrator based in San Francisco who found her work in Stable Diffusion’s data set, has been raising awareness about the issues around AI art and copyright.\n\nArtists say they risk losing income as people start using AI-generated images based on copyrighted material for commercial purposes. But it’s also a lot more personal, Ortiz says, arguing that because art is so closely linked to a person, it could raise data protection and privacy problems.\n\n“There is a coalition growing within artist industries to figure out how to tackle or mitigate this,” says Ortiz. The group is in its early days of mobilization, which could involve pushing for new policies or regulation. One suggestion is that AI models could be trained on images in the public domain, and AI companies could forge partnerships with museums and artists, Ortiz says.",
     "questions": [
       {
         "num": 31,
@@ -4121,7 +4121,7 @@ const READINGS = [
         "answer": "A"
       }
     ],
-        "answers": [
+    "answers": [
       "B",
       "C",
       "C",
@@ -4133,7 +4133,7 @@ const READINGS = [
     "year": 2024,
     "type": "英语一",
     "textNum": 4,
-    "content": "The miracle of the Chesapeake Bay lies not in its depths, but in the complexity of its natural construction, the interaction of fresh and saline waters, and the mix of land and water. The shallows provide homes for hundreds of species while storing floodwaters, filtering pollutants from water, and protecting nearby communities from potentially destructive storm surges.\n\nAll this was put at great risk late last month, when the U.S. Supreme Court issued a ruling in an Idaho case that provides the U.S. Environmental Protection Agency (EPA) far less authority to regulate wetlands and waterways. Specifically, a 5-4 majority decided that wetlands protected by the EPA under its Clean Water Act authority must have a “continuous surface connection” to bodies of water. This narrowing of the regulatory scope was a victory for builders, mining operators and other commercial interests often at odds with environmental rules. And it carries “significant repercussions for water quality and flood control throughout the United States,” as Justice Brett Kavanaugh observed.\n\nIn Maryland, the good news is that there are many state laws in place that provide wetlands protections. But that’s a very shortsighted view, particularly when it comes to the Chesapeake Bay. The reality is that water, and the pollutants that so often come with it, don’t respect state boundaries. The Chesapeake draws from a 64,000-square-mile watershed that extends into Virginia, Pennsylvania, New York, West Virginia, the District of Columbia and Delaware. Will those jurisdictions extend the same protections now denied under Sackett v. EPA? Perhaps some, but all? That seems unlikely.\n\nIt is too easy, and misleading, to see such court rulings as merely standing up for the rights of land owners when the consequences can be so dire for their neighbors. And it’s a reminder that the EPA’s involvement in the Chesapeake Bay Program has long been crucial as the means to transcend the influence of deep-pocketed special interests in neighboring states. Pennsylvania farmers, to use one telling example, aren't’t thinking about next year’s blue crab harvest in Maryland when they decide whether to spread animal waste on their fields, yet the runoff into nearby creeks can have enormous impact downstream.\n\nAnd so we would call on state lawmakers from Richmond to Albany to consider reviewing their own wetlands protections and see for themselves the enormous stakes involved. We can offer them a visit to Blackwater National Wildlife Refuge in Dorchester County where bald eagles fly over tidal marshes so shallow you could not paddle a boat across them but teaming with aquatic life. It’s worth the scenic drive.",
+    "content": "The miracle of the Chesapeake Bay lies not in its depths, but in the complexity of its natural construction, the interaction of fresh and saline waters, and the mix of land and water. The shallows provide homes for hundreds of species while storing floodwaters, filtering pollutants from water, and protecting nearby communities from potentially destructive storm surges.\n\nAll this was put at great risk late last month, when the U.S. Supreme Court issued a ruling in an Idaho case that provides the U.S. Environmental Protection Agency (EPA) far less authority to regulate wetlands and waterways. Specifically, a 5-4 majority decided that wetlands protected by the EPA under its Clean Water Act authority must have a “continuous surface connection” to bodies of water. This narrowing of the regulatory scope was a victory for builders, mining operators and other commercial interests often at odds with environmental rules. And it carries “significant repercussions for water quality and flood control throughout the United States,” as Justice Brett Kavanaugh observed.\n\nIn Maryland, the good news is that there are many state laws in place that provide wetlands protections. But that’s a very shortsighted view, particularly when it comes to the Chesapeake Bay. The reality is that water, and the pollutants that so often come with it, don’t respect state boundaries. The Chesapeake draws from a 64,000-square-mile watershed that extends into Virginia, Pennsylvania, New York, West Virginia, the District of Columbia and Delaware. Will those jurisdictions extend the same protections now denied under Sackett v. EPA? Perhaps some, but all? That seems unlikely.\n\nIt is too easy, and misleading, to see such court rulings as merely standing up for the rights of land owners when the consequences can be so dire for their neighbors. And it’s a reminder that the EPA’s involvement in the Chesapeake Bay Program has long been crucial as the means to transcend the influence of deep-pocketed special interests in neighboring states. Pennsylvania farmers, to use one telling example, aren't thinking about next year’s blue crab harvest in Maryland when they decide whether to spread animal waste on their fields, yet the runoff into nearby creeks can have enormous impact downstream.\n\nAnd so we would call on state lawmakers from Richmond to Albany to consider reviewing their own wetlands protections and see for themselves the enormous stakes involved. We can offer them a visit to Blackwater National Wildlife Refuge in Dorchester County where bald eagles fly over tidal marshes so shallow you could not paddle a boat across them but teaming with aquatic life. It’s worth the scenic drive.",
     "questions": [
       {
         "num": 36,
@@ -4191,7 +4191,7 @@ const READINGS = [
         "answer": "B"
       }
     ],
-        "answers": [
+    "answers": [
       "A",
       "B",
       "A",
@@ -4261,7 +4261,7 @@ const READINGS = [
         "answer": "A"
       }
     ],
-        "answers": [
+    "answers": [
       "C",
       "A",
       "A",
@@ -4306,7 +4306,7 @@ const READINGS = [
           "C. the rewards of scientific endeavours.",
           "D. the value of fostering human ingenuity."
         ],
-        "answer": "D"
+        "answer": "C"
       },
       {
         "num": 29,
@@ -4317,7 +4317,7 @@ const READINGS = [
           "C. owes much to global net-zero initiatives.",
           "D. aims to explore the power of intelligence."
         ],
-        "answer": "C"
+        "answer": "A"
       },
       {
         "num": 30,
@@ -4328,15 +4328,15 @@ const READINGS = [
           "C. Energy-intensive research work is inevitable.",
           "D. The goals of researchers ought to be realistic."
         ],
-        "answer": "A"
+        "answer": "C"
       }
     ],
-        "answers": [
+    "answers": [
       "B",
       "D",
-      "D",
       "C",
-      "A"
+      "A",
+      "C"
     ]
   },
   {
@@ -4401,7 +4401,7 @@ const READINGS = [
         "answer": "D"
       }
     ],
-        "answers": [
+    "answers": [
       "D",
       "A",
       "A",
@@ -4413,7 +4413,7 @@ const READINGS = [
     "year": 2025,
     "type": "英语一",
     "textNum": 4,
-    "content": "Visit any antiques store and you’ll encounter artifacts from the past: photographs, letters, a brochure detailing the Sinclair dinosaur exhibit from the 1964-1965 World’s Fair, the ephemera of history. Yet these objects aren't’t truly ephemeral, because they’re still here, decades, even centuries later. Why? Because they’re tangible.\n\nHave you pondered the life cycle of intangible formats, digital information, given that those who produce these artifacts seldom make provision for their long-term preservation? For millennia, we’ve known what we’ve known due to artifacts that have survived, often despite their original creators’ neglect. The thing itself is the medium that delivers the information. At the time of creation, no attempts were made at intentional preservation, yet analog materials have a chance of surviving and serving as the historical record that biographers, historians, and novelists rely on.\n\nLibraries and archives have traditionally shouldered the responsibility of organization, preservation, and access to information. Thus, librarians digitize the tangible so that researchers the world over can quickly search and access their holdings. The result is an embarrassment of historical riches, which brings its own needle-and-haystack problems.\n\nLibrarians’ selfless devotion can act against us when users point to universality of access by holding up a cellphone and saying, “it’s all in here” as evidence that libraries are less vital for researchers today. Yet how was that universality of access made possible and, perhaps more importantly, how is it maintained? Who curates what is preserved? When it comes to born-digital information, the terrifying answer can be: if not librarians and archivists, then no one. Digital information requires a great deal more care than analog.\n\nEven when a digital object is preserved, it may only be the carrier that’s saved, not the information itself. As technology advances and a format becomes obsolete, the object is useless.\n\nHave you ever stared helplessly at a ZIP disk, thinking: how do I get the files off this? Without constant migration of digital assets, a nightmare about the foreseeable future is what keeps historians up at night: a historical record that abruptly stops when digital replace analog.\n\nAs a librarian whose day job revolves around special collections and digital assets, I share the night terrors of historians, and I’d be lying if I said a comprehensive preservation solution currently exists. Yet researchers can take some comfort in the fact that there are a multitude of librarians devoted to discovering, organizing, and preserving digital information for researchers current and future. Librarians are uniquely positioned to understand how end users seek and use information. Thus we play an integral role in identifying, preserving, and providing accessibility to digital artifacts so that, while future researchers may find the digital realm a challenging place to ply their trade, they won’t find it an impossible one.",
+    "content": "Visit any antiques store and you’ll encounter artifacts from the past: photographs, letters, a brochure detailing the Sinclair dinosaur exhibit from the 1964-1965 World’s Fair, the ephemera of history. Yet these objects aren't truly ephemeral, because they’re still here, decades, even centuries later. Why? Because they’re tangible.\n\nHave you pondered the life cycle of intangible formats, digital information, given that those who produce these artifacts seldom make provision for their long-term preservation? For millennia, we’ve known what we’ve known due to artifacts that have survived, often despite their original creators’ neglect. The thing itself is the medium that delivers the information. At the time of creation, no attempts were made at intentional preservation, yet analog materials have a chance of surviving and serving as the historical record that biographers, historians, and novelists rely on.\n\nLibraries and archives have traditionally shouldered the responsibility of organization, preservation, and access to information. Thus, librarians digitize the tangible so that researchers the world over can quickly search and access their holdings. The result is an embarrassment of historical riches, which brings its own needle-and-haystack problems.\n\nLibrarians’ selfless devotion can act against us when users point to universality of access by holding up a cellphone and saying, “it’s all in here” as evidence that libraries are less vital for researchers today. Yet how was that universality of access made possible and, perhaps more importantly, how is it maintained? Who curates what is preserved? When it comes to born-digital information, the terrifying answer can be: if not librarians and archivists, then no one. Digital information requires a great deal more care than analog.\n\nEven when a digital object is preserved, it may only be the carrier that’s saved, not the information itself. As technology advances and a format becomes obsolete, the object is useless.\n\nHave you ever stared helplessly at a ZIP disk, thinking: how do I get the files off this? Without constant migration of digital assets, a nightmare about the foreseeable future is what keeps historians up at night: a historical record that abruptly stops when digital replace analog.\n\nAs a librarian whose day job revolves around special collections and digital assets, I share the night terrors of historians, and I’d be lying if I said a comprehensive preservation solution currently exists. Yet researchers can take some comfort in the fact that there are a multitude of librarians devoted to discovering, organizing, and preserving digital information for researchers current and future. Librarians are uniquely positioned to understand how end users seek and use information. Thus we play an integral role in identifying, preserving, and providing accessibility to digital artifacts so that, while future researchers may find the digital realm a challenging place to ply their trade, they won’t find it an impossible one.",
     "questions": [
       {
         "num": 36,
@@ -4471,7 +4471,7 @@ const READINGS = [
         "answer": "D"
       }
     ],
-        "answers": [
+    "answers": [
       "C",
       "B",
       "B",
@@ -4483,15 +4483,15 @@ const READINGS = [
     "year": 2026,
     "type": "英语一",
     "textNum": 1,
-    "content": "For thousands of years, donkeys have been critical for propelling human civilizations forward. They've helped pull wheeled vehicles, carry travelers and move goods across the world. But where and when these animals first became intertwined with humans has been a mystery. Now, researchers have used genomes of over 200 donkeys to trace their domestication back to a single event around 7,000 years ago in East Africa—about 3,000 years before humans tamed horses. The team published their findings in the journal Science this month.\n\n\"Through their DNA, the animals are telling their history themselves,\" co-author Samantha Brooks, an equine researcher at the University of Florida, says in a statement \"We usually only get the human's side of history through written accounts, but of course written history does not always record exactly how something happened. Looking at these DNA sequences, we get a biological testimony to the environment these animals lived in and the experiences they survived.\"\n\nThe researchers examined 207 genomes from modern donkeys living in 31 countries across the globe. They also looked at genomes from 15 wild equids and 31 earlier donkeys that lived between about 4,000 and 100 years ago. The team reconstructed the animals' evolutionary tree and used computer models to pinpoint the domestication event: when herders in Kenya and the Horn of Africa tamed wild asses. They then traced how the animals spread across the rest of the continent into Europe and Asia about 2,500 years later.\n\nThough it's still unclear why the original domestication happened, Science News' Freda Kreier reports that the event coincided with the Sahara growing larger and drier. \"Donkeys are champions when it comes to carrying stuff and are good at going at Paul Sabin deserts,\" co-author Ludovic Orlando, an evolutionary biologist at Paul Sabin University in France, tells the publication. Prehistoric humans may have tamed donkeys' help navigate the expanding Sahara.\n\nResearchers say these findings could help put donkeys in the spotlight The animals could benefit from more research: Currently, there are no published genomes from donkeys located south of the Equator in Africa. But understanding where the animals were first domesticated could guide archaeologists to a narrow region to search for insights about the original tamed donkeys.\n\nNot only does human-understanding the equines' genetic makeup help reveal their contribution to human history, but it also might improve their management in the future, as climate change alters the planet's environment, write the authors.",
+    "content": "For thousands of years, donkeys have been critical for propelling human civilizations forward. They've helped pull wheeled vehicles, carry travelers and move goods across the world. But where and when these animals first became intertwined with humans has been a mystery. Now, researchers have used genomes of over 200 donkeys to trace their domestication back to a single event around 7,000 years ago in East Africa—about 3,000 years before humans tamed horses. The team published their findings in the journal Science this month.\n\n\"Through their DNA, the animals are telling their history themselves,\" co-author Samantha Brooks, an equine researcher at the University of Florida, says in a statement. \"We usually only get the human's side of history through written accounts, but of course written history does not always record exactly how something happened. Looking at these DNA sequences, we get a biological testimony to the environment these animals lived in and the experiences they survived.\"\n\nThe researchers examined 207 genomes from modern donkeys living in 31 countries across the globe. They also looked at genomes from 15 wild equids and 31 earlier donkeys that lived between about 4,000 and 100 years ago. The team reconstructed the animals' evolutionary tree and used computer models to pinpoint the domestication event when herders in Kenya and the Horn of Africa tamed wild asses. They then traced how the animals spread across the rest of the continent into Europe and Asia about 2,500 years later.\n\nThough it's still unclear why the original domestication happened, Science News' Freda Kreier reports that the event coincided with the Sahara growing larger and drier. \"Donkeys are champions when it comes to carrying stuff and are good at crossing deserts,\" co-author Ludovic Orlando, an evolutionary biologist at Paul Sabatier University in France, tells the publication. Prehistoric humans may have tamed donkeys to help navigate the expanding Sahara.\n\nResearchers say these findings could help put donkeys in the spotlight. The animals could benefit from more research: Currently, there are no published genomes from donkeys located south of the Equator in Africa. But understanding where the animals were first domesticated could guide archaeologists to a narrow region to search for insights about the original tamed donkeys.\n\nNot only does understanding the equines' genetic makeup help reveal their contribution to human history, but it also might improve their management in the future, as climate change alters the planet's environment, write the authors.",
     "questions": [
       {
         "num": 21,
-        "stem": "What can be learned about donkeys from paragraph 1?",
+        "stem": "What can be learned about donkeys from Paragraph 1?",
         "options": [
           "A. They seemed mysterious to human ancestors.",
           "B. They underwent multiple domestication events.",
-          "C. They were tamed at an earlier time than horse.",
+          "C. They were tamed at an earlier time than horses.",
           "D. They were vividly portrayed by ancient travelers."
         ],
         "answer": "C"
@@ -4502,14 +4502,14 @@ const READINGS = [
         "options": [
           "A. The earliest habitats of donkeys are hardly traceable.",
           "B. It is increasingly easy to read donkeys' DNA sequences.",
-          "C. Written accounts contain vital dues for donkey research.",
+          "C. Written accounts contain vital clues for donkey research.",
           "D. Genetic analysis offers insight into the history of donkeys."
         ],
         "answer": "D"
       },
       {
         "num": 23,
-        "stem": "In their study, the researchers investigated how donkeys?",
+        "stem": "In their study, the researchers investigated how donkeys ____",
         "options": [
           "A. dispersed widely in the world.",
           "B. survived with the help of herders.",
@@ -4520,7 +4520,7 @@ const READINGS = [
       },
       {
         "num": 24,
-        "stem": "As to why the original domestication of donkeys happened, Orlando?",
+        "stem": "As to why the original domestication of donkeys happened, Orlando ____",
         "options": [
           "A. challenges conventional ideas.",
           "B. provides a possible explanation.",
@@ -4531,7 +4531,7 @@ const READINGS = [
       },
       {
         "num": 25,
-        "stem": "The authors think that their research could help with",
+        "stem": "The authors think that their research could help with ____",
         "options": [
           "A. greater protection of wildlife.",
           "B. better management of donkeys.",
@@ -4541,7 +4541,7 @@ const READINGS = [
         "answer": "B"
       }
     ],
-        "answers": [
+    "answers": [
       "C",
       "D",
       "A",
@@ -4553,11 +4553,11 @@ const READINGS = [
     "year": 2026,
     "type": "英语一",
     "textNum": 2,
-    "content": "There's no business like show business—but in Los Angeles, it feels like there's no business at all. If that sounds melodramatic, consider this: The Art Directors Guild, a labor union representing about 3,000 film workers, has suspended a training program and issued a statement explaining that \"we cannot in good conscience encourage you to pursue our profession is a reaction to Hollywood's decline, which is reaching a critical point for the industry and Southern California.\"\n\nProduction has been slipping away from Hollywood since the 1950s, but the effects have never been more apparent than at present. Other regions in the United States, Canada and Europe have steadily increased incentives to attract TV shows and movies, leaving California in the dust. Georgia offers up to 30% in transferable tax credits on film and TV production costs, plus an additional 10% increase on the base tax credit if the project includes a Georgia promotional logo.\n\nEven as California lost a huge volume of production to other locations, there was still plenty of film production taking place in Los Angeles before this year. We were kept afloat by \"peak TV\", the glut of content that was required by the explosion of streaming services.\n\nIf productions in Southern California dip below a critical level for too long, the industry's essential talent will drift away along with enormous sums of revenue. Persuading studios to film here would become much more challenging if we couldn't after a deep bench of local film workers, on-screen talent and local businesses that support the entertainment industry.\n\nThat's why the California Film Commission and its Los Angeles counterpart, Film LA, now should act, before it's too late. These agencies and other government bodies should dramatically improve incentives to keep our current shows and attract new productions to Los Angeles. Let's go on with the show..and make sure the show doesn't go on without us.",
+    "content": "There's no business like show business—but in Los Angeles, it feels like there's no business at all.\n\nIf that sounds melodramatic, consider this: The Art Directors Guild, a labor union representing about 3,000 film workers, has suspended a training program and issued a statement explaining that \"we cannot in good conscience encourage you to pursue our profession.\" This is a reaction to Hollywood's decline, which is reaching a critical point for the industry and Southern California.\"\n\nProduction has been slipping away from Hollywood since the 1950s, but the effects have never been more apparent than at present. Other regions in the United States, Canada and Europe have steadily increased incentives to attract TV shows and movies, leaving California in the dust. Georgia offers up to 30% in transferable tax credits on film and TV production costs, plus an additional 10% increase on the base tax credit if the project includes a Georgia promotional logo.\n\nEven as California lost a huge volume of production to other locations, there was still plenty of film production taking place in Los Angeles before this year. We were kept afloat by \"peak TV\", the glut of content that was required by the explosion of streaming services.\n\nBut 2022 was the peak of peak TV. Back then platforms such as Netflix, Amazon and Apple TV hemorrhaged billions of dollars to generate content to attract new subscribers, resulting in 633 scripted series being released that year. As the streamers' emphasis changed from subscriber growth to profitability, prices for the services went up and the number of new shows went down to 481 released in 2023, with the number expected to dip into the 300s within a few years.\n\nIf productions in Southern California dip below a critical level for too long, the industry's essential talent will drift away along with enormous sums of revenue. Persuading studios to film here would become much more challenging if we couldn't offer a deep bench of local film workers, on-screen talent and local businesses that support the entertainment industry.\n\nThat's why the California Film Commission and its Los Angeles counterpart, Film LA, now should act, before it's too late. These agencies and other government bodies should dramatically improve incentives to keep our current shows and attract new productions to Los Angeles. Let's go on with the show…and make sure the show doesn't go on without us.",
     "questions": [
       {
         "num": 26,
-        "stem": "The Art Directors Guild's statement reveals",
+        "stem": "The Art Directors Guild's statement reveals ____",
         "options": [
           "A. people's reduced interest in film.",
           "B. film workers' nostalgia for the past.",
@@ -4568,7 +4568,7 @@ const READINGS = [
       },
       {
         "num": 27,
-        "stem": "The example of Georgia is used to illustrate the efforts to",
+        "stem": "The example of Georgia is used to illustrate the efforts to ____",
         "options": [
           "A. lure production with tax incentives.",
           "B. drive improvements in film facilities.",
@@ -4579,7 +4579,7 @@ const READINGS = [
       },
       {
         "num": 28,
-        "stem": "Peak TV passed its peak as",
+        "stem": "Peak TV passed its peak as ____",
         "options": [
           "A. streamers lost their technical advantages.",
           "B. streamers changed their strategic priorities.",
@@ -4590,7 +4590,7 @@ const READINGS = [
       },
       {
         "num": 29,
-        "stem": "According to paragraph 6, California's entertainment industry might face",
+        "stem": "According to Paragraph 6, California's entertainment industry might face ____",
         "options": [
           "A. a decline in product quality.",
           "B. a demand for foreign talent.",
@@ -4601,7 +4601,7 @@ const READINGS = [
       },
       {
         "num": 30,
-        "stem": "The author concludes the text by emphasizing that California should strive to",
+        "stem": "The author concludes the text by emphasizing that California should strive to ____",
         "options": [
           "A. maintain its position in the industry.",
           "B. attract more investment than it had.",
@@ -4611,7 +4611,7 @@ const READINGS = [
         "answer": "A"
       }
     ],
-        "answers": [
+    "answers": [
       "D",
       "A",
       "B",
@@ -4623,7 +4623,7 @@ const READINGS = [
     "year": 2026,
     "type": "英语一",
     "textNum": 3,
-    "content": "The pioneers of wireless saw it as a gift to all the people. Sir John Reith said that it would end \"isolation of the spirit\" and rejoiced:\"It does not matter how many thousand may be listening, there is always enough for others... the genius and the fool, the wealthy and the poor listen simultaneously.\"\n\nBetween two great wars this technological innovation built a new kind of national consciousness Opening this week, a book and exhibition curated by Beatty Rubens at the Bodleian in Oxford records how radio changed everyday life from 1922 to 1939. She draws on letters, diaries and fiction, and a 1939 field notebook of verbatim audience research by Winifred Gill.\n\nThere's fun in testimonies of people enjoying the sheer newness. A cartoon mocks a group failing to converse because they're all in headphones. People report that broadcast music made workmen whistle new tunes. A woman says there have been fewer street fights since the arrival of the wireless but also less stopping and \"talking on the brush handle\".\n\nBy and large the wireless was welcome. I loved the man from the Thirties research who found that wireless suddenly offered \"a lot of variety..things I thought I'd never be interested in..ice hockey, perhaps\". True: for more than 80 pre-digital years, linear speech broadcasting brought the gift of serendipity, random enlivening of a car journey or dull manual task. In my own book about radio I recorded how, on one drive: \"I caught up with the news, learnt some 17th-century history, and was startlingly educated by an unpretentious programme on the history of the stethoscope.\"\n\nBut radio's enriching serendipity is ebbing. With multiple networks and countless podcasts, a smartphone user selects what to hear and when. And while it is wonderful to take a walk with anything in your headphones, infinite choice encourages us to shrink into niche interests and sympathetic beliefs.",
+    "content": "The pioneers of wireless saw it as a gift to all the people. Sir John Reith said that it would end \"isolation of the spirit\" and rejoiced: \"It does not matter how many thousands may be listening, there is always enough for others... the genius and the fool, the wealthy and the poor listen simultaneously.\"\n\nBetween two great wars this technological innovation built a new kind of national consciousness. Opening this week, a book and exhibition curated by Beatty Rubens at the Bodleian in Oxford records how radio changed everyday life from 1922 to 1939. She draws on letters, diaries and fiction, and a 1939 field notebook of verbatim audience research by Winifred Gill.\n\nThere's fun in testimonies of people enjoying the sheer newness. A cartoon mocks a group failing to converse because they're all in headphones. People report that broadcast music made workmen whistle new tunes. A woman says there have been fewer street fights since the arrival of the wireless but also less stopping and \"talking on the brush handle\".\n\nBy and large the wireless was welcome. I loved the man from the Thirties research who found that wireless suddenly offered \"a lot of variety..things I thought I'd never be interested in..ice hockey, perhaps\". True: for more than 80 pre-digital years, linear speech broadcasting brought the gift of serendipity, random enlivening of a car journey or dull manual task. In my own book about radio I recorded how, on one drive: \"I caught up with the news, learnt some 17th-century history, and was startlingly educated by an unpretentious programme on the history of the stethoscope.\"\n\nBut radio's enriching serendipity is ebbing. With multiple networks and countless podcasts, a smartphone user selects what to hear and when. And while it is wonderful to take a walk with anything in your headphones, infinite choice encourages us to shrink into niche interests and sympathetic beliefs.\n\nA hundred years on from Marconi and Reith, is the art of mere listening endangered? Some will say the audiobook boom revives it, though I suppose you can then worry about the decline of reading. But inventions shape all of us and it is worth noticing when techno-social habits do change, and asking whether to control them a bit or shield the youngest. Whatever we do, innovation will happen. Today we fret about the isolating culture of smartphone-staring and selfie-vanity, but already in 1939 there was that lady regretting how, when all her street got wirelesses, it lost the neighbourly habit of \"talking on the brush handle\". It's enough to make a person put down the smartphone and go out front with a yard broom.",
     "questions": [
       {
         "num": 31,
@@ -4649,7 +4649,7 @@ const READINGS = [
       },
       {
         "num": 33,
-        "stem": "It is indicated in Paragraph 4 that",
+        "stem": "It is indicated in Paragraph 4 that ____",
         "options": [
           "A. the research on radio used to be inadequate.",
           "B. the charm of radio remains in the digital age.",
@@ -4660,7 +4660,7 @@ const READINGS = [
       },
       {
         "num": 34,
-        "stem": "The expression \"talking on the brush handle\" in Paragraphs 3 refers to the act",
+        "stem": "The expression \"talking on the brush handle\" in Paragraphs 3 and 6 refers to the act of ____",
         "options": [
           "A. making a loud noise.",
           "B. having a casual chat.",
@@ -4671,7 +4671,7 @@ const READINGS = [
       },
       {
         "num": 35,
-        "stem": "In the last paragraph, the author intends to express the opinion that",
+        "stem": "In the last paragraph, the author intends to express the opinion that ____",
         "options": [
           "A. technology should be aimed at benefiting humans.",
           "B. actions should be taken to revive the art of listening.",
@@ -4681,7 +4681,7 @@ const READINGS = [
         "answer": "D"
       }
     ],
-        "answers": [
+    "answers": [
       "A",
       "A",
       "C",
@@ -4693,11 +4693,11 @@ const READINGS = [
     "year": 2026,
     "type": "英语一",
     "textNum": 4,
-    "content": "When Tom Swetnam joined the U.S. Forest Service in the 1970s, his mandate was to \"put everything out,\" he recalled. But when Swetnam enrolled in graduate school at the University of Arizona's Laboratory of Tree-Ring Research, he was surprised to find a record of repeated blazes dating back hundreds of years before European colonists arrived on the continent Some of the trees he analyzed bore more than 20 fire scars among their rings.\n\nThe fact that fires happened so often meant they couldn't have been severe enough to kill most trees. Instead, a growing body of research showed that frequent, low-severity fires made many ecosystems healthier. They rid the forest of dead and sick trees, reducing competition and curbing the spread of disease. Because flammable material couldn't build up on the landscape, blazes tended to move slowly and peter out when they reached the footprints of previous burns.\n\nIn 2022, Swetnam and other scientists teamed up to compile a database of fire-scarred trees from across the continent. Their North American tree-ring fire-scar network (NAFSN) provided the basis for a study published last month. In the study, the researchers compared the historical fire cadence with the wildfires recorded over the past few decades, and uncovered a striking shortfall. The NAFSN sites experienced less than a quarter of the number of fires that would have been expected without fire suppression.\n\nThis deficit is a testament to the effectiveness of modern firefighting, said Kelly Martin, a past president of the International Association of Wildland Fire. \"Yet the combined consequences of suppression and climate change have eroded humanity's ability to suppress fires, particularly those that ignite under the most dangerous weather conditions.\"\n\nTo prevent entire ecosystems from going up in smoke, Martin said, people must bring healthy fire back to places that need it. At Yosemite National Park, Martin oversaw the use of what is known as prescribed burns to make the landscape more resilient. These fires were carefully planned and intentionally ignited during periods when weather kept the blazes easy to control, and helped eliminate some of the fuel that had build up around the important park's facilities. Research shows that these prescribed burns make subsequent wildfires less severe, even if later fires happen under the most dangerous weather conditions.\n\nYet even as scientists and public officials increasingly agree on the need for more fires in our forests, climate change is making this tactic more challenging, experts said. \"It's a double-edged sword because wildfires are getting more severe and larger under climate change and we need this work even more, but then the work gets more challenging.\" said Susan Prichard, a fire ecologist at the University of Washington.",
+    "content": "When Tom Swetnam joined the U.S. Forest Service in the 1970s, his mandate was to \"put everything out,\" he recalled. But when Swetnam enrolled in graduate school at the University of Arizona's Laboratory of Tree-Ring Research, he was surprised to find a record of repeated blazes dating back hundreds of years before European colonists arrived on the continent. Some of the trees he analyzed bore more than 20 fire scars among their rings.\n\nThe fact that fires happened so often meant they couldn't have been severe enough to kill most trees. Instead, a growing body of research showed that frequent, low-severity fires made many ecosystems healthier. They rid the forest of dead and sick trees, reducing competition and curbing the spread of disease. Because flammable material couldn't build up on the landscape, blazes tended to move slowly and peter out when they reached the footprints of previous burns.\n\nIn 2022, Swetnam and other scientists teamed up to compile a database of fire-scarred trees from across the continent. Their North American tree-ring fire-scar network (NAFSN) provided the basis for a study published last month. In the study, the researchers compared the historical fire cadence with the wildfires recorded over the past few decades, and uncovered a striking shortfall. The NAFSN sites experienced less than a quarter of the number of fires that would have been expected without fire suppression.\n\nThis deficit is a testament to the effectiveness of modern firefighting, said Kelly Martin, a past president of the International Association of Wildland Fire. \"Yet the combined consequences of suppression and climate change have eroded humanity's ability to suppress fires, particularly those that ignite under the most dangerous weather conditions.\"\n\nTo prevent entire ecosystems from going up in smoke, Martin said, people must bring healthy fire back to places that need it. At Yosemite National Park, Martin oversaw the use of what is known as prescribed burns to make the landscape more resilient. These fires were carefully planned and intentionally ignited during periods when weather kept the blazes easy to control, and helped eliminate some of the fuel that had built up around the important park's facilities. Research shows that these prescribed burns make subsequent wildfires less severe, even if later fires happen under the most dangerous weather conditions.\n\nYet even as scientists and public officials increasingly agree on the need for more fires in our forests, climate change is making this tactic more challenging, experts said. \"It's a double-edged sword because wildfires are getting more severe and larger under climate change and we need this work even more, but then the work gets more challenging,\" said Susan Prichard, a fire ecologist at the University of Washington.",
     "questions": [
       {
         "num": 36,
-        "stem": "According to Paragraph 1, Swetnam was surprised by",
+        "stem": "According to Paragraph 1, Swetnam was surprised by ____",
         "options": [
           "A. the scarcity of tree-ring research in the U.S.",
           "B. the firefighting measures in ancient Europe.",
@@ -4708,7 +4708,7 @@ const READINGS = [
       },
       {
         "num": 37,
-        "stem": "Paragraph 2 mainly focuses on",
+        "stem": "Paragraph 2 mainly focuses on ____",
         "options": [
           "A. the causes of previous burns.",
           "B. the treatment of diseased trees.",
@@ -4741,7 +4741,7 @@ const READINGS = [
       },
       {
         "num": 40,
-        "stem": "Both Martin and Prichard would agree that",
+        "stem": "Both Martin and Prichard would agree that ____",
         "options": [
           "A. it is challenging to predict large wildfires.",
           "B. it is urgent to assess the use of planned fires.",
@@ -4751,7 +4751,7 @@ const READINGS = [
         "answer": "C"
       }
     ],
-        "answers": [
+    "answers": [
       "D",
       "C",
       "B",
@@ -4833,7 +4833,7 @@ const READINGS = [
     "year": 2010,
     "type": "英语二",
     "textNum": 2,
-    "content": "I was addressing a small gathering in a suburban Virginia living room – a women’s group that had invited men to join them. Throughout the evening, one man had been particularly talkative, frequently offering ideas and anecdotes, while his wife sat silently beside him on the couch. Toward the end of the evening, I commented that women frequently complain that their husbands don’t talk to them. This man quickly nodded in agreement. He gestured toward his wife and said, “She’s the talker in our family.” The room burst into laughter; the man looked puzzled and hurt. “It’s true,” he explained. “When I come home from work I have nothing to say. If she didn't’t keep the conversation going, we’d spend the whole evening in silence.”\n\nThis episode crystallizes the irony that although American men tend to talk more than women in public situations, they often talk less at home. And this pattern is wreaking havoc with marriage.\n\nThe pattern was observed by political scientist Andrew Hacker in the late 1970s. Sociologist Catherine Kohler Riessman reports in her new book Divorce Talk that most of the women she interviewed – but only a few of the men – gave lack of communication as the reason for their divorces. Given the current divorce rate of nearly 50 percent, that amounts to millions of cases in the United States every year – a virtual epidemic of failed conversation.\n\nIn my own research, complaints from women about their husbands most often focused not on tangible inequities such as having given up the chance for a career to accompany a husband to his, or doing far more than their share of daily life-support work like cleaning, cooking and social arrangements. Instead, they focused on communication: “He doesn't’t listen to me.” “He doesn't’t talk to me.” I found, as Hacker observed years before, that most wives want their husbands to be, first and foremost, conversational partners, but few husbands share this expectation of their wives.\n\nIn short, the image that best represents the current crisis is the stereotypical cartoon scene of a man sitting at the breakfast table with a newspaper held up in front of his face, while a woman glares at the back of it, wanting to talk.",
+    "content": "I was addressing a small gathering in a suburban Virginia living room – a women’s group that had invited men to join them. Throughout the evening, one man had been particularly talkative, frequently offering ideas and anecdotes, while his wife sat silently beside him on the couch. Toward the end of the evening, I commented that women frequently complain that their husbands don’t talk to them. This man quickly nodded in agreement. He gestured toward his wife and said, “She’s the talker in our family.” The room burst into laughter; the man looked puzzled and hurt. “It’s true,” he explained. “When I come home from work I have nothing to say. If she didn’t keep the conversation going, we’d spend the whole evening in silence.”\n\nThis episode crystallizes the irony that although American men tend to talk more than women in public situations, they often talk less at home. And this pattern is wreaking havoc with marriage.\n\nThe pattern was observed by political scientist Andrew Hacker in the late 1970s. Sociologist Catherine Kohler Riessman reports in her new book Divorce Talk that most of the women she interviewed – but only a few of the men – gave lack of communication as the reason for their divorces. Given the current divorce rate of nearly 50 percent, that amounts to millions of cases in the United States every year – a virtual epidemic of failed conversation.\n\nIn my own research, complaints from women about their husbands most often focused not on tangible inequities such as having given up the chance for a career to accompany a husband to his, or doing far more than their share of daily life-support work like cleaning, cooking and social arrangements. Instead, they focused on communication: “He doesn’t listen to me.” “He doesn’t talk to me.” I found, as Hacker observed years before, that most wives want their husbands to be, first and foremost, conversational partners, but few husbands share this expectation of their wives.\n\nIn short, the image that best represents the current crisis is the stereotypical cartoon scene of a man sitting at the breakfast table with a newspaper held up in front of his face, while a woman glares at the back of it, wanting to talk.",
     "questions": [
       {
         "num": 26,
@@ -4903,7 +4903,7 @@ const READINGS = [
     "year": 2010,
     "type": "英语二",
     "textNum": 3,
-    "content": "Over the past decade, many companies had perfected the art of creating automatic behaviors – habits – among consumers. These habits have helped companies earn billions of dollars when customers eat snacks or wipe counters almost without thinking, often in response to a carefully designed set of daily cues.\n\n“There are fundamental public health problems, like dirty hands instead of a soap habit, that remain killers only because we can’t figure out how to change people’s habits,” said Dr. Curtis, the director of the Hygiene Center at the London School of Hygiene & Tropical Medicine. “We wanted to learn from private industry how to create new behaviors that happen automatically.”\n\nThe companies that Dr. Curtis turned to – Procter & Gamble, Colgate- Palmolive and Unilever – had invested hundreds of millions of dollars finding the subtle cues in consumers’ lives that corporations could use to introduce new routines.\n\nIf you look hard enough, you’ll find that many of the products we use every day – chewing gums, skin moisturizers, disinfecting wipes, air fresheners, water purifiers, health snacks, teeth whiteners, fabric softeners, vitamins – are results of manufactured habits. A century ago, few people regularly brushed their teeth multiple times a day. Today, because of shrewd advertising and public health campaigns, many Americans habitually give their pearly whites a cavity-preventing scrub twice a day, often with Colgate, Crest or one of the other brands.\n\nA few decades ago, many people didn't’t drink water outside of a meal. Then beverage companies started bottling the production of far-off springs, and now office workers unthinkingly sip bottled water all day long. Chewing gum, once bought primarily by adolescent boys, is now featured in commercials as a breath freshener and teeth cleanser for use after a meal. Skin moisturizers are advertised as part of morning beauty rituals, slipped in between hair brushing and putting on makeup.\n\n“Our products succeed when they become part of daily or weekly patterns,” said Carol Berning, a consumer psychologist who recently retired from Procter & Gamble, the company that sold $76 billion of Tide, Crest and other products last year. “Creating positive habits is a huge part of improving our consumers’ lives, and it’s essential to making new products commercially viable.”\n\nThrough experiments and observation, social scientists like Dr. Berning have learned that there is power in tying certain behaviors to habitual cues through ruthless advertising. As this new science of habit has emerged, controversies have erupted when the tactics have been used to sell questionable beauty creams or unhealthy foods.",
+    "content": "Over the past decade, many companies had perfected the art of creating automatic behaviors – habits – among consumers. These habits have helped companies earn billions of dollars when customers eat snacks or wipe counters almost without thinking, often in response to a carefully designed set of daily cues.\n\n“There are fundamental public health problems, like dirty hands instead of a soap habit, that remain killers only because we can’t figure out how to change people’s habits,” said Dr. Curtis, the director of the Hygiene Center at the London School of Hygiene & Tropical Medicine. “We wanted to learn from private industry how to create new behaviors that happen automatically.”\n\nThe companies that Dr. Curtis turned to – Procter & Gamble, Colgate-Palmolive and Unilever – had invested hundreds of millions of dollars finding the subtle cues in consumers’ lives that corporations could use to introduce new routines.\n\nIf you look hard enough, you’ll find that many of the products we use every day – chewing gums, skin moisturizers, disinfecting wipes, air fresheners, water purifiers, health snacks, teeth whiteners, fabric softeners, vitamins – are results of manufactured habits. A century ago, few people regularly brushed their teeth multiple times a day. Today, because of shrewd advertising and public health campaigns, many Americans habitually give their pearly whites a cavity-preventing scrub twice a day, often with Colgate, Crest or one of the other brands.\n\nA few decades ago, many people didn’t drink water outside of a meal. Then beverage companies started bottling the production of far-off springs, and now office workers unthinkingly sip bottled water all day long. Chewing gum, once bought primarily by adolescent boys, is now featured in commercials as a breath freshener and teeth cleanser for use after a meal. Skin moisturizers are advertised as part of morning beauty rituals, slipped in between hair brushing and putting on makeup.\n\n“Our products succeed when they become part of daily or weekly patterns,” said Carol Berning, a consumer psychologist who recently retired from Procter & Gamble, the company that sold $76 billion of Tide, Crest and other products last year. “Creating positive habits is a huge part of improving our consumers’ lives, and it’s essential to making new products commercially viable.”\n\nThrough experiments and observation, social scientists like Dr. Berning have learned that there is power in tying certain behaviors to habitual cues through ruthless advertising. As this new science of habit has emerged, controversies have erupted when the tactics have been used to sell questionable beauty creams or unhealthy foods.",
     "questions": [
       {
         "num": 31,
@@ -5253,7 +5253,7 @@ const READINGS = [
     "year": 2011,
     "type": "英语二",
     "textNum": 4,
-    "content": "Will the European Union make it? The question would have sounded strange not long ago. Now even the project’s greatest cheerleaders talk of a continent facing a “Bermuda triangle” of debt, population decline and lower growth.\n\nAs well as those chronic problems, the EU faces an acute crisis in its economic core, the 16 countries that use the single currency. Markets have lost faith that the euro zone’s economies, weaker or stronger, will one day converge thanks to the discipline of sharing a single currency, which denies uncompetitive members the quick fix of devaluation.\n\nYet the debate about how to save Europe’s single currency from disintegration is stuck. It is stuck because the euro zone’s dominant powers, France and Germany, agree on the need for greater harmonisation within the euro zone, but disagree about what to harmonise.\n\nGermany thinks the euro must be saved by stricter rules on borrowing, spending and competitiveness, backed by quasi-automatic sanctions for governments that do not obey. These might include threats to freeze EU funds for poorer regions and EU mega-projects, and even the suspension of a country’s voting rights in EU ministerial councils. It insists that economic co-ordination should involve all 27 members of the EU club, among whom there is a small majority for free-market liberalism and economic rigour; in the inner core alone, Germany fears, a small majority favour French interference.\n\nA “southern” camp headed by France wants something different: “European economic government” within an inner core of euro-zone members. Translated, that means politicians intervening in monetary policy and a system of redistribution from richer to poorer members, via cheaper borrowing for governments through common Eurobonds or complete fiscal transfers. Finally, figures close to the Franch government have murmured, euro-zone members should agree to some fiscal and social harmonisation: e.g., curbing competition in corporate-tax rates or labour costs.\n\nIt is too soon to write off the EU. It remains the world’s largest trading block. At its best, the European project is remarkably liberal: built around a single market of 27 rich and poor countries, its internal borders are far more open to goods, capital and labour than any comparable trading area. It is an ambitious attempt to blunt the sharpest edges of globalisation, and make capitalism benign.",
+    "content": "Will the European Union make it? The question would have sounded strange not long ago. Now even the project’s greatest cheerleaders talk of a continent facing a “Bermuda triangle” of debt, population decline and lower growth.\n\nAs well as those chronic problems, the EU faces an acute crisis in its economic core, the 16 countries that use the single currency. Markets have lost faith that the euro zone’s economies, weaker or stronger, will one day converge thanks to the discipline of sharing a single currency, which denies uncompetitive members the quick fix of devaluation.\n\nYet the debate about how to save Europe’s single currency from disintegration is stuck. It is stuck because the euro zone’s dominant powers, France and Germany, agree on the need for greater harmonisation within the euro zone, but disagree about what to harmonise.\n\nGermany thinks the euro must be saved by stricter rules on borrowing, spending and competitiveness, backed by quasi-automatic sanctions for governments that do not obey. These might include threats to freeze EU funds for poorer regions and EU mega-projects, and even the suspension of a country’s voting rights in EU ministerial councils. It insists that economic co-ordination should involve all 27 members of the EU club, among whom there is a small majority for free-market liberalism and economic rigour; in the inner core alone, Germany fears, a small majority favour French interference.\n\nA “southern” camp headed by France wants something different: “European economic government” within an inner core of euro-zone members. Translated, that means politicians intervening in monetary policy and a system of redistribution from richer to poorer members, via cheaper borrowing for governments through common Eurobonds or complete fiscal transfers. Finally, figures close to the French government have murmured, euro-zone members should agree to some fiscal and social harmonisation: e.g., curbing competition in corporate-tax rates or labour costs.\n\nIt is too soon to write off the EU. It remains the world’s largest trading block. At its best, the European project is remarkably liberal: built around a single market of 27 rich and poor countries, its internal borders are far more open to goods, capital and labour than any comparable trading area. It is an ambitious attempt to blunt the sharpest edges of globalisation, and make capitalism benign.",
     "questions": [
       {
         "num": 36,
@@ -5351,16 +5351,16 @@ const READINGS = [
         "num": 23,
         "stem": "According to Paragraph 3, one problem with the policy is that it may.",
         "options": [
-          "A. result in students'indifference to their report cards",
+          "A. result in students' indifference to their report cards",
           "B. undermine the authority of state tests",
-          "C. restrict teachers'power in education",
+          "C. restrict teachers' power in education",
           "D. discourage students from doing homework"
         ],
         "answer": "D"
       },
       {
         "num": 24,
-        "stem": "As mentioned in Paragraph 4, a key question unanswered about homework 1s",
+        "stem": "As mentioned in Paragraph 4, a key question unanswered about homework is whether____.",
         "options": [
           "A. it should be eliminated",
           "B. it counts much in schooling",
@@ -5399,10 +5399,10 @@ const READINGS = [
         "num": 26,
         "stem": "By saying \"it is…the rainbow\" (Line 3, Para. 1), the author means pink.",
         "options": [
-          "A. cannot explain girls'lack ofimagination",
-          "B. should not be associated with girls'innocence",
+          "A. cannot explain girls' lack of imagination",
+          "B. should not be associated with girls' innocence",
           "C. should not be the sole representation of girlhood",
-          "D. cannot influence girls'lives and interests"
+          "D. cannot influence girls' lives and interests"
         ],
         "answer": "C"
       },
@@ -5410,7 +5410,7 @@ const READINGS = [
         "num": 27,
         "stem": "According to Paragraph 2, which of the following is true of colours?",
         "options": [
-          "A. Colours are encoded in girls'DNA.",
+          "A. Colours are encoded in girls' DNA.",
           "B. Blue used to be regarded as the colour for girls.",
           "C. White is preferred by babies.",
           "D. Pink used to be a neutral colour in symbolising genders."
@@ -5419,7 +5419,7 @@ const READINGS = [
       },
       {
         "num": 28,
-        "stem": "The author suggests that our perception of children's psychological development",
+        "stem": "The author suggests that our perception of children's psychological development was much influenced by ____.",
         "options": [
           "A. the observation of children's nature",
           "B. the marketing of products for children",
@@ -5434,14 +5434,14 @@ const READINGS = [
         "options": [
           "A. classify consumers into smaller groups",
           "B. attach equal importance to different genders",
-          "C. focus on infant wear and older kids'clothes",
-          "D. create some common shoppers'terms"
+          "C. focus on infant wear and older kids' clothes",
+          "D. create some common shoppers' terms"
         ],
         "answer": "A"
       },
       {
         "num": 30,
-        "stem": "It can be concluded that girls'attraction to pink seems to be",
+        "stem": "It can be concluded that girls' attraction to pink seems to be ___.",
         "options": [
           "A. fully understood by clothing manufacturers",
           "B. clearly explained by their inborn tendency",
@@ -5743,7 +5743,7 @@ const READINGS = [
     "year": 2013,
     "type": "英语二",
     "textNum": 3,
-    "content": "Scientists have found that although we are prone to snap overreactions, if we take a moment and think about how we are likely to react, we can reduce or even eliminate the negative effects of our quick, hard-wired responses.\n\nSnap decisions can be important defense mechanisms; if we are judging whether someone is dangerous, our brains and bodies are hard-wired to react very quickly, within milliseconds. But we need more time to assess other factors. To accurately tell whether someone is sociable, studies show, we need at least a minute, preferably five. It takes a while to judge complex aspects of personality, like neuroticism or open -mindedness.\n\nBut snap decisions in reaction to rapid stimuli aren't’t exclusive to the interpersonal realm. Psychologists at the University of Toronto found that viewing a fast-food logo for just a few milliseconds primes us to read 20 percent faster, even though reading has little to do with eating. We unconsciously associate fast food with speed and impatience and carry those impulses into whatever else we’re doing, Subjects exposed to fast-food flashes also tend to think a musical piece lasts too long.\n\nYet we can reverse such influences. If we know we will overreact to consumer products or housing options when we see a happy face (one reason good sales representatives and real estate agents are always smiling), we can take a moment before buying. If we know female job screeners are more likely to reject attractive female applicants, we can help screeners understand their biases – or hire outside screeners.\n\nJohn Gottman, the marriage expert, explains that we quickly “thin slice” information reliably only after we ground such snap reactions in “thick sliced” long-term study. When Dr. Gottman really wants to assess whether a couple will stay together, he invites them to his island retreat for a much longer evaluation: two days, not two seconds.\n\nOur ability to mute our hard-wired reactions by pausing is what differentiates us from animals: dogs can think about the future only intermittently or for a few minutes. But historically we have spent about 12 percent of our days contemplating the longer term. Although technology might change the way we react, it hasn't’t changed our nature. We still have the imaginative capacity to rise above temptation and reverse the high-speed trend.",
+    "content": "Scientists have found that although we are prone to snap overreactions, if we take a moment and think about how we are likely to react, we can reduce or even eliminate the negative effects of our quick, hard-wired responses.\n\nSnap decisions can be important defense mechanisms; if we are judging whether someone is dangerous, our brains and bodies are hard-wired to react very quickly, within milliseconds. But we need more time to assess other factors. To accurately tell whether someone is sociable, studies show, we need at least a minute, preferably five. It takes a while to judge complex aspects of personality, like neuroticism or open-mindedness.\n\nBut snap decisions in reaction to rapid stimuli aren’t exclusive to the interpersonal realm. Psychologists at the University of Toronto found that viewing a fast-food logo for just a few milliseconds primes us to read 20 percent faster, even though reading has little to do with eating. We unconsciously associate fast food with speed and impatience and carry those impulses into whatever else we’re doing, Subjects exposed to fast-food flashes also tend to think a musical piece lasts too long.\n\nYet we can reverse such influences. If we know we will overreact to consumer products or housing options when we see a happy face (one reason good sales representatives and real estate agents are always smiling), we can take a moment before buying. If we know female job screeners are more likely to reject attractive female applicants, we can help screeners understand their biases – or hire outside screeners.\n\nJohn Gottman, the marriage expert, explains that we quickly “thin slice” information reliably only after we ground such snap reactions in “thick sliced” long-term study. When Dr. Gottman really wants to assess whether a couple will stay together, he invites them to his island retreat for a much longer evaluation: two days, not two seconds.\n\nOur ability to mute our hard-wired reactions by pausing is what differentiates us from animals: dogs can think about the future only intermittently or for a few minutes. But historically we have spent about 12 percent of our days contemplating the longer term. Although technology might change the way we react, it hasn’t changed our nature. We still have the imaginative capacity to rise above temptation and reverse the high-speed trend.",
     "questions": [
       {
         "num": 31,
@@ -6163,7 +6163,7 @@ const READINGS = [
     "year": 2015,
     "type": "英语二",
     "textNum": 1,
-    "content": "A new study suggests that contrary to most surveys, people are actually more stressed at home than at work. Researchers measured people’s cortisol, which is a stress marker, while they were at work and while they were at home and found it higher at what is supposed to be a place of refuge.\n\n“Further contradicting conventional wisdom, we found that women as well as men have lower levels of stress at work than at home,” writes one of the researchers, Sarah Damaske. In fact women even say they feel better at work, she notes. “It is men, not women, who report being happier at home than at work.” Another surprise is that the findings hold true for both those with children and without, but more so for nonparents. This is why people who work outside the home have better health.\n\nWhat the study doesn't’t measure is whether people are still doing work when they’re at home, whether it is household work or work brought home from the office. For many men, the end of the workday is a time to kick back. For women who stay home, they never get to leave the office. And for women who work outside the home, they often are playing catch-up-with-household tasks. With the blurring of roles, and the fact that the home front lags well behind the workplace in making adjustments for working women, it’s not surprising that women are more stressed at home.\n\nBut it’s not just a gender thing. At work, people pretty much know what they’re supposed to be doing: working, making money, doing the tasks they have to do in order to draw an income. The bargain is very pure: Employee puts in hours of physical or mental labor and employee draws out life-sustaining moola.\n\nOn the home front, however, people have no such clarity. Rare is the household in which the division of labor is so clinically and methodically laid out. There are a lot of tasks to be done, there are inadequate rewards for most of them. Your home colleagues – your family – have no clear rewards for their labor; they need to be talked into it, or if they’re teenagers, threatened with complete removal of all electronic devices. Plus, they’re your family. You cannot fire your family. You never really get to go home from home.\n\nSo it’s not surprising that people are more stressed at home. Not only are the tasks apparently infinite, the co-workers are much harder to motivate.",
+    "content": "A new study suggests that contrary to most surveys, people are actually more stressed at home than at work. Researchers measured people’s cortisol, which is a stress marker, while they were at work and while they were at home and found it higher at what is supposed to be a place of refuge.\n\n“Further contradicting conventional wisdom, we found that women as well as men have lower levels of stress at work than at home,” writes one of the researchers, Sarah Damaske. In fact women even say they feel better at work, she notes. “It is men, not women, who report being happier at home than at work.” Another surprise is that the findings hold true for both those with children and without, but more so for nonparents. This is why people who work outside the home have better health.\n\nWhat the study doesn’t measure is whether people are still doing work when they’re at home, whether it is household work or work brought home from the office. For many men, the end of the workday is a time to kick back. For women who stay home, they never get to leave the office. And for women who work outside the home, they often are playing catch-up-with-household tasks. With the blurring of roles, and the fact that the home front lags well behind the workplace in making adjustments for working women, it’s not surprising that women are more stressed at home.\n\nBut it’s not just a gender thing. At work, people pretty much know what they’re supposed to be doing: working, making money, doing the tasks they have to do in order to draw an income. The bargain is very pure: Employee puts in hours of physical or mental labor and employee draws out life-sustaining moola.\n\nOn the home front, however, people have no such clarity. Rare is the household in which the division of labor is so clinically and methodically laid out. There are a lot of tasks to be done, there are inadequate rewards for most of them. Your home colleagues – your family – have no clear rewards for their labor; they need to be talked into it, or if they’re teenagers, threatened with complete removal of all electronic devices. Plus, they’re your family. You cannot fire your family. You never really get to go home from home.\n\nSo it’s not surprising that people are more stressed at home. Not only are the tasks apparently infinite, the co-workers are much harder to motivate.",
     "questions": [
       {
         "num": 21,
@@ -6221,7 +6221,7 @@ const READINGS = [
         "answer": "D"
       }
     ],
-        "answers": [
+    "answers": [
       "A",
       "B",
       "B",
@@ -6291,7 +6291,7 @@ const READINGS = [
         "answer": "D"
       }
     ],
-        "answers": [
+    "answers": [
       "C",
       "C",
       "C",
@@ -6303,7 +6303,7 @@ const READINGS = [
     "year": 2015,
     "type": "英语二",
     "textNum": 3,
-    "content": "Even in traditional offices, “the lingua franca of corporate America has gotten much more emotional and much more right-brained than it was 20 years ago,” said Harvard Business School professor Nancy Koehn. She started spinning off examples. “If you and I parachuted back to Fortune 500 companies in 1990, we would see much less frequent use of terms like journey, mission, passion. There were goals, there were strategies, there were objectives, but we didn't’t talk about energy; we didn't’t talk about passion.”\n\nKoehn pointed out that this new era of corporate vocabulary is very “team”-oriented – and not by coincidence. “Let’s not forget sports – in male-dominated corporate America, it’s still a big deal. It’s not explicitly conscious; it’s the idea that I’m a coach, and you’re my team, and we’re in this together. There are lots and lots of CEOs in very different companies, but most think of themselves as coaches and this is their team and they want to win. ”\n\nThese terms are also intended to infuse work with meaning – and, as Rakesh Khurana, another professor, points out, increase allegiance to the firm. “You have the importation of terminology that historically used to be associated with non-profit organizations and religious organizations: terms like vision, values, passion, and purpose,” said Khurana.\n\nThis new focus on personal fulfillment can help keep employees motivated amid increasingly loud debates over work-life balance. The “mommy wars” of the 1990s are still going on today, prompting arguments about why women still can’t have it all and books like Sheryl Sandberg’s Lean In, whose title has become a buzzword in its own right. Terms like unplug, offline, life-hack, bandwidth, and capacity are all about setting boundaries between the office and the home. But if your work is your “passion,” you’ll be more likely to devote yourself to it, even if that means going home for dinner and then working long after the kids are in bed.\n\nBut this seems to be the irony of office speak: Everyone makes fun of it, but managers love it, companies depend on it, and regular people willingly absorb it. As a linguist once said, “You can get people to think it’s nonsense at the same time that you buy into it.” In a workplace that’s fundamentally indifferent to your life and its meaning, office speak can help you figure out how you relate to your work – and how your work defines who you are.",
+    "content": "Even in traditional offices, “the lingua franca of corporate America has gotten much more emotional and much more right-brained than it was 20 years ago,” said Harvard Business School professor Nancy Koehn. She started spinning off examples. “If you and I parachuted back to Fortune 500 companies in 1990, we would see much less frequent use of terms like journey, mission, passion. There were goals, there were strategies, there were objectives, but we didn’t talk about energy; we didn’t talk about passion.”\n\nKoehn pointed out that this new era of corporate vocabulary is very “team”-oriented – and not by coincidence. “Let’s not forget sports – in male-dominated corporate America, it’s still a big deal. It’s not explicitly conscious; it’s the idea that I’m a coach, and you’re my team, and we’re in this together. There are lots and lots of CEOs in very different companies, but most think of themselves as coaches and this is their team and they want to win. ”\n\nThese terms are also intended to infuse work with meaning – and, as Rakesh Khurana, another professor, points out, increase allegiance to the firm. “You have the importation of terminology that historically used to be associated with non-profit organizations and religious organizations: terms like vision, values, passion, and purpose,” said Khurana.\n\nThis new focus on personal fulfillment can help keep employees motivated amid increasingly loud debates over work-life balance. The “mommy wars” of the 1990s are still going on today, prompting arguments about why women still can’t have it all and books like Sheryl Sandberg’s Lean In, whose title has become a buzzword in its own right. Terms like unplug, offline, life-hack, bandwidth, and capacity are all about setting boundaries between the office and the home. But if your work is your “passion,” you’ll be more likely to devote yourself to it, even if that means going home for dinner and then working long after the kids are in bed.\n\nBut this seems to be the irony of office speak: Everyone makes fun of it, but managers love it, companies depend on it, and regular people willingly absorb it. As a linguist once said, “You can get people to think it’s nonsense at the same time that you buy into it.” In a workplace that’s fundamentally indifferent to your life and its meaning, office speak can help you figure out how you relate to your work – and how your work defines who you are.",
     "questions": [
       {
         "num": 31,
@@ -6361,7 +6361,7 @@ const READINGS = [
         "answer": "B"
       }
     ],
-        "answers": [
+    "answers": [
       "D",
       "A",
       "D",
@@ -6431,7 +6431,7 @@ const READINGS = [
         "answer": "A"
       }
     ],
-        "answers": [
+    "answers": [
       "B",
       "C",
       "A",
@@ -6443,7 +6443,7 @@ const READINGS = [
     "year": 2016,
     "type": "英语二",
     "textNum": 1,
-    "content": "It’s true that high-school coding classes aren't’t essential for learning computer science in college. Students without experience can catch up after a few introductory courses, said Tom Cortina, the assistant dean at Carnegie Mellon’s School of Computer Science.\n\nHowever, Cortina said, early exposure is beneficial. When younger kids learn computer science, they learn that it’s not just a confusing, endless string of letters and numbers – but a tool to build apps, or create artwork, or test hypotheses. It’s not as hard for them to transform their thought processes as it is for older students. Breaking down problems into bite-sized chunks and using code to solve them becomes normal. Giving more children this training could increase the number of people interested in the field and help fill the jobs gap, Cortina said.\n\nStudents also benefit from learning something about coding before they get to college, where introductory computer-science classes are packed to the brim, which can drive the less-experienced or -determined students away.\n\nThe Flatiron School, where people pay to learn programming, started as one of the many coding bootcamps that’s become popular for adults looking for a career change. The high-schoolers get the same curriculum, but “we try to gear lessons toward things they’re interested in,” said Victoria Friedman, an instructor. For instance, one of the apps the students are developing suggests movies based on your mood.\n\nThe students in the Flatiron class probably won’t drop out of high school and build the next Facebook. Programming languages have a quick turnover, so the “Ruby on Rails” language they learned may not even be relevant by the time they enter the job market. But the skills they learn – how to think logically through a problem and organize the results – apply to any coding language, said Deborah Seehorn, an education consultant for the state of North Carolina.\n\nIndeed, the Flatiron students might not go into IT at all. But creating a future army of coders is not the sole purpose of the classes. These kids are going to be surrounded by computers – in their pockets, in their offices, in their homes – for the rest of their lives. The younger they learn how computers think, how to coax the machine into producing what they want – the earlier they learn that they have the power to do that – the better.",
+    "content": "It’s true that high-school coding classes aren’t essential for learning computer science in college. Students without experience can catch up after a few introductory courses, said Tom Cortina, the assistant dean at Carnegie Mellon’s School of Computer Science.\n\nHowever, Cortina said, early exposure is beneficial. When younger kids learn computer science, they learn that it’s not just a confusing, endless string of letters and numbers – but a tool to build apps, or create artwork, or test hypotheses. It’s not as hard for them to transform their thought processes as it is for older students. Breaking down problems into bite-sized chunks and using code to solve them becomes normal. Giving more children this training could increase the number of people interested in the field and help fill the jobs gap, Cortina said.\n\nStudents also benefit from learning something about coding before they get to college, where introductory computer-science classes are packed to the brim, which can drive the less-experienced or -determined students away.\n\nThe Flatiron School, where people pay to learn programming, started as one of the many coding bootcamps that’s become popular for adults looking for a career change. The high-schoolers get the same curriculum, but “we try to gear lessons toward things they’re interested in,” said Victoria Friedman, an instructor. For instance, one of the apps the students are developing suggests movies based on your mood.\n\nThe students in the Flatiron class probably won’t drop out of high school and build the next Facebook. Programming languages have a quick turnover, so the “Ruby on Rails” language they learned may not even be relevant by the time they enter the job market. But the skills they learn – how to think logically through a problem and organize the results – apply to any coding language, said Deborah Seehorn, an education consultant for the state of North Carolina.\n\nIndeed, the Flatiron students might not go into IT at all. But creating a future army of coders is not the sole purpose of the classes. These kids are going to be surrounded by computers – in their pockets, in their offices, in their homes – for the rest of their lives. The younger they learn how computers think, how to coax the machine into producing what they want – the earlier they learn that they have the power to do that – the better.",
     "questions": [
       {
         "num": 21,
@@ -6501,7 +6501,7 @@ const READINGS = [
         "answer": "A"
       }
     ],
-        "answers": [
+    "answers": [
       "B",
       "B",
       "A",
@@ -6513,7 +6513,7 @@ const READINGS = [
     "year": 2016,
     "type": "英语二",
     "textNum": 2,
-    "content": "Biologists estimate that as many as 2 million lesser prairie chickens – a kind of bird living on stretching grasslands – once lent red to the often grey landscape of the midwestern and southwestern United States. But just some 22,000 birds remain today, occupying about 16% of the species’ historic range.\n\nThe crash was a major reason the U.S. Fish and Wildlife Service (USFWS) decided to formally list the bird as threatened. “The lesser prairie chicken is in a desperate situation,” said USFWS Director Daniel Ashe. Some environmentalists, however, were disappointed. They had pushed the agency to designate the bird as “endangered,” a status that gives federal officials greater regulatory power to crack down on threats. But Ashe and others argued that the “threatened” tag gave the federal government flexibility to try out new, potentially less confrontational conservation approaches. In particular, they called for forging closer collaborations with western state governments, which are often uneasy with federal action, and with the private landowners who control an estimated 95% of the prairie chicken’s habitat.\n\nUnder the plan, for example, the agency said it would not prosecute landowners or businesses that unintentionally kill, harm, or disturb the bird, as long as they had signed a range-wide management plan to restore prairie chicken habitat. Negotiated by USFWS and the states, the plan requires individuals and businesses that damage habitat as part of their operations to pay into a fund to replace every acre destroyed with 2 new acres of suitable habitat. The fund will also be used to compensate landowners who set aside habitat. USFWS also set an interim goal of restoring prairie chicken populations to an annual average of 67,000 birds over the next 10 years. And it gives the Western Association of Fish and Wildlife Agencies (WAFWA), a coalition of state agencies, the job of monitoring progress. Overall, the idea is to let “states remain in the driver’s seat for managing the species,” Ashe said.\n\nNot everyone buys the win-win rhetoric. Some Congress members are trying to block the plan, and at least a dozen industry groups, four states, and three environmental groups are challenging it in federal court. Not surprisingly, industry groups and states generally argue it goes too far; environmentalists say it doesn't’t go far enough. “The federal government is giving responsibility for managing the bird to the same industries that are pushing it to extinction,” says biologist Jay Lininger.",
+    "content": "Biologists estimate that as many as 2 million lesser prairie chickens – a kind of bird living on stretching grasslands – once lent red to the often grey landscape of the midwestern and southwestern United States. But just some 22,000 birds remain today, occupying about 16% of the species’ historic range.\n\nThe crash was a major reason the U.S. Fish and Wildlife Service (USFWS) decided to formally list the bird as threatened. “The lesser prairie chicken is in a desperate situation,” said USFWS Director Daniel Ashe. Some environmentalists, however, were disappointed. They had pushed the agency to designate the bird as “endangered,” a status that gives federal officials greater regulatory power to crack down on threats. But Ashe and others argued that the “threatened” tag gave the federal government flexibility to try out new, potentially less confrontational conservation approaches. In particular, they called for forging closer collaborations with western state governments, which are often uneasy with federal action, and with the private landowners who control an estimated 95% of the prairie chicken’s habitat.\n\nUnder the plan, for example, the agency said it would not prosecute landowners or businesses that unintentionally kill, harm, or disturb the bird, as long as they had signed a range-wide management plan to restore prairie chicken habitat. Negotiated by USFWS and the states, the plan requires individuals and businesses that damage habitat as part of their operations to pay into a fund to replace every acre destroyed with 2 new acres of suitable habitat. The fund will also be used to compensate landowners who set aside habitat. USFWS also set an interim goal of restoring prairie chicken populations to an annual average of 67,000 birds over the next 10 years. And it gives the Western Association of Fish and Wildlife Agencies (WAFWA), a coalition of state agencies, the job of monitoring progress. Overall, the idea is to let “states remain in the driver’s seat for managing the species,” Ashe said.\n\nNot everyone buys the win-win rhetoric. Some Congress members are trying to block the plan, and at least a dozen industry groups, four states, and three environmental groups are challenging it in federal court. Not surprisingly, industry groups and states generally argue it goes too far; environmentalists say it doesn’t go far enough. “The federal government is giving responsibility for managing the bird to the same industries that are pushing it to extinction,” says biologist Jay Lininger.",
     "questions": [
       {
         "num": 26,
@@ -6571,7 +6571,7 @@ const READINGS = [
         "answer": "C"
       }
     ],
-        "answers": [
+    "answers": [
       "A",
       "C",
       "A",
@@ -6583,7 +6583,7 @@ const READINGS = [
     "year": 2016,
     "type": "英语二",
     "textNum": 3,
-    "content": "That everyone’s too busy these days is a cliché. But one specific complaint is made especially mournfully: There’s never any time to read.\n\nWhat makes the problem thornier is that the usual time-management techniques don’t seem sufficient. The web’s full of articles offering tips on making time to read: “Give up TV” or “Carry a book with you at all times.” But in my experience, using such methods to free up the odd 30 minutes doesn't’t work. Sit down to read and the flywheel of work-related thoughts keeps spinning – or else you’re so exhausted that a challenging book’s the last thing you need. The modern mind, Tim Parks, a novelist and critic, writes, “is overwhelmingly inclined toward communication... It is not simply that one is interrupted; it is that one is actually inclined to interruption.” Deep reading requires not just time, but a special kind of time which can’t be obtained merely by becoming more efficient.\n\nIn fact, “becoming more efficient” is part of the problem. Thinking of time as a resource to be maximised means you approach it instrumentally, judging any given moment as well spent only in so far as it advances progress toward some goal. Immersive reading, by contrast, depends on being willing to risk inefficiency, goallessness, even time-wasting. Try to slot it in as a to-do list item and you’ll manage only goal-focused reading – useful, sometimes, but not the most fulfilling kind. “The future comes at us like empty bottles along an unstoppable and nearly infinite conveyor belt,” writes Gary Eberle in his book Sacred Time, and “we feel a pressure to fill these different-sized bottles (days, hours, minutes) as they pass, for if they get by without being filled, we will have wasted them.” No mind-set could be worse for losing yourself in a book.\n\nSo what does work? Perhaps surprisingly, scheduling regular times for reading. You’d think this might fuel the efficiency mind-set, but in fact, Eberle notes, such ritualistic behaviour helps us “step outside time’s flow” into “soul time.” You could limit distractions by reading only physical books, or on single-purpose e-readers. “Carry a book with you at all times” can actually work, too – providing you dip in often enough, so that reading becomes the default state from which you temporarily surface to take care of business, before dropping back down. On a really good day, it no longer feels as if you’re “making time to read,” but just reading, and making time for everything else.",
+    "content": "That everyone’s too busy these days is a cliché. But one specific complaint is made especially mournfully: There’s never any time to read.\n\nWhat makes the problem thornier is that the usual time-management techniques don’t seem sufficient. The web’s full of articles offering tips on making time to read: “Give up TV” or “Carry a book with you at all times.” But in my experience, using such methods to free up the odd 30 minutes doesn’t work. Sit down to read and the flywheel of work-related thoughts keeps spinning – or else you’re so exhausted that a challenging book’s the last thing you need. The modern mind, Tim Parks, a novelist and critic, writes, “is overwhelmingly inclined toward communication... It is not simply that one is interrupted; it is that one is actually inclined to interruption.” Deep reading requires not just time, but a special kind of time which can’t be obtained merely by becoming more efficient.\n\nIn fact, “becoming more efficient” is part of the problem. Thinking of time as a resource to be maximised means you approach it instrumentally, judging any given moment as well spent only in so far as it advances progress toward some goal. Immersive reading, by contrast, depends on being willing to risk inefficiency, goallessness, even time-wasting. Try to slot it in as a to-do list item and you’ll manage only goal-focused reading – useful, sometimes, but not the most fulfilling kind. “The future comes at us like empty bottles along an unstoppable and nearly infinite conveyor belt,” writes Gary Eberle in his book Sacred Time, and “we feel a pressure to fill these different-sized bottles (days, hours, minutes) as they pass, for if they get by without being filled, we will have wasted them.” No mind-set could be worse for losing yourself in a book.\n\nSo what does work? Perhaps surprisingly, scheduling regular times for reading. You’d think this might fuel the efficiency mind-set, but in fact, Eberle notes, such ritualistic behaviour helps us “step outside time’s flow” into “soul time.” You could limit distractions by reading only physical books, or on single-purpose e-readers. “Carry a book with you at all times” can actually work, too – providing you dip in often enough, so that reading becomes the default state from which you temporarily surface to take care of business, before dropping back down. On a really good day, it no longer feels as if you’re “making time to read,” but just reading, and making time for everything else.",
     "questions": [
       {
         "num": 31,
@@ -6641,7 +6641,7 @@ const READINGS = [
         "answer": "B"
       }
     ],
-        "answers": [
+    "answers": [
       "D",
       "B",
       "D",
@@ -6653,7 +6653,7 @@ const READINGS = [
     "year": 2016,
     "type": "英语二",
     "textNum": 4,
-    "content": "Against a backdrop of drastic changes in economy and population structure, younger Americans are drawing a new 21st-century road map to success, a latest poll has found.\n\nAcross generational lines, Americans continue to prize many of the same traditional milestones of a successful life, including getting married, having children, owning a home, and retiring in their sixties. But while young and old mostly agree on what constitutes the finish line of a fulfilling life, they offer strikingly different paths for reaching it.\n\nYoung people who are still getting started in life were more likely than older adults to prioritize personal fulfillment in their work, to believe they will advance their careers most by regularly changing jobs, to favor communities with more public services and a faster pace of life, to agree that couples should be financially secure before getting married or having children, and to maintain that children are best served by two parents working outside the home, the survey found.\n\nFrom career to community and family, these contrasts suggest that in the aftermath of the searing Great Recession, those just starting out in life are defining priorities and expectations that will increasingly spread through virtually all aspects of American life, from consumer preferences to housing patterns to politics.\n\nYoung and old converge on one key point: Overwhelming majorities of both groups said they believe it is harder for young people today to get started in life than it was for earlier generations. While younger people are somewhat more optimistic than their elders about the prospects for those starting out today, big majorities in both groups believe those “just getting started in life” face a tougher climb than earlier generations in reaching such signpost achievements as securing a good-paying job, starting a family, managing debt, and finding affordable housing.\n\nPete Schneider considers the climb tougher today. Schneider, a 27-year-old auto technician from the Chicago suburbs, says he struggled to find a job after graduating from college. Even now that he is working steadily, he said, “I can’t afford to pay my monthly mortgage payments on my own, so I have to rent rooms out to people to make that happen.” Looking back, he is struck that his parents could provide a comfortable life for their children even though neither had completed college when he was young. “I still grew up in an upper middle-class home with parents who didn't’t have college degrees,” Schneider said. “I don’t think people are capable of that anymore.”",
+    "content": "Against a backdrop of drastic changes in economy and population structure, younger Americans are drawing a new 21st-century road map to success, a latest poll has found.\n\nAcross generational lines, Americans continue to prize many of the same traditional milestones of a successful life, including getting married, having children, owning a home, and retiring in their sixties. But while young and old mostly agree on what constitutes the finish line of a fulfilling life, they offer strikingly different paths for reaching it.\n\nYoung people who are still getting started in life were more likely than older adults to prioritize personal fulfillment in their work, to believe they will advance their careers most by regularly changing jobs, to favor communities with more public services and a faster pace of life, to agree that couples should be financially secure before getting married or having children, and to maintain that children are best served by two parents working outside the home, the survey found.\n\nFrom career to community and family, these contrasts suggest that in the aftermath of the searing Great Recession, those just starting out in life are defining priorities and expectations that will increasingly spread through virtually all aspects of American life, from consumer preferences to housing patterns to politics.\n\nYoung and old converge on one key point: Overwhelming majorities of both groups said they believe it is harder for young people today to get started in life than it was for earlier generations. While younger people are somewhat more optimistic than their elders about the prospects for those starting out today, big majorities in both groups believe those “just getting started in life” face a tougher climb than earlier generations in reaching such signpost achievements as securing a good-paying job, starting a family, managing debt, and finding affordable housing.\n\nPete Schneider considers the climb tougher today. Schneider, a 27-year-old auto technician from the Chicago suburbs, says he struggled to find a job after graduating from college. Even now that he is working steadily, he said, “I can’t afford to pay my monthly mortgage payments on my own, so I have to rent rooms out to people to make that happen.” Looking back, he is struck that his parents could provide a comfortable life for their children even though neither had completed college when he was young. “I still grew up in an upper middle-class home with parents who didn’t have college degrees,” Schneider said. “I don’t think people are capable of that anymore.”",
     "questions": [
       {
         "num": 36,
@@ -6711,7 +6711,7 @@ const READINGS = [
         "answer": "C"
       }
     ],
-        "answers": [
+    "answers": [
       "B",
       "C",
       "D",
@@ -6781,7 +6781,7 @@ const READINGS = [
         "answer": "B"
       }
     ],
-        "answers": [
+    "answers": [
       "A",
       "B",
       "C",
@@ -6793,7 +6793,7 @@ const READINGS = [
     "year": 2017,
     "type": "英语二",
     "textNum": 2,
-    "content": "With so much focus on children’s use of screens, it’s easy for parents to forget about their own screen use. “Tech is designed to really suck you in,” says Jenny Radesky in her study of digital play, “and digital products are there to promote maximal engagement. It makes it hard to disengage, and leads to a lot of bleed-over into the family routine.”\n\nRadesky has studied the use of mobile phones and tablets at mealtimes by giving mother-child pairs a food-testing exercise. She found that mothers who used devices during the exercise started 20 per cent fewer verbal and 39 per cent fewer nonverbal interactions with their children. During a separate observation, she saw that phones became a source of tension in the family. Parents would be looking at their emails while the children would be making excited bids for their attention.\n\nInfants are wired to look at parents’ faces to try to understand their world, and if those faces are blank and unresponsive – as they often are when absorbed in a device – it can be extremely disconcerting for the children. Radesky cites the “still face experiment” devised by developmental psychologist Ed Tronick in the 1970s. In it, a mother is asked to interact with her child in a normal way before putting on a blank expression and not giving them any visual social feedback: The child becomes increasingly distressed as she tries to capture her mother’s attention. “Parents don’t have to be exquisitely present at all times, but there needs to be a balance and parents need to be responsive and sensitive to a child’s verbal or nonverbal expressions of an emotional need,” says Radesky.\n\nOn the other hand, Tronick himself is concerned that the worries about kids’ use of screens are born out of an “oppressive ideology that demands that parents should always be interacting” with their children: “It’s based on a somewhat fantasised, very white, very upper-middle-class ideology that says if you’re failing to expose your child to 30,000 words you are neglecting them.” Tronick believes that just because a child isn't’t learning from the screen doesn't’t mean there’s no value to it – particularly if it gives parents time to have a shower, do housework or simply have a break from their child. Parents, he says, can get a lot out of using their devices to speak to a friend or get some work out of the way. This can make them feel happier, which lets them be more available to their child the rest of the time.",
+    "content": "With so much focus on children’s use of screens, it’s easy for parents to forget about their own screen use. “Tech is designed to really suck you in,” says Jenny Radesky in her study of digital play, “and digital products are there to promote maximal engagement. It makes it hard to disengage, and leads to a lot of bleed-over into the family routine.”\n\nRadesky has studied the use of mobile phones and tablets at mealtimes by giving mother-child pairs a food-testing exercise. She found that mothers who used devices during the exercise started 20 per cent fewer verbal and 39 per cent fewer nonverbal interactions with their children. During a separate observation, she saw that phones became a source of tension in the family. Parents would be looking at their emails while the children would be making excited bids for their attention.\n\nInfants are wired to look at parents’ faces to try to understand their world, and if those faces are blank and unresponsive – as they often are when absorbed in a device – it can be extremely disconcerting for the children. Radesky cites the “still face experiment” devised by developmental psychologist Ed Tronick in the 1970s. In it, a mother is asked to interact with her child in a normal way before putting on a blank expression and not giving them any visual social feedback: The child becomes increasingly distressed as she tries to capture her mother’s attention. “Parents don’t have to be exquisitely present at all times, but there needs to be a balance and parents need to be responsive and sensitive to a child’s verbal or nonverbal expressions of an emotional need,” says Radesky.\n\nOn the other hand, Tronick himself is concerned that the worries about kids’ use of screens are born out of an “oppressive ideology that demands that parents should always be interacting” with their children: “It’s based on a somewhat fantasised, very white, very upper-middle-class ideology that says if you’re failing to expose your child to 30,000 words you are neglecting them.” Tronick believes that just because a child isn’t learning from the screen doesn’t mean there’s no value to it – particularly if it gives parents time to have a shower, do housework or simply have a break from their child. Parents, he says, can get a lot out of using their devices to speak to a friend or get some work out of the way. This can make them feel happier, which lets them be more available to their child the rest of the time.",
     "questions": [
       {
         "num": 26,
@@ -6851,7 +6851,7 @@ const READINGS = [
         "answer": "A"
       }
     ],
-        "answers": [
+    "answers": [
       "B",
       "D",
       "D",
@@ -6863,7 +6863,7 @@ const READINGS = [
     "year": 2017,
     "type": "英语二",
     "textNum": 3,
-    "content": "Today, widespread social pressure to immediately go to college in conjunction with increasingly high expectations in a fast-moving world often causes students to completely overlook the possibility of taking a gap year. After all, if everyone you know is going to college in the fall, it seems silly to stay back a year, doesn't’t it? And after going to school for 12 years, it doesn't’t feel natural to spend a year doing something that isn't’t academic.\n\nBut while this may be true, it’s not a good enough reason to condemn gap years. There’s always a constant fear of falling behind everyone else on the socially perpetuated “race to the finish line,” whether that be toward graduate school, medical school or a lucrative career. But despite common misconceptions, a gap year does not hinder the success of academic pursuits – in fact, it probably enhances it.\n\nStudies from the United States and Australia show that students who take a gap year are generally better prepared for and perform better in college than those who do not. Rather than pulling students back, a gap year pushes them ahead by preparing them for independence, new responsibilities and environmental changes – all things that first-year students often struggle with the most. Gap year experiences can lessen the blow when it comes to adjusting to college and being thrown into a brand new environment, making it easier to focus on academics and activities rather than acclimation blunders.\n\nIf you’re not convinced of the inherent value in taking a year off to explore interests, then consider its financial impact on future academic choices. According to the National Center for Education Statistics, nearly 80 percent of college students end up changing their majors at least once. This isn't’t surprising, considering the basic mandatory high school curriculum leaves students with a poor understanding of the vast academic possibilities that await them in college. Many students find themselves listing one major on their college applications, but switching to another after taking college classes. It’s not necessarily a bad thing, but depending on the school, it can be costly to make up credits after switching too late in the game. At Boston College, for example, you would have to complete an extra year were you to switch to the nursing school from another department. Taking a gap year to figure things out initially can help prevent stress and save money later on.",
+    "content": "Today, widespread social pressure to immediately go to college in conjunction with increasingly high expectations in a fast-moving world often causes students to completely overlook the possibility of taking a gap year. After all, if everyone you know is going to college in the fall, it seems silly to stay back a year, doesn’t it? And after going to school for 12 years, it doesn’t feel natural to spend a year doing something that isn’t academic.\n\nBut while this may be true, it’s not a good enough reason to condemn gap years. There’s always a constant fear of falling behind everyone else on the socially perpetuated “race to the finish line,” whether that be toward graduate school, medical school or a lucrative career. But despite common misconceptions, a gap year does not hinder the success of academic pursuits – in fact, it probably enhances it.\n\nStudies from the United States and Australia show that students who take a gap year are generally better prepared for and perform better in college than those who do not. Rather than pulling students back, a gap year pushes them ahead by preparing them for independence, new responsibilities and environmental changes – all things that first-year students often struggle with the most. Gap year experiences can lessen the blow when it comes to adjusting to college and being thrown into a brand new environment, making it easier to focus on academics and activities rather than acclimation blunders.\n\nIf you’re not convinced of the inherent value in taking a year off to explore interests, then consider its financial impact on future academic choices. According to the National Center for Education Statistics, nearly 80 percent of college students end up changing their majors at least once. This isn’t surprising, considering the basic mandatory high school curriculum leaves students with a poor understanding of the vast academic possibilities that await them in college. Many students find themselves listing one major on their college applications, but switching to another after taking college classes. It’s not necessarily a bad thing, but depending on the school, it can be costly to make up credits after switching too late in the game. At Boston College, for example, you would have to complete an extra year were you to switch to the nursing school from another department. Taking a gap year to figure things out initially can help prevent stress and save money later on.",
     "questions": [
       {
         "num": 31,
@@ -6921,7 +6921,7 @@ const READINGS = [
         "answer": "A"
       }
     ],
-        "answers": [
+    "answers": [
       "C",
       "D",
       "A",
@@ -6933,7 +6933,7 @@ const READINGS = [
     "year": 2017,
     "type": "英语二",
     "textNum": 4,
-    "content": "Though often viewed as a problem for western states, the growing frequency of wildfires is a national concern because of its impact on federal tax dollars, says Professor Max Moritz, a specialist in fire ecology and management.\n\nIn 2015, the US Forest Service for the first time spent more than half of its $5.5 billion annual budget fighting fires – nearly double the percentage it spent on such efforts 20 years ago. In effect, fewer federal funds today are going towards the agency’s other work – such as forest conservation, watershed and cultural resources management, and infrastructure upkeep – that affect the lives of all Americans.\n\nAnother nationwide concern is whether public funds from other agencies are going into construction in fire-prone districts. As Moritz puts it, how often are federal dollars building homes that are likely to be lost to a wildfire?\n\n“It’s already a huge problem from a public expenditure perspective for the whole country,” he says. “We need to take a magnifying glass to that. Like, ‘Wait a minute, is this OK?’ Do we want instead to redirect those funds to concentrate on lower-hazard parts of the landscape?”\n\nSuch a view would require a corresponding shift in the way US society today views fire, researchers say.\n\nFor one thing, conversations about wildfires need to be more inclusive. Over the past decade, the focus has been on climate change – how the warming of the Earth from greenhouse gases is leading to conditions that worsen fires.\n\nWhile climate is a key element, Moritz says, it shouldn't’t come at the expense of the rest of the equation.\n\n“The human systems and the landscapes we live on are linked, and the interactions go both ways,” he says. Failing to recognize that, he notes, leads to “an overly simplified view of what the solutions might be. Our perception of the problem and of what the solution is becomes very limited.”\n\nAt the same time, people continue to treat fire as an event that needs to be wholly controlled and unleashed only out of necessity, says Professor Balch at the University of Colorado. But acknowledging fire’s inevitable presence in human life is an attitude crucial to developing the laws, policies, and practices that make it as safe as possible, she says.\n\n“We’ve disconnected ourselves from living with fire,” Balch says. “It is really important to understand and try and tease out what is the human connection with fire today.”",
+    "content": "Though often viewed as a problem for western states, the growing frequency of wildfires is a national concern because of its impact on federal tax dollars, says Professor Max Moritz, a specialist in fire ecology and management.\n\nIn 2015, the US Forest Service for the first time spent more than half of its $5.5 billion annual budget fighting fires – nearly double the percentage it spent on such efforts 20 years ago. In effect, fewer federal funds today are going towards the agency’s other work – such as forest conservation, watershed and cultural resources management, and infrastructure upkeep – that affect the lives of all Americans.\n\nAnother nationwide concern is whether public funds from other agencies are going into construction in fire-prone districts. As Moritz puts it, how often are federal dollars building homes that are likely to be lost to a wildfire?\n\n“It’s already a huge problem from a public expenditure perspective for the whole country,” he says. “We need to take a magnifying glass to that. Like, ‘Wait a minute, is this OK?’ Do we want instead to redirect those funds to concentrate on lower-hazard parts of the landscape?”\n\nSuch a view would require a corresponding shift in the way US society today views fire, researchers say.\n\nFor one thing, conversations about wildfires need to be more inclusive. Over the past decade, the focus has been on climate change – how the warming of the Earth from greenhouse gases is leading to conditions that worsen fires.\n\nWhile climate is a key element, Moritz says, it shouldn’t come at the expense of the rest of the equation.\n\n“The human systems and the landscapes we live on are linked, and the interactions go both ways,” he says. Failing to recognize that, he notes, leads to “an overly simplified view of what the solutions might be. Our perception of the problem and of what the solution is becomes very limited.”\n\nAt the same time, people continue to treat fire as an event that needs to be wholly controlled and unleashed only out of necessity, says Professor Balch at the University of Colorado. But acknowledging fire’s inevitable presence in human life is an attitude crucial to developing the laws, policies, and practices that make it as safe as possible, she says.\n\n“We’ve disconnected ourselves from living with fire,” Balch says. “It is really important to understand and try and tease out what is the human connection with fire today.”",
     "questions": [
       {
         "num": 36,
@@ -6991,7 +6991,7 @@ const READINGS = [
         "answer": "B"
       }
     ],
-        "answers": [
+    "answers": [
       "B",
       "D",
       "C",
@@ -7003,7 +7003,7 @@ const READINGS = [
     "year": 2018,
     "type": "英语二",
     "textNum": 1,
-    "content": "It is curious that Stephen Koziatek feels almost as though he has to justify his efforts to give his students a better future.\n\nMr. Koziatek is part of something pioneering. He is a teacher at a New Hampshire high school where learning is not something of books and tests and mechanical memorization, but practical. When did it become accepted wisdom that students should be able to name the 13th president of the United States but be utterly overwhelmed by a broken bike chain?\n\nAs Koziatek knows, there is learning in just about everything. Nothing is necessarily gained by forcing students to learn geometry at a graffitied desk stuck with generations of discarded chewing gum. They can also learn geometry by assembling a bicycle.\n\nBut he’s also found a kind of insidious prejudice. Working with your hands is seen as almost a mark of inferiority. Schools in the family of vocational education “have that stereotype...that it’s for kids who can’t make it academically,” he says.\n\nOn one hand, that viewpoint is a logical product of America’s evolution. Manufacturing is not the economic engine that it once was. The job security that the US economy once offered to high school graduates has largely evaporated. More education is the new principle. We want more for our kids, and rightfully so.\n\nBut the headlong push into bachelor’s degrees for all – and the subtle devaluing of anything less – misses an important point: That’s not the only thing the American economy needs. Yes, a bachelor’s degree opens more doors. But even now, 54 percent of the jobs in the country are middle-skill jobs, such as construction and high-skill manufacturing. But only 44 percent of workers are adequately trained.\n\nIn other words, at a time when the working class has turned the country on its political head, frustrated that the opportunity that once defined America is vanishing, one obvious solution is staring us in the face. There is a gap in working-class jobs, but the workers who need those jobs most aren't’t equipped to do them. Koziatek’s Manchester School of Technology High School is trying to fill that gap.\n\nKoziatek’s school is a wake-up call. When education becomes one-size-fits-all, it risks overlooking a nation’s diversity of gifts.",
+    "content": "It is curious that Stephen Koziatek feels almost as though he has to justify his efforts to give his students a better future.\n\nMr. Koziatek is part of something pioneering. He is a teacher at a New Hampshire high school where learning is not something of books and tests and mechanical memorization, but practical. When did it become accepted wisdom that students should be able to name the 13th president of the United States but be utterly overwhelmed by a broken bike chain?\n\nAs Koziatek knows, there is learning in just about everything. Nothing is necessarily gained by forcing students to learn geometry at a graffitied desk stuck with generations of discarded chewing gum. They can also learn geometry by assembling a bicycle.\n\nBut he’s also found a kind of insidious prejudice. Working with your hands is seen as almost a mark of inferiority. Schools in the family of vocational education “have that stereotype...that it’s for kids who can’t make it academically,” he says.\n\nOn one hand, that viewpoint is a logical product of America’s evolution. Manufacturing is not the economic engine that it once was. The job security that the US economy once offered to high school graduates has largely evaporated. More education is the new principle. We want more for our kids, and rightfully so.\n\nBut the headlong push into bachelor’s degrees for all – and the subtle devaluing of anything less – misses an important point: That’s not the only thing the American economy needs. Yes, a bachelor’s degree opens more doors. But even now, 54 percent of the jobs in the country are middle-skill jobs, such as construction and high-skill manufacturing. But only 44 percent of workers are adequately trained.\n\nIn other words, at a time when the working class has turned the country on its political head, frustrated that the opportunity that once defined America is vanishing, one obvious solution is staring us in the face. There is a gap in working-class jobs, but the workers who need those jobs most aren't equipped to do them. Koziatek’s Manchester School of Technology High School is trying to fill that gap.\n\nKoziatek’s school is a wake-up call. When education becomes one-size-fits-all, it risks overlooking a nation’s diversity of gifts.",
     "questions": [
       {
         "num": 21,
@@ -7061,7 +7061,7 @@ const READINGS = [
         "answer": "A"
       }
     ],
-        "answers": [
+    "answers": [
       "A",
       "C",
       "B",
@@ -7073,7 +7073,7 @@ const READINGS = [
     "year": 2018,
     "type": "英语二",
     "textNum": 2,
-    "content": "While fossil fuels – coal, oil, gas – still generate roughly 85 percent of the world’s energy supply, it’s clearer than ever that the future belongs to renewable sources such as wind and solar. The move to renewables is picking up momentum around the world: They now account for more than half of new power sources going on line.\n\nSome growth stems from a commitment by governments and farsighted businesses to fund cleaner energy sources. But increasingly the story is about the plummeting prices of renewables, especially wind and solar. The cost of solar panels has dropped by 80 percent and the cost of wind turbines by close to one-third in the past eight years.\n\nIn many parts of the world renewable energy is already a principal energy source. In Scotland, for example, wind turbines provide enough electricity to power 95 percent of homes. While the rest of the world takes the lead, notably China and Europe, the United States is also seeing a remarkable shift. In March, for the first time, wind and solar power accounted for more than 10 percent of the power generated in the US, reported the US Energy Information Administration.\n\nPresident Trump has underlined fossil fuels – especially coal – as the path to economic growth. In a recent speech in Iowa, he dismissed wind power as an unreliable energy source. But that message did not play well with many in Iowa, where wind turbines dot the fields and provide 36 percent of the state’s electricity generation – and where tech giants like Microsoft are being attracted by the availability of clean energy to power their data centers.\n\nThe question “what happens when the wind doesn't’t blow or the sun doesn't’t shine?” has provided a quick put-down for skeptics. But a boost in the storage capacity of batteries is making their ability to keep power flowing around the clock more likely.\n\nThe advance is driven in part by vehicle manufacturers, who are placing big bets on battery-powered electric vehicles. Although electric cars are still a rarity on roads now, this massive investment could change the picture rapidly in coming years.\n\nWhile there’s a long way to go, the trend lines for renewables are spiking. The pace of change in energy sources appears to be speeding up – perhaps just in time to have a meaningful effect in slowing climate change. What Washington does – or doesn't’t do – to promote alternative energy may mean less and less at a time of a global shift in thought.",
+    "content": "While fossil fuels – coal, oil, gas – still generate roughly 85 percent of the world’s energy supply, it’s clearer than ever that the future belongs to renewable sources such as wind and solar. The move to renewables is picking up momentum around the world: They now account for more than half of new power sources going on line.\n\nSome growth stems from a commitment by governments and farsighted businesses to fund cleaner energy sources. But increasingly the story is about the plummeting prices of renewables, especially wind and solar. The cost of solar panels has dropped by 80 percent and the cost of wind turbines by close to one-third in the past eight years.\n\nIn many parts of the world renewable energy is already a principal energy source. In Scotland, for example, wind turbines provide enough electricity to power 95 percent of homes. While the rest of the world takes the lead, notably China and Europe, the United States is also seeing a remarkable shift. In March, for the first time, wind and solar power accounted for more than 10 percent of the power generated in the US, reported the US Energy Information Administration.\n\nPresident Trump has underlined fossil fuels – especially coal – as the path to economic growth. In a recent speech in Iowa, he dismissed wind power as an unreliable energy source. But that message did not play well with many in Iowa, where wind turbines dot the fields and provide 36 percent of the state’s electricity generation – and where tech giants like Microsoft are being attracted by the availability of clean energy to power their data centers.\n\nThe question “what happens when the wind doesn't blow or the sun doesn't shine?” has provided a quick put-down for skeptics. But a boost in the storage capacity of batteries is making their ability to keep power flowing around the clock more likely.\n\nThe advance is driven in part by vehicle manufacturers, who are placing big bets on battery-powered electric vehicles. Although electric cars are still a rarity on roads now, this massive investment could change the picture rapidly in coming years.\n\nWhile there’s a long way to go, the trend lines for renewables are spiking. The pace of change in energy sources appears to be speeding up – perhaps just in time to have a meaningful effect in slowing climate change. What Washington does – or doesn't do – to promote alternative energy may mean less and less at a time of a global shift in thought.",
     "questions": [
       {
         "num": 26,
@@ -7099,7 +7099,7 @@ const READINGS = [
       },
       {
         "num": 28,
-        "stem": "It can be learned that in Iowa,.",
+        "stem": "It can be learned that in Iowa.",
         "options": [
           "A. wind is a widely used energy source",
           "B. wind energy has replaced fossil fuels",
@@ -7110,7 +7110,7 @@ const READINGS = [
       },
       {
         "num": 29,
-        "stem": "Which of the following is true about clean energy according to Paragraphs 5&6？",
+        "stem": "Which of the following is true about clean energy according to Paragraphs 5&6?",
         "options": [
           "A. Its application has boosted battery storage.",
           "B. It is commonly used in car manufacturing.",
@@ -7131,7 +7131,7 @@ const READINGS = [
         "answer": "C"
       }
     ],
-        "answers": [
+    "answers": [
       "C",
       "A",
       "A",
@@ -7143,7 +7143,7 @@ const READINGS = [
     "year": 2018,
     "type": "英语二",
     "textNum": 3,
-    "content": "The power and ambition of the giants of the digital economy is astonishing- Amazon has just announced the purchase of the upmarket grocery chain Whole Foods for ＄ 13.5bn, but two years ago Facebook paid even more than that to acquire the WhatsApp messaging service, which doesn't’t have any physical product at all. What WhatsApp offered Facebook was an intricate and finely detailed web of its users’ friendships and social lives.\n\nFacebook promised the European commission then that it would not link phone numbers to Facebook identities, but it broke the promise almost as soon as the deal went through. Even without knowing what was in the messages, the knowledge of who sent them and to whom was enormously revealing and still could be. What political journalist, what party whip, would not want to know the makeup of the WhatsApp groups in which Theresa May’s enemies are currently plotting? It may be that the value of Whole Foods to Amazon is not so much the 460 shops it owns, but the records of which customers have purchased what.\n\nCompetition law appears to be the only way to address these imbalances of power. But it is clumsy. For one thing, it is very slow compared to the pace of change within the digital economy. By the time a problem has been addressed and remedied it may have vanished in the marketplace, to be replaced by new abuses of power. But there is a deeper conceptual problem, too. Competition law as presently interpreted deals with financial disadvantage to consumers and this is not obvious when the users of these services don’t pay for them. The users of their services are not their customers. That would be the people who buy advertising from them – and Facebook and Google, the two virtual giants, dominate digital advertising to the disadvantage of all other media and entertainment companies.\n\nThe product they’re selling is data, and we, the users, convert our lives to data for the benefit of the digital giants. Just as some ants farm the bugs called aphids for the honeydew they produce when they feed, so Google farms us for the data that our digital lives yield. Ants keep predatory insects away from where their aphids feed; Gmail keeps the spammers out of our inboxes. It doesn't’t feel like a human or democratic relationship, even if both sides benefit.",
+    "content": "The power and ambition of the giants of the digital economy is astonishing- Amazon has just announced the purchase of the upmarket grocery chain Whole Foods for ＄13.5bn, but two years ago Facebook paid even more than that to acquire the WhatsApp messaging service, which doesn't have any physical product at all. What WhatsApp offered Facebook was an intricate and finely detailed web of its users’ friendships and social lives.\n\nFacebook promised the European commission then that it would not link phone numbers to Facebook identities, but it broke the promise almost as soon as the deal went through. Even without knowing what was in the messages, the knowledge of who sent them and to whom was enormously revealing and still could be. What political journalist, what party whip, would not want to know the makeup of the WhatsApp groups in which Theresa May’s enemies are currently plotting? It may be that the value of Whole Foods to Amazon is not so much the 460 shops it owns, but the records of which customers have purchased what.\n\nCompetition law appears to be the only way to address these imbalances of power. But it is clumsy. For one thing, it is very slow compared to the pace of change within the digital economy. By the time a problem has been addressed and remedied it may have vanished in the marketplace, to be replaced by new abuses of power. But there is a deeper conceptual problem, too. Competition law as presently interpreted deals with financial disadvantage to consumers and this is not obvious when the users of these services don’t pay for them. The users of their services are not their customers. That would be the people who buy advertising from them – and Facebook and Google, the two virtual giants, dominate digital advertising to the disadvantage of all other media and entertainment companies.\n\nThe product they’re selling is data, and we, the users, convert our lives to data for the benefit of the digital giants. Just as some ants farm the bugs called aphids for the honeydew they produce when they feed, so Google farms us for the data that our digital lives yield. Ants keep predatory insects away from where their aphids feed; Gmail keeps the spammers out of our inboxes. It doesn't feel like a human or democratic relationship, even if both sides benefit.",
     "questions": [
       {
         "num": 31,
@@ -7201,7 +7201,7 @@ const READINGS = [
         "answer": "D"
       }
     ],
-        "answers": [
+    "answers": [
       "B",
       "C",
       "D",
@@ -7271,7 +7271,7 @@ const READINGS = [
         "answer": "B"
       }
     ],
-        "answers": [
+    "answers": [
       "A",
       "D",
       "D",
@@ -7283,7 +7283,7 @@ const READINGS = [
     "year": 2019,
     "type": "英语二",
     "textNum": 1,
-    "content": "Unlike so-called basic emotions such as sadness, fear, and anger, guilt emerges a little later, in conjunction with a child’s growing grasp of social and moral norms. Children aren't’t born knowing how to say “I’m sorry”; rather, they learn over time that such statements appease parents and friends – and their own consciences. This is why researchers generally regard so-called moral guilt, in the right amount, to be a good thing.\n\nIn the popular imagination, of course, guilt still gets a bad rap. It is deeply uncomfortable – it’s the emotional equivalent of wearing a jacket weighted with stones. Yet this understanding is outdated. “There has been a kind of revival or a rethinking about what guilt is and what role guilt can serve,” says Amrisha Vaish, a psychology researcher at the University of Virginia, adding that this revival is part of a larger recognition that emotions aren't’t binary – feelings that may be advantageous in one context may be harmful in another. Jealousy and anger, for example, may have evolved to alert us to important inequalities. Too much happiness can be destructive.\n\nAnd guilt, by prompting us to think more deeply about our goodness, can encourage humans to make up for errors and fix relationships. Guilt, in other words, can help hold a cooperative species together. It is a kind of social glue.\n\nViewed in this light, guilt is an opportunity. Work by Tina Malti, a psychology professor at the University of Toronto, suggests that guilt may compensate for an emotional deficiency. In a number of studies, Malti and others have shown that guilt and sympathy may represent different pathways to cooperation and sharing. Some kids who are low in sympathy may make up for that shortfall by experiencing more guilt, which can rein in their nastier impulses. And vice versa: High sympathy can substitute for low guilt.\n\nIn a 2014 study, for example, Malti looked at 244 children. Using caregiver assessments and the children’s self-observations, she rated each child’s overall sympathy level and his or her tendency to feel negative emotions after moral transgressions. Then the kids were handed chocolate coins, and given a chance to share them with an anonymous child. For the low-sympathy kids, how much they shared appeared to turn on how inclined they were to feel guilty. The guilt-prone ones shared more, even though they hadn't’t magically become more sympathetic to the other child’s deprivation.\n\n“That’s good news, ” Malti says. “We can be prosocial because we caused harm and we feel regret.”",
+    "content": "Unlike so-called basic emotions such as sadness, fear, and anger, guilt emerges a little later, in conjunction with a child’s growing grasp of social and moral norms. Children aren't born knowing how to say “I’m sorry”; rather, they learn over time that such statements appease parents and friends – and their own consciences. This is why researchers generally regard so-called moral guilt, in the right amount, to be a good thing.\n\nIn the popular imagination, of course, guilt still gets a bad rap. It is deeply uncomfortable – it’s the emotional equivalent of wearing a jacket weighted with stones. Yet this understanding is outdated. “There has been a kind of revival or a rethinking about what guilt is and what role guilt can serve,” says Amrisha Vaish, a psychology researcher at the University of Virginia, adding that this revival is part of a larger recognition that emotions aren't binary – feelings that may be advantageous in one context may be harmful in another. Jealousy and anger, for example, may have evolved to alert us to important inequalities. Too much happiness can be destructive.\n\nAnd guilt, by prompting us to think more deeply about our goodness, can encourage humans to make up for errors and fix relationships. Guilt, in other words, can help hold a cooperative species together. It is a kind of social glue.\n\nViewed in this light, guilt is an opportunity. Work by Tina Malti, a psychology professor at the University of Toronto, suggests that guilt may compensate for an emotional deficiency. In a number of studies, Malti and others have shown that guilt and sympathy may represent different pathways to cooperation and sharing. Some kids who are low in sympathy may make up for that shortfall by experiencing more guilt, which can rein in their nastier impulses. And vice versa: High sympathy can substitute for low guilt.\n\nIn a 2014 study, for example, Malti looked at 244 children. Using caregiver assessments and the children’s self-observations, she rated each child’s overall sympathy level and his or her tendency to feel negative emotions after moral transgressions. Then the kids were handed chocolate coins, and given a chance to share them with an anonymous child. For the low-sympathy kids, how much they shared appeared to turn on how inclined they were to feel guilty. The guilt-prone ones shared more, even though they hadn't magically become more sympathetic to the other child’s deprivation.\n\n“That’s good news,” Malti says. “We can be prosocial because we caused harm and we feel regret.”",
     "questions": [
       {
         "num": 21,
@@ -7341,7 +7341,7 @@ const READINGS = [
         "answer": "D"
       }
     ],
-        "answers": [
+    "answers": [
       "C",
       "B",
       "D",
@@ -7411,7 +7411,7 @@ const READINGS = [
         "answer": "C"
       }
     ],
-        "answers": [
+    "answers": [
       "D",
       "D",
       "B",
@@ -7423,7 +7423,7 @@ const READINGS = [
     "year": 2019,
     "type": "英语二",
     "textNum": 3,
-    "content": "American farmers have been complaining of labor shortages for several years. The complaints are unlikely to stop without an overhaul of immigration rules for farm workers.\n\nCongress has obstructed efforts to create a more straightforward visa for agricultural workers that would let foreign workers stay longer in the U.S. and change jobs within the industry. If this doesn't’t change, American businesses, communities, and consumers will be the losers.\n\nPerhaps half of U.S. farm laborers are undocumented immigrants. As fewer such workers enter the country, the characteristics of the agricultural workforce are changing. Today’s farm laborers, while still predominantly born in Mexico, are more likely to be settled rather than migrating and more likely to be married than single. They’re also aging. At the start of this century, about one-third of crop workers were over the age of 35. Now more than half are. And picking crops is hard on older bodies. One oft-debated cure for this labor shortage remains as implausible as it’s been all along: Native U.S. workers won’t be returning to the farm.\n\nMechanization isn't’t the answer, either – not yet, at least. Production of corn, cotton, rice, soybeans, and wheat has been largely mechanized, but many high-value, labor-intensive crops, such as strawberries, need labor. Even dairy farms, where robots do a small share of milking, have a long way to go before they’re automated.\n\nAs a result, farms have grown increasingly reliant on temporary guest workers using the H-2A visa to fill the gaps in the workforce. Starting around 2012, requests for the visas rose sharply; from 2011 to 2016 the number of visas issued more than doubled. The H-2A visa has no numerical cap, unlike the H-2B visa for nonagricultural work, which is limited to 66,000 a year. Even so, employers complain they aren't’t given all the workers they need. The process is cumbersome, expensive, and unreliable. One survey found that bureaucratic delays led the average H-2A worker to arrive on the job 22 days late. The shortage is compounded by federal immigration raids, which remove some workers and drive others underground.\n\nIn a 2012 survey, 71 percent of tree-fruit growers and almost 80 percent of raisin and berry growers said they were short of labor. Some western farmers have responded by moving operations to Mexico. From 1998 to 2000, 14.5 percent of the fruit Americans consumed was imported. Little more than a decade later, the share of imports was 25.8 percent.\n\nIn effect, the U.S. can import food or it can import the workers who pick it.",
+    "content": "American farmers have been complaining of labor shortages for several years. The complaints are unlikely to stop without an overhaul of immigration rules for farm workers.\n\nCongress has obstructed efforts to create a more straightforward visa for agricultural workers that would let foreign workers stay longer in the U.S. and change jobs within the industry. If this doesn't change, American businesses, communities, and consumers will be the losers.\n\nPerhaps half of U.S. farm laborers are undocumented immigrants. As fewer such workers enter the country, the characteristics of the agricultural workforce are changing. Today’s farm laborers, while still predominantly born in Mexico, are more likely to be settled rather than migrating and more likely to be married than single. They’re also aging. At the start of this century, about one-third of crop workers were over the age of 35. Now more than half are. And picking crops is hard on older bodies. One oft-debated cure for this labor shortage remains as implausible as it’s been all along: Native U.S. workers won’t be returning to the farm.\n\nMechanization isn't the answer, either – not yet, at least. Production of corn, cotton, rice, soybeans, and wheat has been largely mechanized, but many high-value, labor-intensive crops, such as strawberries, need labor. Even dairy farms, where robots do a small share of milking, have a long way to go before they’re automated.\n\nAs a result, farms have grown increasingly reliant on temporary guest workers using the H-2A visa to fill the gaps in the workforce. Starting around 2012, requests for the visas rose sharply; from 2011 to 2016 the number of visas issued more than doubled. The H-2A visa has no numerical cap, unlike the H-2B visa for nonagricultural work, which is limited to 66,000 a year. Even so, employers complain they aren't given all the workers they need. The process is cumbersome, expensive, and unreliable. One survey found that bureaucratic delays led the average H-2A worker to arrive on the job 22 days late. The shortage is compounded by federal immigration raids, which remove some workers and drive others underground.\n\nIn a 2012 survey, 71 percent of tree-fruit growers and almost 80 percent of raisin and berry growers said they were short of labor. Some western farmers have responded by moving operations to Mexico. From 1998 to 2000, 14.5 percent of the fruit Americans consumed was imported. Little more than a decade later, the share of imports was 25.8 percent.\n\nIn effect, the U.S. can import food or it can import the workers who pick it.",
     "questions": [
       {
         "num": 31,
@@ -7481,7 +7481,7 @@ const READINGS = [
         "answer": "B"
       }
     ],
-        "answers": [
+    "answers": [
       "C",
       "D",
       "B",
@@ -7493,7 +7493,7 @@ const READINGS = [
     "year": 2019,
     "type": "英语二",
     "textNum": 4,
-    "content": "Arnold Schwarzenegger, Dia Mirza and Adrian Grenier have a message for you: It’s easy to beat plastic. They’re part of a bunch of celebrities starring in a new video for World Environment Day – encouraging you, the consumer, to swap out your single-use plastic staples like straws and cutlery to combat the plastics crisis.\n\nThe key messages that have been put together for World Environment Day do include a call for governments to enact legislation to curb single-use plastics. But the overarching message is directed at individuals.\n\nMy concern with leaving it up to the individual, however, is our limited sense of what needs to be achieved. On their own, taking our own bags to the grocery store or quitting plastic straws, for example, will accomplish little and require very little of us. They could even be detrimental, satisfying a need to have “done our bit” without ever progressing onto bigger, bolder, more effective actions – a kind of “moral licensing” that allays our concerns and stops us doing more and asking more of those in charge.\n\nWhile the conversation around our environment and our responsibility toward it remains centered on shopping bags and straws, we’re ignoring the balance of power that implies that as “consumers” we must shop sustainably, rather than as “citizens” hold our governments and industries to account to push for real systemic change.\n\nIt’s important to acknowledge that the environment isn't’t everyone’s priority – or even most people’s. We shouldn't’t expect it to be. In her latest book, Why Good People Do Bad Environmental Things, Wellesley College professor Elizabeth R. DeSombre argues that the best way to collectively change the behavior of large numbers of people is for the change to be structural.\n\nThis might mean implementing policy such as a plastic tax that adds a cost to environmentally problematic action, or banning single-use plastics altogether. India has just announced it will “eliminate all single-use plastic in the country by 2022.” There are also incentive-based ways of making better environmental choices easier, such as ensuring recycling is at least as easy as trash disposal.\n\nDeSombre isn't’t saying people should stop caring about the environment. It’s just that individual actions are too slow, she says, for that to be the only, or even primary, approach to changing widespread behavior.\n\nNone of this is about writing off the individual. It’s just about putting things into perspective. We don’t have time to wait. We need progressive policies that shape collective action (and rein in polluting businesses), alongside engaged citizens pushing for change.",
+    "content": "Arnold Schwarzenegger, Dia Mirza and Adrian Grenier have a message for you: It’s easy to beat plastic. They’re part of a bunch of celebrities starring in a new video for World Environment Day – encouraging you, the consumer, to swap out your single-use plastic staples like straws and cutlery to combat the plastics crisis.\n\nThe key messages that have been put together for World Environment Day do include a call for governments to enact legislation to curb single-use plastics. But the overarching message is directed at individuals.\n\nMy concern with leaving it up to the individual, however, is our limited sense of what needs to be achieved. On their own, taking our own bags to the grocery store or quitting plastic straws, for example, will accomplish little and require very little of us. They could even be detrimental, satisfying a need to have “done our bit” without ever progressing onto bigger, bolder, more effective actions – a kind of “moral licensing” that allays our concerns and stops us doing more and asking more of those in charge.\n\nWhile the conversation around our environment and our responsibility toward it remains centered on shopping bags and straws, we’re ignoring the balance of power that implies that as “consumers” we must shop sustainably, rather than as “citizens” hold our governments and industries to account to push for real systemic change.\n\nIt’s important to acknowledge that the environment isn't everyone’s priority – or even most people’s. We shouldn't expect it to be. In her latest book, Why Good People Do Bad Environmental Things, Wellesley College professor Elizabeth R. DeSombre argues that the best way to collectively change the behavior of large numbers of people is for the change to be structural.\n\nThis might mean implementing policy such as a plastic tax that adds a cost to environmentally problematic action, or banning single-use plastics altogether. India has just announced it will “eliminate all single-use plastic in the country by 2022.” There are also incentive-based ways of making better environmental choices easier, such as ensuring recycling is at least as easy as trash disposal.\n\nDeSombre isn't saying people should stop caring about the environment. It’s just that individual actions are too slow, she says, for that to be the only, or even primary, approach to changing widespread behavior.\n\nNone of this is about writing off the individual. It’s just about putting things into perspective. We don’t have time to wait. We need progressive policies that shape collective action (and rein in polluting businesses), alongside engaged citizens pushing for change.",
     "questions": [
       {
         "num": 36,
@@ -7551,7 +7551,7 @@ const READINGS = [
         "answer": "C"
       }
     ],
-        "answers": [
+    "answers": [
       "B",
       "B",
       "D",
@@ -7563,7 +7563,7 @@ const READINGS = [
     "year": 2020,
     "type": "英语二",
     "textNum": 1,
-    "content": "Rats and other animals need to be highly attuned to social signals from others so they can identify friends to cooperate with and enemies to avoid.To find out if this extends to non-living beings, Laleh Quinn at the University of California, San Diego, and her colleagues tested whether rats can detect social signals from robotic rats.\n\nThey housed eight adult rats with two types of robotic rat—one social and one asocial—for four days.The robot rats were quite minimalist, resembling a chunkier version of a computer mouse with wheels to move around and colourful markings.\n\nDuring the experiment, the social robot rat followed the living rats around, played with the same toys, and opened cage doors to let trapped rats escape. Meanwhile, the asocial robot simply moved forwards and backwards and side to side.\n\nNext, the researchers trapped the robots in cages and gave the rats the opportunity to release them by pressing a lever.Across 18 trials each, the living rats were 52 per cent more likely on average to set the social robot free than the asocial one. This suggests that the rats perceived the social robot as a genuine social being, says Quinn. The rats may have bonded more with the social robot because it displayed behaviors like communal exploring and playing. This could lead to the rats better remembering having freed it earlier, and wanting the robot to return the favour when they get trapped, she says .\n\n“Rats have been shown to engage in multiple forms of reciprocal help and cooperation, including what is referred to as direct reciprocity where a rat will help another rat that has previously helped them,” says Quinn.\n\nThe readiness of the rats to befriend the social robot was surprising given its minimal design.The robot was the same size as a regular rat but resembled a simple plastic box on wheels. “We’d assumed we’d have to give it a moving head and tail, facial features, and put a scent on it to make it smell like a real rat, but that wasn't’t necessary,”says Janet Wiles at the University of Queensland in Australia, who helped with the research.\n\nThe finding shows how sensitive rats are to social cues, even when they come from basic robots. says Wiles. Similarly, children tend to treat robots as if they are fellow beings, even when they display only simple social signals. “We humans seem to be fascinated by robots, and it turns out other animals are too,” says Wiles.",
+    "content": "Rats and other animals need to be highly attuned to social signals from others so they can identify friends to cooperate with and enemies to avoid. To find out if this extends to non-living beings, Laleh Quinn at the University of California, San Diego, and her colleagues tested whether rats can detect social signals from robotic rats.\n\nThey housed eight adult rats with two types of robotic rat—one social and one asocial—for four days. The robot rats were quite minimalist, resembling a chunkier version of a computer mouse with wheels to move around and colourful markings.\n\nDuring the experiment, the social robot rat followed the living rats around, played with the same toys, and opened cage doors to let trapped rats escape. Meanwhile, the asocial robot simply moved forwards and backwards and side to side.\n\nNext, the researchers trapped the robots in cages and gave the rats the opportunity to release them by pressing a lever. Across 18 trials each, the living rats were 52 per cent more likely on average to set the social robot free than the asocial one. This suggests that the rats perceived the social robot as a genuine social being, says Quinn. The rats may have bonded more with the social robot because it displayed behaviors like communal exploring and playing. This could lead to the rats better remembering having freed it earlier, and wanting the robot to return the favour when they get trapped, she says. \n\n“Rats have been shown to engage in multiple forms of reciprocal help and cooperation, including what is referred to as direct reciprocity where a rat will help another rat that has previously helped them,” says Quinn.\n\nThe readiness of the rats to befriend the social robot was surprising given its minimal design. The robot was the same size as a regular rat but resembled a simple plastic box on wheels. “We’d assumed we’d have to give it a moving head and tail, facial features, and put a scent on it to make it smell like a real rat, but that wasn't necessary,” says Janet Wiles at the University of Queensland in Australia, who helped with the research.\n\nThe finding shows how sensitive rats are to social cues, even when they come from basic robots, says Wiles. Similarly, children tend to treat robots as if they are fellow beings, even when they display only simple social signals. “We humans seem to be fascinated by robots, and it turns out other animals are too,” says Wiles.",
     "questions": [
       {
         "num": 21,
@@ -7621,7 +7621,7 @@ const READINGS = [
         "answer": "D"
       }
     ],
-        "answers": [
+    "answers": [
       "A",
       "D",
       "B",
@@ -7633,7 +7633,7 @@ const READINGS = [
     "year": 2020,
     "type": "英语二",
     "textNum": 2,
-    "content": "It is true that CEO pay has gone up—top ones may make 300 times the pay of typical workers on average, and since the mid-1970s, CEO pay for large publicly traded American corporations has, by varying estimates, gone up by about 500%. The typical CEO of a top American corporation now makes about $18.9 million a year.\n\nThe best model for understanding the growth of CEO pay is that of limited CEO talent in a world where business opportunities for the top firms are growing rapidly. The efforts of America’ s highest-earning 1% have been one of the more dynamic elements of the global economy. It’s not popular to say. but one reason their pay has gone up so much is that CEOs really have upped their game relative to many other workers in the U.S. economy.\n\nToday’ s CEO, at least for major American firms, must have many more skills than simply being able to “run the company.” CEOs must have a good sense of financial markets and maybe even how the company should trade in them .They also need better public relations skills than their predecessors, as the costs of even a minor slipup can be significant. Then there’s the fact that large American companies are much more globalized than ever before, with supply chains spread across a larger number of countries. To lead in that system requires knowledge that is fairly mind-boggling. Plus, virtually all major American companies are becoming tech companies, one way or another. Beyond this, major CEOs still have to do all the day-to-day work they have always done.\n\nThe common idea that high CEO pay is mainly about ripping people off doesn't’t explain history very well. By most measures, corporate governance has become a lot tighter and more rigorous since the 1970s. Yet it is principally during this period of stronger governance that CEO pay has been high and rising.That suggests it is in the broader corporate interest to recruit top candidates for increasingly tough jobs.\n\nFurthermore, the highest CEO salaries are paid to outside candidates, not to the cozy insider picks, another sign that high CEO pay is not some kind of depredation at the expense of the rest of the company. And the stock market reacts positively when companies tie CEO pay to, say, stock prices, a sign that those practices build up corporate value not just for the CEO.",
+    "content": "It is true that CEO pay has gone up—top ones may make 300 times the pay of typical workers on average, and since the mid-1970s, CEO pay for large publicly traded American corporations has, by varying estimates, gone up by about 500%. The typical CEO of a top American corporation now makes about $18.9 million a year.\n\nThe best model for understanding the growth of CEO pay is that of limited CEO talent in a world where business opportunities for the top firms are growing rapidly. The efforts of America’s highest-earning 1% have been one of the more dynamic elements of the global economy. It’s not popular to say, but one reason their pay has gone up so much is that CEOs really have upped their game relative to many other workers in the U.S. economy.\n\nToday’s CEO, at least for major American firms, must have many more skills than simply being able to “run the company.” CEOs must have a good sense of financial markets and maybe even how the company should trade in them. They also need better public relations skills than their predecessors, as the costs of even a minor slipup can be significant. Then there’s the fact that large American companies are much more globalized than ever before, with supply chains spread across a larger number of countries. To lead in that system requires knowledge that is fairly mind-boggling. Plus, virtually all major American companies are becoming tech companies, one way or another. Beyond this, major CEOs still have to do all the day-to-day work they have always done.\n\nThe common idea that high CEO pay is mainly about ripping people off doesn't explain history very well. By most measures, corporate governance has become a lot tighter and more rigorous since the 1970s. Yet it is principally during this period of stronger governance that CEO pay has been high and rising. That suggests it is in the broader corporate interest to recruit top candidates for increasingly tough jobs.\n\nFurthermore, the highest CEO salaries are paid to outside candidates, not to the cozy insider picks, another sign that high CEO pay is not some kind of depredation at the expense of the rest of the company. And the stock market reacts positively when companies tie CEO pay to, say, stock prices, a sign that those practices build up corporate value not just for the CEO.",
     "questions": [
       {
         "num": 26,
@@ -7648,7 +7648,7 @@ const READINGS = [
       },
       {
         "num": 27,
-        "stem": "Compared with their predecessors, today’ s CEOs are required to.",
+        "stem": "Compared with their predecessors, today’s CEOs are required to.",
         "options": [
           "A. foster a stronger sense of teamwork",
           "B. finance more research and development",
@@ -7659,7 +7659,7 @@ const READINGS = [
       },
       {
         "num": 28,
-        "stem": "CEO pay has been rising since the 1970s despite ..",
+        "stem": "CEO pay has been rising since the 1970s despite.",
         "options": [
           "A. continual internal opposition",
           "B. strict corporate governance",
@@ -7691,7 +7691,7 @@ const READINGS = [
         "answer": "A"
       }
     ],
-        "answers": [
+    "answers": [
       "C",
       "D",
       "B",
@@ -7703,7 +7703,7 @@ const READINGS = [
     "year": 2020,
     "type": "英语二",
     "textNum": 3,
-    "content": "Madrid was hailed as a public health beacon last November when it rolled out ambitious restrictions on the most polluting cars. Seven months and one election day later, a new conservative city council suspended enforcement of the clean air zone, a first step toward its possible demise.\n\nMayor José Luis Martinez-Almeida made opposition to the zone a centrepiece of his election campaign, despite its success in improving air quality. A judge has now overruled the city’s decision to stop levying fines, ordering them reinstated. But with legal battles ahead, the zone’s future looks uncertain at best.\n\nAmong other weaknesses, the measures cities must employ when left to tackle dirty air on their own are politically contentious, and therefore vulnerable. That’s because they inevitably put the costs of cleaning the air on to individual drivers—who must pay fees or buy better vehicles—rather than on to the car manufacturers whose cheating is the real cause of our toxic pollution.\n\nIt’s not hard to imagine a similar reversal happening in London. The new ultra-low emission zone (Ulez) is likely to be a big issue in next year's mayoral election. And if Sadiq khan wins and extends it to the North and South Circular roads in 2021 as he intends, it is sure to spark intense opposition from the far larger number of motorists who will then be affected.\n\nIt's not that measures such as London’s Ulez are useless. Far from it. Local officials are using the levers that are available to them to safeguard residents’ health in the face of a serious threat. The zones do deliver some improvements to air quality, and the science tells us that means real health benefits—fewer heart attacks, strokes and premature births, less cancer, dementia and asthma. Fewer untimely deaths.\n\nBut mayors and councilors can only do so much about a problem that is far bigger than any one city or town. They are acting because national governments—Britain’s and others across Europe—have failed to do so.\n\nRestrictions that keep highly polluting cars out of certain areas—city centres, “school streets”, even individual roads—are a response to the absence of a larger effort to properly enforce existing regulations and require auto companies to bring their vehicles into compliance. Wales has introduced special low speed limits to minimise pollution. We’re doing everything but insist that manufacturers clean up their cars.",
+    "content": "Madrid was hailed as a public health beacon last November when it rolled out ambitious restrictions on the most polluting cars. Seven months and one election day later, a new conservative city council suspended enforcement of the clean air zone, a first step toward its possible demise.\n\nMayor José Luis Martinez-Almeida made opposition to the zone a centrepiece of his election campaign, despite its success in improving air quality. A judge has now overruled the city’s decision to stop levying fines, ordering them reinstated. But with legal battles ahead, the zone’s future looks uncertain at best.\n\nMadrid's back and forth on clean air is a pointed reminder of the limits to the patchwork, city-by-city approach that characterises efforts on air pollution across Europe, Britain very much included.\n\nAmong other weaknesses, the measures cities must employ when left to tackle dirty air on their own are politically contentious, and therefore vulnerable. That’s because they inevitably put the costs of cleaning the air on to individual drivers—who must pay fees or buy better vehicles—rather than on to the car manufacturers whose cheating is the real cause of our toxic pollution.\n\nIt’s not hard to imagine a similar reversal happening in London. The new ultra-low emission zone (Ulez) is likely to be a big issue in next year's mayoral election. And if Sadiq Khan wins and extends it to the North and South Circular roads in 2021 as he intends, it is sure to spark intense opposition from the far larger number of motorists who will then be affected.\n\nIt's not that measures such as London’s Ulez are useless. Far from it. Local officials are using the levers that are available to them to safeguard residents’ health in the face of a serious threat. The zones do deliver some improvements to air quality, and the science tells us that means real health benefits—fewer heart attacks, strokes and premature births, less cancer, dementia and asthma. Fewer untimely deaths.\n\nBut mayors and councilors can only do so much about a problem that is far bigger than any one city or town. They are acting because national governments—Britain’s and others across Europe—have failed to do so.\n\nRestrictions that keep highly polluting cars out of certain areas—city centres, “school streets”, even individual roads—are a response to the absence of a larger effort to properly enforce existing regulations and require auto companies to bring their vehicles into compliance. Wales has introduced special low speed limits to minimise pollution. We’re doing everything but insist that manufacturers clean up their cars.",
     "questions": [
       {
         "num": 31,
@@ -7761,7 +7761,7 @@ const READINGS = [
         "answer": "B"
       }
     ],
-        "answers": [
+    "answers": [
       "D",
       "D",
       "A",
@@ -7773,7 +7773,7 @@ const READINGS = [
     "year": 2020,
     "type": "英语二",
     "textNum": 4,
-    "content": "Now that members of Generation Z are graduating college this spring—the most commonly-accepted definition says this generation was born after 1995, give or take a year—the attention has been rising steadily in recent weeks. Gen Zs are about to hit the streets looking for work in a labor market that’s tighter than it's been in decades. And employers are planning on hiring about 17 percent more new graduates for jobs in the U.S. this year than last, according to a survey conducted by the National Association of Colleges and Employers. Everybody wants to know how the people who will soon inhabit those empty office cubicles will differ from those who came before them.\n\nIf “entitled” is the most common adjective, fairly or not, applied to millennials (those born between 1981 and 1995), the catchwords for Generation Z are practical and cautious. According to the career counselors and experts who study them, Generation Zs are clear-eyed, economic pragmatists. Despite graduating into the best economy in the past 50 years, Gen Zs know what an economic train wreck looks like. They were impressionable kids during the crash of 2008, when many of their parents lost their jobs or their life savings or both. They aren't interested in taking any chances. The booming economy seems to have done little to assuage this underlying generational sense of anxious urgency, especially for those who have college debt. College loan balances in the U.S. now stand at a record $1.5 trillion, according to the Federal Reserve.\n\nOne survey from Accenture found that 88 percent of graduating seniors this year chose their major with a job in mind. In a 2019 survey of University of Georgia students, meanwhile, the career office found the most desirable trait in a future employer was the ability to offer secure employment (followed by professional development and training, and then inspiring purpose). Job security or stability was the second most important career goal(work-life balance was number one), followed by a sense of being dedicated to a cause or to feel good about serving the greater good.\n\nThat’s a big change from the previous generation. “Millennials wanted more flexibility in their lives,” notes Tanya Michelsen, Associate Director of YouthSight, a UK-based brand manager that conducts regular 60-day surveys of British youth, in findings that might just as well apply to American youth. “Generation Zs are looking for more certainty and stability, because of the rise of the gig economy. They have troubles seeing a financial future and they are quite risk averse.”",
+    "content": "Now that members of Generation Z are graduating college this spring—the most commonly-accepted definition says this generation was born after 1995, give or take a year—the attention has been rising steadily in recent weeks. Gen Zs are about to hit the streets looking for work in a labor market that’s tighter than it's been in decades. And employers are planning on hiring about 17 percent more new graduates for jobs in the U.S. this year than last, according to a survey conducted by the National Association of Colleges and Employers. Everybody wants to know how the people who will soon inhabit those empty office cubicles will differ from those who came before them.\n\nIf “entitled” is the most common adjective, fairly or not, applied to millennials (those born between 1981 and 1995), the catchwords for Generation Z are practical and cautious. According to the career counselors and experts who study them, Generation Zs are clear-eyed, economic pragmatists. Despite graduating into the best economy in the past 50 years, Gen Zs know what an economic train wreck looks like. They were impressionable kids during the crash of 2008, when many of their parents lost their jobs or their life savings or both. They aren't interested in taking any chances. The booming economy seems to have done little to assuage this underlying generational sense of anxious urgency, especially for those who have college debt. College loan balances in the U.S. now stand at a record $1.5 trillion, according to the Federal Reserve.\n\nOne survey from Accenture found that 88 percent of graduating seniors this year chose their major with a job in mind. In a 2019 survey of University of Georgia students, meanwhile, the career office found the most desirable trait in a future employer was the ability to offer secure employment (followed by professional development and training, and then inspiring purpose). Job security or stability was the second most important career goal(work-life balance was number one), followed by a sense of being dedicated to a cause or to feel good about serving the greater good.\n\nThat’s a big change from the previous generation. “Millennials wanted more flexibility in their lives,” notes Tanya Michelsen, Associate Director of YouthSight, a UK-based brand manager that conducts regular 60-day surveys of British youth, in findings that might just as well apply to American youth. “Generation Zs are looking for more certainty and stability, because of the rise of the gig economy. They have trouble seeing a financial future and they are quite risk averse.”",
     "questions": [
       {
         "num": 36,
@@ -7799,7 +7799,7 @@ const READINGS = [
       },
       {
         "num": 38,
-        "stem": "The word \"assuage\"(line 9, para. 2) is closet in meaning to.",
+        "stem": "The word \"assuage\"(line 9, para. 2) is closest in meaning to.",
         "options": [
           "A. deepen",
           "B. define",
@@ -7831,7 +7831,7 @@ const READINGS = [
         "answer": "B"
       }
     ],
-        "answers": [
+    "answers": [
       "D",
       "C",
       "D",
@@ -7843,7 +7843,7 @@ const READINGS = [
     "year": 2021,
     "type": "英语二",
     "textNum": 1,
-    "content": "“Reskilling” is something that sounds like a buzzword but is actually a requirement if we plan to have a future where a lot of would-be workers do not get left behind. We know we are moving into a period where the jobs in demand will change rapidly, as will the requirements of the jobs that remain.Research by the World Economic Forum finds that on average 42 per cent of the“core skills”within job roles will change by 2022.That is a very short timeline.\n\nThe question of who should pay for reskilling is a thorny one.For individual companies, the temptation is always to let go of workers whose skills are no longer in demand and replace them with those whose skills are.That does not always happen. AT&T is often given as the gold standard of a company who decided to do a massive reskilling program rather than go with a fire-and-hire strategy.Other companies including Amazon and Disney had also pledged to create their own plans.When the skills mismatch is in the broader economy though, the focus usually turns to government to handle.Efforts in Canada and elsewhere have been arguably languid at best, and have given us a situation where we frequently hear of employers begging for workers, even at times and in regions where unemployment is high.\n\nWith the pandemic, unemployment is very high indeed. In February,at 3.5 per cent and 5.5 per cent respectively, unemployment rates in Canada and the United States were at generational lows and worker shortages were everywhere.As of May, those rates had spiked up to 13.3 per cent and 13.7 per cent,and although many worker shortages had disappeared, not all had done so.In the medical field, to take an obvious example, the pandemic meant that there were still clear shortages of doctors, nurses and other medical personnel.\n\nOf course, it is not like you can take an unemployed waiter and train him to be a doctor in a few weeks, no matter who pays for it.But even if you cannot close that gap, maybe you can close others, and doing so would be to the benefit of all concerned.That seems to be the case in Sweden: When forced to furlough 90 per cent of their cabin staff, Scandinavian Airlines decided to start up a short retraining program that reskilled the laid-off workers to support hospital staff.The effort was a collective one and involved other companies as well as a Swedish university.",
+    "content": "“Reskilling” is something that sounds like a buzzword but is actually a requirement if we plan to have a future where a lot of would-be workers do not get left behind. We know we are moving into a period where the jobs in demand will change rapidly, as will the requirements of the jobs that remain. Research by the World Economic Forum finds that on average 42 per cent of the “core skills” within job roles will change by 2022. That is a very short timeline.\n\nThe question of who should pay for reskilling is a thorny one. For individual companies, the temptation is always to let go of workers whose skills are no longer in demand and replace them with those whose skills are. That does not always happen. AT&T is often given as the gold standard of a company who decided to do a massive reskilling program rather than go with a fire-and-hire strategy. Other companies including Amazon and Disney had also pledged to create their own plans. When the skills mismatch is in the broader economy though, the focus usually turns to government to handle. Efforts in Canada and elsewhere have been arguably languid at best, and have given us a situation where we frequently hear of employers begging for workers, even at times and in regions where unemployment is high.\n\nWith the pandemic, unemployment is very high indeed. In February, at 3.5 per cent and 5.5 per cent respectively, unemployment rates in Canada and the United States were at generational lows and worker shortages were everywhere. As of May, those rates had spiked up to 13.3 per cent and 13.7 per cent, and although many worker shortages had disappeared, not all had done so. In the medical field, to take an obvious example, the pandemic meant that there were still clear shortages of doctors, nurses and other medical personnel.\n\nOf course, it is not like you can take an unemployed waiter and train him to be a doctor in a few weeks, no matter who pays for it. But even if you cannot close that gap, maybe you can close others, and doing so would be to the benefit of all concerned. That seems to be the case in Sweden: When forced to furlough 90 per cent of their cabin staff, Scandinavian Airlines decided to start up a short retraining program that reskilled the laid-off workers to support hospital staff. The effort was a collective one and involved other companies as well as a Swedish university.",
     "questions": [
       {
         "num": 21,
@@ -7869,7 +7869,7 @@ const READINGS = [
       },
       {
         "num": 23,
-        "stem": "Eforts to resolve the skills mismatch in Canada._",
+        "stem": "Efforts to resolve the skills mismatch in Canada._",
         "options": [
           "A. have driven up labour costs",
           "B. have proved to be inconsistent",
@@ -7894,14 +7894,14 @@ const READINGS = [
         "stem": "Scandinavian Airlines decided to___",
         "options": [
           "A. create job vacancies for the unemployed",
-          "B. prepare their laid-off worker for other jobs",
+          "B. prepare their laid-off workers for other jobs",
           "C. retrain their cabin staff for better services",
           "D. finance their staff's college education"
         ],
         "answer": "B"
       }
     ],
-        "answers": [
+    "answers": [
       "B",
       "A",
       "D",
@@ -7913,7 +7913,7 @@ const READINGS = [
     "year": 2021,
     "type": "英语二",
     "textNum": 2,
-    "content": "With the global population predicted to hit close to 10 billion by 2050, and forecasts that agricultural production in some regions will need to nearly double to keep pace, food security is increasingly making headlines.In the UK, it has become a big talking point recently too, for a rather particular reason: Brexit.\n\nBrexit is seen by some as an opportunity to reverse a recent trend towards the UK importing food. The country produces only about 60 per cent of the food it eats, down from almost three-quarters in the late 1980s.A move back to self-sufficiency,the argument goes, would boost the farming industry, political sovereignty and even the nation’s health.Sounds great — but how feasible is this vision?\n\nAccording to a report on UK food production from the University of Leeds,UK, 85 per cent of the country’s total land area is associated with meat and dairy production.That supplies 80 per cent of what is consumed, so even covering the whole country in livestock farms wouldn't’t allow us to cover all our meat and dairy needs.\n\nThere are many caveats to those figures,but they are still grave.To become much more self-sufficient, the UK would need to drastically reduce its consumption of animal foods, and probably also farm more intensively — meaning fewer green fields and more factory-style production.\n\nBut switching to a mainly plant-based diet wouldn't’t help.There is a good reason why the UK is dominated by animal husbandry: most of its terrain doesn't’t have the right soil or climate to grow crops on a commercial basis.Just 25 per cent of the country’s land is suitable for crop-growing, most of which is already occupied by arable fields.Even if we converted all the suitable land to fields of fruit and veg — which would involve taking out all the nature reserves and removing thousands of people from their homes — we would achieve only a 30 per cent boost in crop production.\n\nJust 23 per cent of the fruit and vegetables consumed in the UK are currently home-grown, so even with the most extreme measures we could meet only 30 per cent of our fresh produce needs.That is before we look for the space to grow the grains, sugars, seeds and oils that provide us with the vast bulk of our current calorie intake.",
+    "content": "With the global population predicted to hit close to 10 billion by 2050, and forecasts that agricultural production in some regions will need to nearly double to keep pace, food security is increasingly making headlines. In the UK, it has become a big talking point recently too, for a rather particular reason: Brexit.\n\nBrexit is seen by some as an opportunity to reverse a recent trend towards the UK importing food. The country produces only about 60 per cent of the food it eats, down from almost three-quarters in the late 1980s. A move back to self-sufficiency, the argument goes, would boost the farming industry, political sovereignty and even the nation’s health. Sounds great — but how feasible is this vision?\n\nAccording to a report on UK food production from the University of Leeds, UK, 85 per cent of the country’s total land area is associated with meat and dairy production. That supplies 80 per cent of what is consumed, so even covering the whole country in livestock farms wouldn't allow us to cover all our meat and dairy needs.\n\nThere are many caveats to those figures, but they are still grave. To become much more self-sufficient, the UK would need to drastically reduce its consumption of animal foods, and probably also farm more intensively — meaning fewer green fields and more factory-style production.\n\nBut switching to a mainly plant-based diet wouldn't help. There is a good reason why the UK is dominated by animal husbandry: most of its terrain doesn't have the right soil or climate to grow crops on a commercial basis. Just 25 per cent of the country’s land is suitable for crop-growing, most of which is already occupied by arable fields. Even if we converted all the suitable land to fields of fruit and veg — which would involve taking out all the nature reserves and removing thousands of people from their homes — we would achieve only a 30 per cent boost in crop production.\n\nJust 23 per cent of the fruit and vegetables consumed in the UK are currently home-grown, so even with the most extreme measures we could meet only 30 per cent of our fresh produce needs. That is before we look for the space to grow the grains, sugars, seeds and oils that provide us with the vast bulk of our current calorie intake.",
     "questions": [
       {
         "num": 26,
@@ -7971,7 +7971,7 @@ const READINGS = [
         "answer": "B"
       }
     ],
-        "answers": [
+    "answers": [
       "B",
       "C",
       "C",
@@ -7983,7 +7983,7 @@ const READINGS = [
     "year": 2021,
     "type": "英语二",
     "textNum": 3,
-    "content": "When Microsoft bought task management app Wunderlist and mobile calendar Sunrise in 2015,it picked two newcomers that were attracting considerable buzz in Silicon Valley.Microsoft’s own Office dominates the market for “productivity” software, but the start-ups represented a new wave of technology designed from the ground up for the smartphone world.\n\nBoth apps, however, were later scrapped, after Microsoft said it had used their best features in its own products.Their teams of engineers stayed on,making them two of the many “ acqui-hires”that the biggest companies have used to feed their great hunger for tech talent.\n\nTo Microsoft’s critics,the fates of Wunderlist and Sunrise are examples of a remorseless drive by Big Tech to chew up any innovative companies that lie in their path. “They bought the seedlings and closed them down,” complained Paul Arnold, a partner at San Francisco-based Switch Ventures, putting an end to businesses that might one day turn into competitors.Microsoft declined to comment.\n\nLike other start-up investors, Mr. Arnold’s own business often depends on selling start-ups to larger tech companies, though he admits to mixed feelings about the result: “I think these things are good for me, if I put my selfish hat on.But are they good for the American economy?I don’t know.”\n\nThe US Federal Trade Commission says it wants to find the answer to that question.This week, it asked the five most valuable US tech companies for information about their many small acquisitions over the past decade.Although only a research project at this stage, the request has raised the prospect of regulators wading into early-stage tech markets that until now have been beyond their reach.\n\nGiven their combined market value of more than $5.5 trillion, rifling through such small deals—many of them much less prominent than Wunderlist and Sunrise—might seem beside the point.Between them, the five biggest tech companies have spent an average of only $3.4 billion a year on sub- $ 1 billion acquisitions over the past five years—a drop in the ocean compared with their massive financial reserves, and the more than $130 billion of venture capital that was invested in the US last year.\n\nHowever, critics say the big companies use such deals to buy their most threatening potential competitors before their businesses have a chance to gain momentum, in some cases as part of a“ buy and kill”tactic to simply close them down.",
+    "content": "When Microsoft bought task management app Wunderlist and mobile calendar Sunrise in 2015, it picked two newcomers that were attracting considerable buzz in Silicon Valley. Microsoft’s own Office dominates the market for “productivity” software, but the start-ups represented a new wave of technology designed from the ground up for the smartphone world.\n\nBoth apps, however, were later scrapped, after Microsoft said it had used their best features in its own products. Their teams of engineers stayed on, making them two of the many “acqui-hires” that the biggest companies have used to feed their great hunger for tech talent.\n\nTo Microsoft’s critics, the fates of Wunderlist and Sunrise are examples of a remorseless drive by Big Tech to chew up any innovative companies that lie in their path. “They bought the seedlings and closed them down,” complained Paul Arnold, a partner at San Francisco-based Switch Ventures, putting an end to businesses that might one day turn into competitors. Microsoft declined to comment.\n\nLike other start-up investors, Mr. Arnold’s own business often depends on selling start-ups to larger tech companies, though he admits to mixed feelings about the result: “I think these things are good for me, if I put my selfish hat on. But are they good for the American economy? I don’t know.”\n\nThe US Federal Trade Commission says it wants to find the answer to that question. This week, it asked the five most valuable US tech companies for information about their many small acquisitions over the past decade. Although only a research project at this stage, the request has raised the prospect of regulators wading into early-stage tech markets that until now have been beyond their reach.\n\nGiven their combined market value of more than $5.5 trillion, rifling through such small deals—many of them much less prominent than Wunderlist and Sunrise—might seem beside the point. Between them, the five biggest tech companies have spent an average of only $3.4 billion a year on sub- $ 1 billion acquisitions over the past five years—a drop in the ocean compared with their massive financial reserves, and the more than $130 billion of venture capital that was invested in the US last year.\n\nHowever, critics say the big companies use such deals to buy their most threatening potential competitors before their businesses have a chance to gain momentum, in some cases as part of a “buy and kill” tactic to simply close them down.",
     "questions": [
       {
         "num": 31,
@@ -8041,7 +8041,7 @@ const READINGS = [
         "answer": "A"
       }
     ],
-        "answers": [
+    "answers": [
       "A",
       "B",
       "C",
@@ -8053,11 +8053,11 @@ const READINGS = [
     "year": 2021,
     "type": "英语二",
     "textNum": 4,
-    "content": "We’re fairly good at judging people based on first impressions, thin slices of experience ranging from a glimpse of a photo to five-minute interaction, and deliberation can be not only extraneous but intrusive.In one study of the ability she called“thin slicing,” the late psychologist Nalini Ambady asked participants to watch silent 10-second video clips of professors and to rate the instructor’s overall effectiveness.Their ratings correlated strongly with students’ end-of-semester ratings. Another set of participants had to count backward from 1,000 by nines as they watched the clips, occupying their conscious working memory.Their ratings were just as accurate, demonstrating the intuitive nature of the social processing.\n\nCritically, another group was asked to spend a minute writing down reasons for their judgment, before giving the rating.Accuracy dropped dramatically. Ambady suspected that deliberation focused them on vivid but misleading cues, such as certain gestures or utterances, rather than letting the complex interplay of subtle signals form a holistic impression.She found similar interference when participants watched 15-second clips of pairs of people and judged whether they were strangers, friends, or dating partners.\n\nOther research shows we’re better at detecting deception from thin slices when we rely on intuition instead of reflection. “It’s as if you’re driving a stick shift,” says Judith Hall, a psychologist at Northeastern University, “and if you start thinking about it too much, you can’t remember what you’re doing. But if you go on automatic pilot,you’re fine.Much of our social life is like that.”\n\nThinking too much can also harm our ability to form preferences.College students’ ratings of strawberry jams and college courses aligned better with experts’ opinions when the students weren't’t asked to analyze their rationale.And people made car-buying decisions that were both objectively better and more personally satisfying when asked to focus on their feelings rather than on details, but only if the decision was complex—when they had a lot of information to process.\n\nIntuition’s special powers are unleashed only in certain circumstances.In one study,participants completed a battery of eight tasks, including four that tapped reflective thinking (discerning rules, comprehending vocabulary) and four that tapped intuition and creativity (generating new products or figures of speech).Then they rated the degree to which they had used intuition (“gut feelings,” “ hunches,” “my heart”).Use of their gut hurt their performance on the first four tasks, as expected, and helped them on the rest. Sometimes the heart is smarter than the head.",
+    "content": "We’re fairly good at judging people based on first impressions, thin slices of experience ranging from a glimpse of a photo to five-minute interaction, and deliberation can be not only extraneous but intrusive. In one study of the ability she called “thin slicing,” the late psychologist Nalini Ambady asked participants to watch silent 10-second video clips of professors and to rate the instructor’s overall effectiveness. Their ratings correlated strongly with students’ end-of-semester ratings. Another set of participants had to count backward from 1,000 by nines as they watched the clips, occupying their conscious working memory. Their ratings were just as accurate, demonstrating the intuitive nature of the social processing.\n\nCritically, another group was asked to spend a minute writing down reasons for their judgment, before giving the rating. Accuracy dropped dramatically. Ambady suspected that deliberation focused them on vivid but misleading cues, such as certain gestures or utterances, rather than letting the complex interplay of subtle signals form a holistic impression. She found similar interference when participants watched 15-second clips of pairs of people and judged whether they were strangers, friends, or dating partners.\n\nOther research shows we’re better at detecting deception from thin slices when we rely on intuition instead of reflection. “It’s as if you’re driving a stick shift,” says Judith Hall, a psychologist at Northeastern University, “and if you start thinking about it too much, you can’t remember what you’re doing. But if you go on automatic pilot, you’re fine. Much of our social life is like that.”\n\nThinking too much can also harm our ability to form preferences. College students’ ratings of strawberry jams and college courses aligned better with experts’ opinions when the students weren't asked to analyze their rationale. And people made car-buying decisions that were both objectively better and more personally satisfying when asked to focus on their feelings rather than on details, but only if the decision was complex—when they had a lot of information to process.\n\nIntuition’s special powers are unleashed only in certain circumstances. In one study, participants completed a battery of eight tasks, including four that tapped reflective thinking (discerning rules, comprehending vocabulary) and four that tapped intuition and creativity (generating new products or figures of speech). Then they rated the degree to which they had used intuition (“gut feelings,” “hunches,” “my heart”). Use of their gut hurt their performance on the first four tasks, as expected, and helped them on the rest. Sometimes the heart is smarter than the head.",
     "questions": [
       {
         "num": 36,
-        "stem": "Nalini Ambady’ s study deals with.",
+        "stem": "Nalini Ambady’s study deals with.",
         "options": [
           "A. the power of people’s memory",
           "B. the reliability of first impressions",
@@ -8111,7 +8111,7 @@ const READINGS = [
         "answer": "B"
       }
     ],
-        "answers": [
+    "answers": [
       "B",
       "A",
       "A",
@@ -8123,7 +8123,7 @@ const READINGS = [
     "year": 2022,
     "type": "英语二",
     "textNum": 1,
-    "content": "On a recent sunny day, 13,000 chickens roam over Larry Brown's 40 windswept acres in Shiner, Texas. Some rest in the shade of a parked car. Others drink water with the cows. This all seems random, but ifs by design, part of what the $ 6.1 billion U.S. egg industry bets will be its next big thing: climate-friendly eggs.\n\nThese eggs, which are making their debut now on shelves for as much as $ 8 a dozen, are still labeled organic and animal-friendly, but they're also from birds that live on farms using regenerative agriculture——special techniques to cultivate rich soils that can trap greenhouse gases. Such eggs could be marketed as helping to fight climate change. \"I'm excited about our progress^^ says Brown, who harvests eggs for Denver­ based Nest Fresh Eggs and is adding more cover crops that draw worms and crickets for the chickens to eat. The birds' waste then fertilizes fields. Such improvements “allow our hens to forage for higher-quality natural feed that will be good for the land, the hens, and the eggs that we supply to our customers.^^ The egg industry's push is the first major test of whether animal products from regenerative farms can become the next premium offering. In barely more than a decade, organic eggs went from being dismissed as a niche product in natural foods stores to being sold at Walmart. More recently there were similar doubts about probiotics and plant-based meats, but both have exploded into major supermarket categories. If the sustainable-egg rollout is successful, it could open the floodgates for regenerative beef^ broccoli, and beyond.\n\nRegenerative products could be a hard sell, because the concept is tough to define quickly, says Julie Stanton, associate professor of agricultural economics at Pennsylvania State University Brandywine. Such farming also brings minimal, if any, improvement to the food products (though some producers say their eggs have more protein).\n\nThe industry is betting that the same consumers paying more for premium attributes such as free-range, non-GMO, and pasture-raised eggs will embrace sustainability.\n\nSurveys show that younger generations are more concerned about climate change, and some of the success of plant-based meat can be chalked up to shoppers wanting to signal their desire to protect the environment. Young adults \"really care about the planet/9 says John Brunnquell, president of Egg Innovations. \"They are absolutely altering the food chain beyond what I think even they understand what they're doing.”",
+    "content": "On a recent sunny day, 13,000 chickens roam over Larry Brown's 40 windswept acres in Shiner, Texas. Some rest in the shade of a parked car. Others drink water with the cows. This all seems random, but it's by design, part of what the $ 6.1 billion U.S. egg industry bets will be its next big thing: climate-friendly eggs.\n\nThese eggs, which are making their debut now on shelves for as much as $ 8 a dozen, are still labeled organic and animal-friendly, but they're also from birds that live on farms using regenerative agriculture——special techniques to cultivate rich soils that can trap greenhouse gases. Such eggs could be marketed as helping to fight climate change. \"I'm excited about our progress,\" says Brown, who harvests eggs for Denver-based Nest Fresh Eggs and is adding more cover crops that draw worms and crickets for the chickens to eat. The birds' waste then fertilizes fields. Such improvements “allow our hens to forage for higher-quality natural feed that will be good for the land, the hens, and the eggs that we supply to our customers.\" The egg industry's push is the first major test of whether animal products from regenerative farms can become the next premium offering. In barely more than a decade, organic eggs went from being dismissed as a niche product in natural foods stores to being sold at Walmart. More recently there were similar doubts about probiotics and plant-based meats, but both have exploded into major supermarket categories. If the sustainable-egg rollout is successful, it could open the floodgates for regenerative beef, broccoli, and beyond.\n\nRegenerative products could be a hard sell, because the concept is tough to define quickly, says Julie Stanton, associate professor of agricultural economics at Pennsylvania State University Brandywine. Such farming also brings minimal, if any, improvement to the food products (though some producers say their eggs have more protein).\n\nThe industry is betting that the same consumers paying more for premium attributes such as free-range, non-GMO, and pasture-raised eggs will embrace sustainability.\n\nSurveys show that younger generations are more concerned about climate change, and some of the success of plant-based meat can be chalked up to shoppers wanting to signal their desire to protect the environment. Young adults \"really care about the planet,\" says John Brunnquell, president of Egg Innovations. \"They are absolutely altering the food chain beyond what I think even they understand what they're doing.”",
     "questions": [
       {
         "num": 21,
@@ -8171,7 +8171,7 @@ const READINGS = [
       },
       {
         "num": 25,
-        "stem": "John Brunnquell would disagree with Julie Stanton over regenerative",
+        "stem": "John Brunnquell would disagree with Julie Stanton over regenerative products'.",
         "options": [
           "A. market prospects",
           "B. standard definition",
@@ -8181,7 +8181,7 @@ const READINGS = [
         "answer": "A"
       }
     ],
-        "answers": [
+    "answers": [
       "D",
       "C",
       "C",
@@ -8193,7 +8193,7 @@ const READINGS = [
     "year": 2022,
     "type": "英语二",
     "textNum": 2,
-    "content": "More Americans are opting to work well into retirement, a growing trend that threatens to upend the old workforce model.\n\nOne in three Americans who are at least 40 have or plan to have a job in retirement to prepare for a longer life, according to a survey conducted by Harris Poll for TD Ameritrade.\n\nEven more surprising is that more than half of “unretirees”- those who plan to work in retirement or went back to work after retiring- said they would be employed in their later years even if they had enough money to settle down, the survey showed.\n\nFinancial needs aren't the only culprit for the “unretirement“ trend. Other reasons, according to the study, include personal fulfillment such as staying mentally fit, preventing boredom or avoiding depression. About 72% of “unretiree“ respondents said that they would return to work once retired to keep mentally fit while 59% said it would be tied to making ends meet. “The concept of retirement is evolving,said Christine Russell, senior manager of retirement at TD Ameritrade. \"It's not just about finances. The value of work is also driving folks to continue working past retirement.^^ One reason for the change in retirement patterns: Americans are living longer. The share of the population 65 and older was 16% in 2018, up 32% from the prior year, according to the US. Census Bureau. Thafs also up 302% since 2010. Older Americans are also the fastest-growing segment of the US. workforce, and boomers are expected to live longer than previous generations. The percentage of retirement-age people in the labor force has doubled over the past three decades. About 20% of people 65 and older were in the workforce in February, up from an all-time low of 10% in January 1985, according to money manager United Income.\n\nBecause of longer life spans, Americans are also boosting their savings to preserve their nest eggs, the TD Ameritrade study showed, which surveyed 2000 adults between 40 to 79. Six in 10 \"unretirees“ are increasing their savings in anticipation of a longer life, according to the survey. Among the most popular ways they are doing this, the company said, is by reducing their overall expenses, securing life insurance or maximizing their contributions to retirement accounts.\n\nUnfortunately, many people who are opting to work in retirement are preparing to do so because they are worried about making ends meet in their later years, said Brent Weiss, a co-founder at Baltimore-based financial-planning firm Facet Wealth. He suggested that preretirees should speak with a financial adviser to set long-term financial goals. “The most challenging moments in life are getting married, starting a family and ultimately retiring,Weiss said. \"It's not just a financial decision, but an emotional one.\n\nMany people believe they can't retire”",
+    "content": "More Americans are opting to work well into retirement, a growing trend that threatens to upend the old workforce model.\n\nOne in three Americans who are at least 40 have or plan to have a job in retirement to prepare for a longer life, according to a survey conducted by Harris Poll for TD Ameritrade.\n\nEven more surprising is that more than half of \"unretirees\"—those who plan to work in retirement or went back to work after retiring—said they would be employed in their later years even if they had enough money to settle down, the survey showed.\n\nFinancial needs aren't the only culprit for the \"unretirement\" trend. Other reasons, according to the study, include personal fulfillment such as staying mentally fit, preventing boredom or avoiding depression. About 72% of \"unretiree\" respondents said that they would return to work once retired to keep mentally fit while 59% said it would be tied to making ends meet. \"The concept of retirement is evolving,\" said Christine Russell, senior manager of retirement at TD Ameritrade. \"It's not just about finances. The value of work is also driving folks to continue working past retirement.\" One reason for the change in retirement patterns: Americans are living longer. The share of the population 65 and older was 16% in 2018, up 32% from the prior year, according to the U.S. Census Bureau. That's also up 30.2% since 2010. Older Americans are also the fastest-growing segment of the US workforce, and boomers are expected to live longer than previous generations. The percentage of retirement-age people in the labor force has doubled over the past three decades. About 20% of people 65 and older were in the workforce in February, up from an all-time low of 10% in January 1985, according to money manager United Income.\n\nBecause of longer life spans, Americans are also boosting their savings to preserve their nest eggs, the TD Ameritrade study showed, which surveyed 2000 adults between 40 and 79. Six in 10 \"unretirees\" are increasing their savings in anticipation of a longer life, according to the survey. Among the most popular ways they are doing this, the company said, is by reducing their overall expenses, securing life insurance or maximizing their contributions to retirement accounts.\n\nUnfortunately, many people who are opting to work in retirement are preparing to do so because they are worried about making ends meet in their later years, said Brent Weiss, a co-founder at Baltimore-based financial-planning firm Facet Wealth. He suggested that preretirees should speak with a financial adviser to set long-term financial goals. \"The most challenging moments in life are getting married, starting a family and ultimately retiring,\" Weiss said. \"It's not just a financial decision, but an emotional one. Many people believe they can't retire.\"",
     "questions": [
       {
         "num": 26,
@@ -8213,7 +8213,7 @@ const READINGS = [
           "A. retirement may cause problems for them",
           "B. boredom can be relieved after retirement",
           "C. the mental health of retirees is overlooked",
-          "D. <,aunretiremenf, contributes to the economy"
+          "D. \"unretirement\" contributes to the economy"
         ],
         "answer": "A"
       },
@@ -8230,7 +8230,7 @@ const READINGS = [
       },
       {
         "num": 29,
-        "stem": "Many \"unretirees“ are increasing their savings by.",
+        "stem": "Many \"unretirees\" are increasing their savings by.",
         "options": [
           "A. investing more in stocks",
           "B. taking up odd jobs",
@@ -8251,7 +8251,7 @@ const READINGS = [
         "answer": "A"
       }
     ],
-        "answers": [
+    "answers": [
       "D",
       "A",
       "C",
@@ -8263,7 +8263,7 @@ const READINGS = [
     "year": 2022,
     "type": "英语二",
     "textNum": 3,
-    "content": "We have all encountered them, in both our personal and professional lives. Think about the times you felt tricked or frustrated by a membership or subscription that had a seamless sign-up process but was later difficult to cancel. Something that should be simple and transparent can be complicated, intentionally or unintentionally, in ways that impair consumer choice. These are examples of dark patterns.\n\nFirst coined in 2010 by user experience expert Harry Brignull,dark patterns^^ is a catch-all term for practices that manipulate user interfaces to influence the decision­ making ability of users. Brignull identifies 12 types of common dark patterns, ranging from misdirection and hidden costs to “roach motel,“ where a user experience seems easy and intuitive at the start, but turns difficult when the user tries to get out.\n\nIn a 2019 study of 53,000 product pages and 11,000 websites, researchers found that about one in 10 employs these design practices. Though widely prevalent, the concept of dark patterns is still not well understood. Business and nonprofit leaders should be aware of dark patterns and try to avoid the gray areas they engender.\n\nWhere is the line between ethical, persuasive design and dark patterns? Businesses should engage in conversations with IT, compliance, risk, and legal teams to review their privacy policy, and include in the discussion the customer/user experience designers and coders responsible for the company's user interface, as well as the marketers and advertisers responsible for sign-ups, checkout baskets, pricing, and promotions. Any or all these teams can play a role in creating or avoiding \"digital deception.^^ Lawmakers and regulators are slowly starting to address the ambiguity around dark patterns, most recently at the state level. In March, the California Attorney General announced the approval of additional regulations under the California Consumer Privacy Act (CCPA) that \"ensure that consumers will not be confused or misled when seeking to exercise their data privacy rights.^^ The regulations aim to ban dark patterns this means prohibiting companies from using confusing language or unnecessary steps such as forcing them to click through multiple screens or listen to reasons why they shouldn't opt out.^^ As more states consider promulgating additional regulations, there is a need for greater accountability from within the business community. Dark patterns also can be addressed on a self-regulatory basis, but only if organizations hold themselves accountable, not just to legal requirements but also to industry best practices and standards.",
+    "content": "We have all encountered them, in both our personal and professional lives. Think about the times you felt tricked or frustrated by a membership or subscription that had a seamless sign-up process but was later difficult to cancel. Something that should be simple and transparent can be complicated, intentionally or unintentionally, in ways that impair consumer choice. These are examples of dark patterns.\n\nFirst coined in 2010 by user experience expert Harry Brignull, \"dark patterns\" is a catch-all term for practices that manipulate user interfaces to influence the decision-making ability of users. Brignull identifies 12 types of common dark patterns, ranging from misdirection and hidden costs to \"roach motel,\" where a user experience seems easy and intuitive at the start, but turns difficult when the user tries to get out.\n\nIn a 2019 study of 53,000 product pages and 11,000 websites, researchers found that about one in 10 employs these design practices. Though widely prevalent, the concept of dark patterns is still not well understood. Business and nonprofit leaders should be aware of dark patterns and try to avoid the gray areas they engender.\n\nWhere is the line between ethical, persuasive design and dark patterns? Businesses should engage in conversations with IT, compliance, risk, and legal teams to review their privacy policy, and include in the discussion the customer/user experience designers and coders responsible for the company's user interface, as well as the marketers and advertisers responsible for sign-ups, checkout baskets, pricing, and promotions. Any or all these teams can play a role in creating or avoiding \"digital deception.\" Lawmakers and regulators are slowly starting to address the ambiguity around dark patterns, most recently at the state level. In March, the California Attorney General announced the approval of additional regulations under the California Consumer Privacy Act (CCPA) that \"ensure that consumers will not be confused or misled when seeking to exercise their data privacy rights.\" The regulations aim to ban dark patterns—this means prohibiting companies from using confusing language or unnecessary steps such as forcing them to click through multiple screens or listen to reasons why they shouldn't opt out.\" As more states consider promulgating additional regulations, there is a need for greater accountability from within the business community. Dark patterns also can be addressed on a self-regulatory basis, but only if organizations hold themselves accountable, not just to legal requirements but also to industry best practices and standards.",
     "questions": [
       {
         "num": 31,
@@ -8271,7 +8271,7 @@ const READINGS = [
         "options": [
           "A. improve user experiences",
           "B. leak user information for profit",
-          "C. undermine users9 decision-making",
+          "C. undermine users' decision-making",
           "D. remind users of hidden costs"
         ],
         "answer": "C"
@@ -8314,14 +8314,14 @@ const READINGS = [
         "stem": "According to the last paragraph, a key to coping with dark patterns is",
         "options": [
           "A. new legal requirements",
-          "B. businesses9 self-discipline",
+          "B. businesses' self-discipline",
           "C. strict regulatory standards",
-          "D. consumers9 safety awareness"
+          "D. consumers' safety awareness"
         ],
         "answer": "B"
       }
     ],
-        "answers": [
+    "answers": [
       "C",
       "D",
       "B",
@@ -8333,7 +8333,7 @@ const READINGS = [
     "year": 2022,
     "type": "英语二",
     "textNum": 4,
-    "content": "Although ethics classes are common around the world, scientists are unsure if their lessons can actually change behavior; evidence either way is weak, relying on contrived laboratory tests or sometimes unreliable self-reports. But a new study published in Cognition found that, in at least one real-world situation, a single ethics lesson may have had lasting effects.\n\nThe researchers investigated one class session's impact on eating meat. They chose this particular behavior for three reasons, according to study co-author Eric Schwitzgebel, a philosopher at the University of California, Riverside: students9 attitudes on the topic are variable and unstable, behavior is easily measurable, and ethics literature largely agrees that eating less meat is good because it reduces environmental harm and animal suffering. Half of the students in four large philosophy classes read an article on the ethics of factory-farmed meat, optionally watched an 11-minute video on the topic and joined a 5O-minute discussion. The other half focused on charitable giving instead.\n\nThen, unknown to the students, the researchers studied their anonymized meal-card purchases for that semester- nearly 14,000 receipts for almost 500 students.\n\nSchwitzgebel predicted the intervention would have no effect; he had previously found that ethics professors do not differ from other professors on a range of behaviors, including voting rates, blood donation and returning library books. But among student subjects who discussed meat ethics, meal purchases containing meat decreased from 52 to 45 percent- and this effect held steady for the study's duration of several weeks.\n\nPurchases from the other group remained at 52 percent. “That's actually a pretty large effect for a pretty small intervention,,9 Schwitzgebel says. Psychologist Nina Strohminger at the University of Pennsylvania, who was not involved in the study, says she wants the effect to be real but cannot rule out some unknown confounding variable. And if real, she notes, it might be reversible by another nudge: \"Easy come, easy go.” Schwitzgebel suspects the greatest impact came from social influence- classmates or teaching assistants leading the discussions may have shared their own vegetarianism, showing it as achievable or more common. Second, the video may have had an emotional impact. Least rousing, he thinks, was rational argument, although his co­ authors say reason might play a bigger role. Now the researchers are probing the specific effects of teaching style, teaching assistants9 eating habits and students' video exposure. Meanwhile, Schwitzgebel- who had predicted no effect- will be eating his words.",
+    "content": "Although ethics classes are common around the world, scientists are unsure if their lessons can actually change behavior; evidence either way is weak, relying on contrived laboratory tests or sometimes unreliable self-reports. But a new study published in Cognition found that, in at least one real-world situation, a single ethics lesson may have had lasting effects.\n\nThe researchers investigated one class session's impact on eating meat. They chose this particular behavior for three reasons, according to study co-author Eric Schwitzgebel, a philosopher at the University of California, Riverside: students' attitudes on the topic are variable and unstable, behavior is easily measurable, and ethics literature largely agrees that eating less meat is good because it reduces environmental harm and animal suffering. Half of the students in four large philosophy classes read an article on the ethics of factory-farmed meat, optionally watched an 11-minute video on the topic and joined a 50-minute discussion. The other half focused on charitable giving instead.\n\nThen, unknown to the students, the researchers studied their anonymized meal-card purchases for that semester—nearly 14,000 receipts for almost 500 students.\n\nSchwitzgebel predicted the intervention would have no effect; he had previously found that ethics professors do not differ from other professors on a range of behaviors, including voting rates, blood donation and returning library books. But among student subjects who discussed meat ethics, meal purchases containing meat decreased from 52 to 45 percent—and this effect held steady for the study's duration of several weeks.\n\nPurchases from the other group remained at 52 percent. \"That's actually a pretty large effect for a pretty small intervention,\" Schwitzgebel says. Psychologist Nina Strohminger at the University of Pennsylvania, who was not involved in the study, says she wants the effect to be real but cannot rule out some unknown confounding variable. And if real, she notes, it might be reversible by another nudge: \"Easy come, easy go.\" Schwitzgebel suspects the greatest impact came from social influence—classmates or teaching assistants leading the discussions may have shared their own vegetarianism, showing it as achievable or more common. Second, the video may have had an emotional impact. Least rousing, he thinks, was rational argument, although his co-authors say reason might play a bigger role. Now the researchers are probing the specific effects of teaching style, teaching assistants' eating habits and students' video exposure. Meanwhile, Schwitzgebel—who had predicted no effect—will be eating his words.",
     "questions": [
       {
         "num": 36,
@@ -8352,7 +8352,7 @@ const READINGS = [
         "options": [
           "A. It is common among students.",
           "B. It is a behavior easy to measure.",
-          "C. It is important to students5 health.",
+          "C. It is important to students' health.",
           "D. It is a hot topic in ethics classes."
         ],
         "answer": "B"
@@ -8391,7 +8391,7 @@ const READINGS = [
         "answer": "C"
       }
     ],
-        "answers": [
+    "answers": [
       "A",
       "B",
       "D",
@@ -8458,22 +8458,22 @@ const READINGS = [
           "C. is becoming increasingly affordable",
           "D. has been a controversial product"
         ],
-        "answer": "C"
+        "answer": "D"
       }
     ],
-        "answers": [
+    "answers": [
       "A",
       "B",
       "B",
       "C",
-      "C"
+      "D"
     ]
   },
   {
     "year": 2023,
     "type": "英语二",
     "textNum": 2,
-    "content": "It’s easy to dismiss as absurd the federal government’s ideas for plugging the chronic funding gap of our national parks. Can anyone really think ifs a good idea to allow Amazon deliveries to your tent in Yosemite or food trucks to line up under the redwood trees at Sequoia National Park?\n\nBut the government is right about one thing: U.S. national parks are in crisis. Collectively, they have a maintenance backlog of more than $ 12 billion. Roads, trails, restrooms, visitor centers and other infrastructure are crumbling.\n\nBut privatizing and commercializing the campgrounds would not be a cure-all. Campgrounds are a tiny portion of the overall infrastructure backlog, and businesses in the parks hand over, on average, only about 5% of their revenues to the National Park Service.\n\nMoreover, increased privatization would certainly undercut one of the major reasons why 300 million visitors come to the parks each year: to enjoy nature and get a break from the commercial drumbeat that overwhelms daily life.\n\nThe real problem is that the parks have been chronically starved of funding. An economic survey of 700 U.S. taxpayers found that people would be willing to pay a significant amount of money to make sure the parks and their programs are kept intact. Some 81% of respondents said they would be willing to pay additional taxes for the next 10 years to avoid any cuts to the national parks.\n\nThe national parks provide great value to U.S. residents both as places to escape and as symbols of nature. On top of this, they produce value from their extensive educational programs, their positive impact on the climate through carbon sequestration, their contribution to our cultural and artistic life, and of course through tourism. The parks also help keep America’s past alive, working with thousands of local jurisdictions around the country to protect historical sites and to bring the stories of these places to life.\n\nThe parks do all this on a shoestring. Congress allocates only $ 3 billion a year to the national park system—an amount that has been flat since 2001 (in inflation-adjusted dollars) with the exception of a onetime boost in 2009. Meanwhile, the number of annual visitors has increased by more than 50% since 1980, and now stands at 330 million visitors per year.",
+    "content": "It’s easy to dismiss as absurd the federal government’s ideas for plugging the chronic funding gap of our national parks. Can anyone really think it's a good idea to allow Amazon deliveries to your tent in Yosemite or food trucks to line up under the redwood trees at Sequoia National Park?\n\nBut the government is right about one thing: U.S. national parks are in crisis. Collectively, they have a maintenance backlog of more than $ 12 billion. Roads, trails, restrooms, visitor centers and other infrastructure are crumbling.\n\nBut privatizing and commercializing the campgrounds would not be a cure-all. Campgrounds are a tiny portion of the overall infrastructure backlog, and businesses in the parks hand over, on average, only about 5% of their revenues to the National Park Service.\n\nMoreover, increased privatization would certainly undercut one of the major reasons why 300 million visitors come to the parks each year: to enjoy nature and get a break from the commercial drumbeat that overwhelms daily life.\n\nThe real problem is that the parks have been chronically starved of funding. An economic survey of 700 U.S. taxpayers found that people would be willing to pay a significant amount of money to make sure the parks and their programs are kept intact. Some 81% of respondents said they would be willing to pay additional taxes for the next 10 years to avoid any cuts to the national parks.\n\nThe national parks provide great value to U.S. residents both as places to escape and as symbols of nature. On top of this, they produce value from their extensive educational programs, their positive impact on the climate through carbon sequestration, their contribution to our cultural and artistic life, and of course through tourism. The parks also help keep America’s past alive, working with thousands of local jurisdictions around the country to protect historical sites and to bring the stories of these places to life.\n\nThe parks do all this on a shoestring. Congress allocates only $ 3 billion a year to the national park system—an amount that has been flat since 2001 (in inflation-adjusted dollars) with the exception of a onetime boost in 2009. Meanwhile, the number of annual visitors has increased by more than 50% since 1980, and now stands at 330 million visitors per year.",
     "questions": [
       {
         "num": 26,
@@ -8531,7 +8531,7 @@ const READINGS = [
         "answer": "D"
       }
     ],
-        "answers": [
+    "answers": [
       "D",
       "A",
       "C",
@@ -8543,7 +8543,7 @@ const READINGS = [
     "year": 2023,
     "type": "英语二",
     "textNum": 3,
-    "content": "The Internet may be changing merely what we remember, not our capacity to do so, suggests Columbia University psychology professor Betsy Sparrow. In 2011, Sparrow led a study in which participants were asked to record 40 factoids in a computer (“an ostrich’s eye is bigger than its brain,” for example). Half of the participants were told the information would be erased, while the other half were told it would be saved. Guess what? The latter group made no effort to recall the information when quizzed on it later, because they knew they could find it on their computers. In the same study, a group was asked to remember both the information and the folders it was stored in. They didn't’t remember the information, but they remembered how to find the folders. In other words, human memory is not deteriorating but “adapting to new communications technology,” Sparrow says.\n\nIn a very practical way, the Internet is becoming an external hard drive for our memories, a process known as “cognitive offloading.” Traditionally, this role was fulfilled by data banks, libraries, and other humans. Your father may never remember birthdays because your mother does, for instance. Some worry that this is having a destructive effect on society, but Sparrow sees an upside. Perhaps, she suggests, the trend will change our approach to learning from a focus on individual facts and memorization to an emphasis on more conceptual thinking—something that is not available on the Internet. “I personally have never seen all that much intellectual value in memorizing things,” Sparrow says, adding that we haven’t lost our ability to do it.\n\nStill other experts say ifs too soon to understand how the Internet affects our brains. There is no experimental evidence showing that it interferes with our ability to focus, for instance, wrote psychologists Christopher Chabris and Daniel J. Simons. And surfing the web exercised the brain more than reading did among computer-savvy older adults in a 2008 study involving 24 participants at the Semel Institute for Neuroscience and Human Behavior at the University of California, Los Angeles.\n\n“There may be costs associated with our increased reliance on the Internet, but I’d have to imagine that overall the benefits are going to outweigh those costs,” observes psychology professor Benjamin Storm. “It seems pretty clear that memory is changing, but is it changing for the better? At this point, we don’t know.”",
+    "content": "The Internet may be changing merely what we remember, not our capacity to do so, suggests Columbia University psychology professor Betsy Sparrow. In 2011, Sparrow led a study in which participants were asked to record 40 factoids in a computer (“an ostrich’s eye is bigger than its brain,” for example). Half of the participants were told the information would be erased, while the other half were told it would be saved. Guess what? The latter group made no effort to recall the information when quizzed on it later, because they knew they could find it on their computers. In the same study, a group was asked to remember both the information and the folders it was stored in. They didn't remember the information, but they remembered how to find the folders. In other words, human memory is not deteriorating but “adapting to new communications technology,” Sparrow says.\n\nIn a very practical way, the Internet is becoming an external hard drive for our memories, a process known as “cognitive offloading.” Traditionally, this role was fulfilled by data banks, libraries, and other humans. Your father may never remember birthdays because your mother does, for instance. Some worry that this is having a destructive effect on society, but Sparrow sees an upside. Perhaps, she suggests, the trend will change our approach to learning from a focus on individual facts and memorization to an emphasis on more conceptual thinking—something that is not available on the Internet. “I personally have never seen all that much intellectual value in memorizing things,” Sparrow says, adding that we haven’t lost our ability to do it.\n\nStill other experts say it's too soon to understand how the Internet affects our brains. There is no experimental evidence showing that it interferes with our ability to focus, for instance, wrote psychologists Christopher Chabris and Daniel J. Simons. And surfing the web exercised the brain more than reading did among computer-savvy older adults in a 2008 study involving 24 participants at the Semel Institute for Neuroscience and Human Behavior at the University of California, Los Angeles.\n\n“There may be costs associated with our increased reliance on the Internet, but I’d have to imagine that overall the benefits are going to outweigh those costs,” observes psychology professor Benjamin Storm. “It seems pretty clear that memory is changing, but is it changing for the better? At this point, we don’t know.”",
     "questions": [
       {
         "num": 31,
@@ -8558,7 +8558,7 @@ const READINGS = [
       },
       {
         "num": 32,
-        "stem": "The process of a cognitive offloading”.",
+        "stem": "The process of \"cognitive offloading\".",
         "options": [
           "A. helps us identify false information",
           "B. keeps our memory from failing",
@@ -8601,7 +8601,7 @@ const READINGS = [
         "answer": "B"
       }
     ],
-        "answers": [
+    "answers": [
       "C",
       "D",
       "A",
@@ -8613,65 +8613,65 @@ const READINGS = [
     "year": 2023,
     "type": "英语二",
     "textNum": 4,
-    "content": "",
+    "content": "Teenagers are paradoxical. That's a mild and detached way of saying something that parents often express with considerably stronger language. But the paradox is scientific as well as personal. In adolescence, helpless and dependent children who have relied on grown-ups for just about everything become independent people who can take care of themselves and help each other. At the same time, once cheerful and compliant children become rebellious teenage risk-takers.\n\nA new study published in the journal Child Development, by Eveline Crone of the University of Leiden and colleagues, suggests that the positive and negative sides of teenagers go hand in hand. The study is part of a new wave of thinking about adolescence. For a long time, scientists and policy makers concentrated on the idea that teenagers were a problem that needed to be solved. The new work emphasizes that adolescence is a time of opportunity as well as risk.\n\nThe researchers studied \"prosocial\" and rebellious traits in more than 200 children and young adults, ranging from 11 to 28 years old. The participants filled out questionnaires about how often they did things that were altruistic and positive, like sacrificing their own interests to help a friend, or rebellious and negative, like getting drunk or staying out late.\n\nOther studies have shown that rebellious behavior increases as you become a teenager and then fades away as you grow older. But the new study shows that, interestingly, the same pattern holds for prosocial behavior. Teenagers were more likely than younger children or adults to report that they did things like unselfishly helping a friend.\n\nMost significantly, there was a positive correlation between prosociality and rebelliousness. The teenagers who were more rebellious were also more likely to help others. The good and bad sides of adolescence seem to develop together.\n\nIs there some common factor that underlies these apparently contradictory developments? One idea is that teenage behavior is related to what researchers call \"reward sensitivity.\" Decision-making always involves balancing rewards and risks, benefits and costs. \"Reward sensitivity\" measures how much reward it takes to outweigh risk.\n\nTeenagers are particularly sensitive to social rewards—winning the game, impressing a new friend, getting that boy to notice you. Reward sensitivity, like prosocial behavior and risk-taking, seems to go up in adolescence and then down again as we age. Somehow, when you hit 30, the chance that something exciting and new will happen at that party just doesn't seem to outweigh the effort of getting up off the couch.",
     "questions": [
       {
         "num": 36,
-        "stem": "According to Paragraph 1,childrengrowing into adolescencetendto ____",
+        "stem": "According to Paragraph 1, children growing into adolescence tend to ____",
         "options": [
-          "A. develop opposite personalitytraits.",
-          "B. seetheworld in anunreasonableway.",
-          "C. have fondmemoriesoftheirpast.",
-          "D. show affection fortheirparents."
+          "A. develop opposite personality traits.",
+          "B. see the world in an unreasonable way.",
+          "C. have fond memories of their past.",
+          "D. show affection for their parents."
         ],
         "answer": "A"
       },
       {
         "num": 37,
-        "stem": "It canbelearnedfrom Paragraph 2thatCrone’sstudy____",
+        "stem": "It can be learned from Paragraph 2 that Crone’s study ____",
         "options": [
-          "A. exploresteenagers’socialresponsibilities.",
-          "B. examines teenagers’ emotionalproblems.",
-          "C. provides anewinsightinto adolescence.",
-          "D. highlightsnegative adolescentbehavior."
+          "A. explores teenagers’ social responsibilities.",
+          "B. examines teenagers’ emotional problems.",
+          "C. provides a new insight into adolescence.",
+          "D. highlights negative adolescent behavior."
         ],
         "answer": "C"
       },
       {
         "num": 38,
-        "stem": "WhatdoesCrone’sstudy findaboutprosocialbehavior?",
+        "stem": "What does Crone’s study find about prosocial behavior?",
         "options": [
-          "A. It resultsfrom thewishto cooperate.",
-          "B. It is cultivatedthrougheducation.",
-          "C. It is subjectto familyinfluence.",
-          "D. It tendsto peakin adolescence."
+          "A. It results from the wish to cooperate.",
+          "B. It is cultivated through education.",
+          "C. It is subject to family influence.",
+          "D. It tends to peak in adolescence."
         ],
         "answer": "D"
       },
       {
         "num": 39,
-        "stem": "It canbelearnedfrom thelasttwoparagraphsthat teenagers ____",
+        "stem": "It can be learned from the last two paragraphs that teenagers ____",
         "options": [
-          "A. overstress theirinfluenceonothers.",
-          "B. care alot aboutsocial recognition.",
-          "C. becomeanxiousabouttheirfuture.",
-          "D. endeavorto live ajoyfullife."
+          "A. overstress their influence on others.",
+          "B. care a lot about social recognition.",
+          "C. become anxious about their future.",
+          "D. endeavor to live a joyful life."
         ],
         "answer": "B"
       },
       {
         "num": 40,
-        "stem": "Whatisthetextmainly about?",
+        "stem": "What is the text mainly about?",
         "options": [
-          "A. Whyteenagers areself-contradictory.",
-          "B. Whyteenagers arerisk-sensitive.",
-          "C. Howteenagersdevelopprosociality.",
-          "D. Howteenagersbecomeindependent."
+          "A. Why teenagers are self-contradictory.",
+          "B. Why teenagers are risk-sensitive.",
+          "C. How teenagers develop prosociality.",
+          "D. How teenagers become independent."
         ],
         "answer": "A"
       }
     ],
-        "answers": [
+    "answers": [
       "A",
       "C",
       "D",
@@ -8741,7 +8741,7 @@ const READINGS = [
         "answer": "D"
       }
     ],
-        "answers": [
+    "answers": [
       "C",
       "C",
       "D",
@@ -8768,7 +8768,7 @@ const READINGS = [
       },
       {
         "num": 27,
-        "stem": "According to Confdr, the UK government’s fresh incentives",
+        "stem": "According to Confor, the UK government’s fresh incentives",
         "options": [
           "A. can hardly address a construction crisis.",
           "B. are believed to come at a wrong time.",
@@ -8811,7 +8811,7 @@ const READINGS = [
         "answer": "C"
       }
     ],
-        "answers": [
+    "answers": [
       "A",
       "A",
       "B",
@@ -8881,7 +8881,7 @@ const READINGS = [
         "answer": "B"
       }
     ],
-        "answers": [
+    "answers": [
       "C",
       "D",
       "B",
@@ -8951,7 +8951,7 @@ const READINGS = [
         "answer": "D"
       }
     ],
-        "answers": [
+    "answers": [
       "A",
       "A",
       "D",
@@ -8963,7 +8963,7 @@ const READINGS = [
     "year": 2025,
     "type": "英语二",
     "textNum": 1,
-    "content": "U.S. customers historically tipped people they assumed were earning most of their income via tips, such as restaurant servers earning less than the minimum wage. In the earlys, a wide range of businesses started processing purchases with iPads and other digital payment systems. These systems often prompted customers to tip for services that were not previously tipped.\n\nToday’s tip requests are often not connected to the salary and service norms that used to determine when and how people tip. Customers in the past nearly always paid tips after receiving a service, such as at the conclusion of a restaurant meal, after getting a haircut or once a pizza was delivered. That timing could reward high-quality service and give workers an incentive to provide it.\n\nIt’s becoming more common for tips to be requested beforehand. And new tipping technology may even automatically add tips.\n\nThe prevalence of digital payment devices has made it easier to ask customers for a tip.\n\nThat helps explain why tip requests are creeping into new kinds of services. Customers now routinely see menus of suggested default options — often well above 20% of what they owe.\n\nThe amounts have risen from 10% or less in thes to 15% around the year 2000 to 20% or higher today. This increase is sometimes called tipflation — the expectation of ever-higher tip amounts.\n\nTipping has always been a vital source of income for workers in historically tipped services, like restaurants, where the tipped minimum wage can be as low as US $2.13 an hour.\n\nTip creep and tipflation are now further supplementing the income of many low-wage service workers.\n\nNotably, tipping primarily benefits some of these workers, such as waiters, but not others, such as cooks and dishwashers. To ensure that all employees were paid fair wages, some restaurants banned tipping and increased prices, but this movement towards no-tipping services has largely fizzled out.\n\nSo to increase employee wages without raising prices, more employers are succumbing to temptations of tip creep and tipflation. However, many customers are frustrated because they feel they are being asked for too high of a tip too often. And, as our research emphasizes, tipping now seems to be more coercive, less generous, and often completely dissociated from service quality.",
+    "content": "U.S. customers historically tipped people they assumed were earning most of their income via tips, such as restaurant servers earning less than the minimum wage. In the early 2010s, a wide range of businesses started processing purchases with iPads and other digital payment systems. These systems often prompted customers to tip for services that were not previously tipped.\n\nToday’s tip requests are often not connected to the salary and service norms that used to determine when and how people tip. Customers in the past nearly always paid tips after receiving a service, such as at the conclusion of a restaurant meal, after getting a haircut or once a pizza was delivered. That timing could reward high-quality service and give workers an incentive to provide it.\n\nIt’s becoming more common for tips to be requested beforehand. And new tipping technology may even automatically add tips.\n\nThe prevalence of digital payment devices has made it easier to ask customers for a tip.\n\nThat helps explain why tip requests are creeping into new kinds of services. Customers now routinely see menus of suggested default options — often well above 20% of what they owe.\n\nThe amounts have risen from 10% or less in the 1950s to 15% around the year 2000 to 20% or higher today. This increase is sometimes called tipflation — the expectation of ever-higher tip amounts.\n\nTipping has always been a vital source of income for workers in historically tipped services, like restaurants, where the tipped minimum wage can be as low as US $2.13 an hour.\n\nTip creep and tipflation are now further supplementing the income of many low-wage service workers.\n\nNotably, tipping primarily benefits some of these workers, such as waiters, but not others, such as cooks and dishwashers. To ensure that all employees were paid fair wages, some restaurants banned tipping and increased prices, but this movement toward no-tipping services has largely fizzled out.\n\nSo to increase employee wages without raising prices, more employers are succumbing to the temptations of tip creep and tipflation. However, many customers are frustrated because they feel they are being asked for too high of a tip too often. And, as our research emphasizes, tipping now seems to be more coercive, less generous, and often completely dissociated from service quality.",
     "questions": [
       {
         "num": 21,
@@ -9033,7 +9033,7 @@ const READINGS = [
     "year": 2025,
     "type": "英语二",
     "textNum": 2,
-    "content": "When it was established, the National Health Service (NHS) was visionary: offering high- quality, timely care to meet the dominant needs of the population it served. Nearly 75 years on, with the UK facing very different health challenges, it is clear that the model is out of date.\n\nFrom life expectancy to cancer and infant mortality rates, we are lagging behind many of our peers. With more than 6.8 million on waitlists, healthcare is becoming increasingly inaccessible for those who cannot opt to pay for private treatment; and the cost of providing healthcare is increasingly squeezing our investment in other public services. As demand for healthcare continues to grow, pressures on the workforce — which is already near breaking point — will only become more acute.\n\nMany of the answers to the crisis in health and care are well rehearsed. We need to be much better at reducing and diverting demand on health services, rather than simply managing it. Much more needs to be invested in communities and primary care to reduce our reliance on hospitals. And capacity in social care needs to be greater, to support the growing number of people living with long-term conditions.\n\nYet despite two decades of strategies and a number of major health reforms, we have failed to make meaningful progress on any of these aims. That is why the Reform think tank is launching a new programme of work entitled “Reimagining health”, supported by ten former health ministers. Together, we are calling for a much more open and honest conversation about the future of health in the UK, and an “urgent rethink” of the hospital-centric model we retain.\n\nThis must begin with the question of how we maximise the health of the nation, rather than “fix” the NHS. It is estimated, for example, that healthcare accounts for only about 20% of health outcomes. Much more important are the places we live, work and socialise — yet there is no clear cross-government strategy for improving these social determinants of health.\n\nWorse, when policies like the national obesity strategy are scrapped, taxpayers are left with the hefty price tag of treating the illnesses, like diabetes, that result.\n\nReform wants to ask how power and resources should be distributed in our health system.\n\nWhat health functions should remain at the centre, and what should be given to local leaders, often responsible for services that create health, and with a much better understanding of the needs of their populations?",
+    "content": "When it was established, the National Health Service (NHS) was visionary: offering high- quality, timely care to meet the dominant needs of the population it served. Nearly 75 years on, with the UK facing very different health challenges, it is clear that model is out of date.\n\nFrom life expectancy to cancer and infant mortality rates, we are lagging behind many of our peers. With more than 6.8 million on waitlists, healthcare is becoming increasingly inaccessible for those who cannot opt to pay for private treatment; and the cost of providing healthcare is increasingly squeezing out investment in other public services. As demand for healthcare continues to grow, pressures on the workforce — which is already near breaking point — will only become more acute.\n\nMany of the answers to the crisis in health and care are well rehearsed. We need to be much better at reducing and diverting demand on health services, rather than simply managing it. Much more needs to be invested in communities and primary care to reduce our reliance on hospitals. And capacity in social care needs to be greater, to support the growing number of people living with long-term conditions.\n\nYet despite two decades of strategies and a number of major health reforms, we have failed to make meaningful progress on any of these aims. That is why the Reform think tank is launching a new programme of work entitled “Reimagining health”, supported by ten former health ministers. Together, we are calling for a much more open and honest conversation about the future of health in the UK, and an “urgent rethink” of the hospital-centric model we retain.\n\nThis must begin with the question of how we maximise the health of the nation, rather than “fix” the NHS. It is estimated, for example, that healthcare accounts for only about 20% of health outcomes. Much more important are the places we live, work and socialise — yet there is no clear cross-government strategy for improving these social determinants of health.\n\nWorse, when policies like the national obesity strategy are scrapped, taxpayers are left with the hefty price tag of treating the illnesses, like diabetes, that result.\n\nReform wants to ask how power and resources should be distributed in our health system.\n\nWhat health functions should remain at the centre, and what should be given to local leaders, often responsible for services that create health, and with a much better understanding of the needs of their populations?",
     "questions": [
       {
         "num": 26,
@@ -9103,7 +9103,7 @@ const READINGS = [
     "year": 2025,
     "type": "英语二",
     "textNum": 3,
-    "content": "Heat action plans, or HAPs, have been proliferating in India in the past few years. In general, an HAP spells out when and how officials should issue heat warnings and alert hospitals and other institutions. Nagpur’s plan, for instance, calls for hospitals to set aside “cold wards” in the summer for treating heatstroke patients, and advises builders to give construction laborers a break from work on very hot days.\n\nBut implementation of existing HAPs has been uneven, according to a report from the center for Policy Research. Many lack adequate funding, it found. And their triggering thresholds often are not customized to the local climate. In some areas, high daytime temperatures alone might serve as an adequate trigger for alerts. But in other places, nighttime temperatures or humidity might be as important a gauge of risk as daytime highs.\n\nMumbai’s April heat stroke deaths highlighted the need for more nuanced and localized warnings, researchers say. That day’s high temperature of roughlyc wasc shy of the heat wave alert threshold for coastal cities set by national meteorological authorities. But the effects of the heat were amplified by humidity — an often neglected factor in heat alert systems — and the lack of shade at the late-morning outdoor ceremony.\n\nTo help improve HAPs, urban planner Kotharkar’s team is working on a model plan that outlines best practices and could be adapted to local conditions. Among other things, she says, all cities should create a vulnerability map to help focus responses on the populations most at risk.\n\nSuch mapping doesn't’t need to be complex, Kotharkar says. “A useful map can be created by looking at even a few key parameters.” For example, neighborhoods with a large elderly population or informal dwellings that cope poorly with heat could get special warnings or be bolstered with cooling centers. The Nagpur project has already created a risk and vulnerability map, which enabled Kotharkar to tell officials which neighborhoods to focus on in the event of a heat wave this summer.\n\nHAPs shouldn't’t just include short-term emergency responses, researchers say, but also recommend medium- to long-term measures that could make communities cooler. In Nagpur, for example, Kotharkar’s team has been able to advise city officials about where to plant trees to provide shade. HAPs could also guide efforts to retrofit homes or modify building regulations. “Reducing deaths in an emergency is a good target to have, but it’s the lowest target,” says Climate researcher Chandni Singh.",
+    "content": "Heat action plans, or HAPs, have been proliferating in India in the past few years. In general, an HAP spells out when and how officials should issue heat warnings and alert hospitals and other institutions. Nagpur’s plan, for instance, calls for hospitals to set aside “cold wards” in the summer for treating heatstroke patients, and advises builders to give construction laborers a break from work on very hot days.\n\nBut implementation of existing HAPs has been uneven, according to a report from the Centre for Policy Research. Many lack adequate funding, it found. And their triggering thresholds often are not customized to the local climate. In some areas, high daytime temperatures alone might serve as an adequate trigger for alerts. But in other places, nighttime temperatures or humidity might be as important a gauge of risk as daytime highs.\n\nMumbai’s April heat stroke deaths highlighted the need for more nuanced and localized warnings, researchers say. That day’s high temperature of roughly 36°C was 1°C shy of the heat wave alert threshold for coastal cities set by national meteorological authorities. But the effects of the heat were amplified by humidity — an often neglected factor in heat alert systems — and the lack of shade at the late-morning outdoor ceremony.\n\nTo help improve HAPs, urban planner Rajashree Kotharkar’s team is working on a model plan that outlines best practices and could be adapted to local conditions. Among other things, she says, all cities should create a vulnerability map to help focus responses on the populations most at risk.\n\nSuch mapping doesn't need to be complex, Kotharkar says. “A useful map can be created by looking at even a few key parameters.” For example, neighborhoods with a large elderly population or informal dwellings that cope poorly with heat could get special warnings or be bolstered with cooling centers. The Nagpur project has already created a risk and vulnerability map, which enabled Kotharkar to tell officials which neighborhoods to focus on in the event of a heat wave this summer.\n\nHAPs shouldn't just include short-term emergency responses, researchers say, but also recommend medium- to long-term measures that could make communities cooler. In Nagpur, for example, Kotharkar’s team has been able to advise city officials about where to plant trees to provide shade. HAPs could also guide efforts to retrofit homes or modify building regulations. “Reducing deaths in an emergency is a good target to have, but it’s the lowest target,” says Climate researcher Chandni Singh.",
     "questions": [
       {
         "num": 31,
@@ -9154,8 +9154,8 @@ const READINGS = [
         "stem": "According to the last paragraph, researchers believe that HAPs should ____",
         "options": [
           "A. focus more on heatstroke treatment.",
-          "B. invite wider public participation.",
-          "C. apply for more government grants.",
+          "B. apply for more government grants.",
+          "C. invite wider public participation.",
           "D. serve a broader range of purposes."
         ],
         "answer": "D"
@@ -9243,7 +9243,7 @@ const READINGS = [
     "year": 2026,
     "type": "英语二",
     "textNum": 1,
-    "content": "Ask people about public libraries and a certain image springs to mind: dusty, old-fashioned, the sort of place you enjoyed as a child but, rather like a British seaside town, would you go there now? And anyway-aren't’t they all closing?\n\nThe reality is startlingly different, as I discovered when the culture department commissioned me to conduct an independent review of English public libraries, published yesterday. As I visited libraries up and down the country, I was surprised to learn there are more than twice the number of libraries (2,892) as there are branches of McDonald’s.\n\nEnter any one of them and you will find a hive of activity, while books are, and should always be, at the heart of any library, a multitude of other services are offered: employment advice, language classes or digital access and support.\n\nThere are libraries with business and intellectual property centres, which can help business owners and entrepreneurs. Many have nurses on site to carry out basic health checks, with a link to the GP’s surgery, there are libraries where young people can borrow a Fifa-standard football free.\n\nIn return for all of this, you’ll be asked for precisely nothing. There will be no charge and you will never be asked to justify or explain yourself, you will simply be welcomed in, offered help if you need it, and left alone if you do not. There is no other institution, public or private, that can say the same.\n\nYet still our libraries are often overlooked and underappreciated. There is an overall decline in visits and many are struggling as local authorities come under continued financial pressure.\n\nThe number of libraries that have closed since 2010 is disputed. An annual survey by the Chartered Institute of Public Finance and Accountancy puts it at nearly 800 across the UK; official statistics held by the Arts Council record 230 in England. It is, of course, 230 libraries too many. So if we are to protect our libraries for future generations, we must raise awareness of them and the work they do.\n\nThe review recommends a national branding campaign to give libraries a stronger physical presence, the reintroduction of a scheme to enable members to use their card in any library in the country, and automatic memberships for children. If we don’t use them, we will end up losing them. And for those who haven’t been to a library for some time, they may be surprised by what they find.",
+    "content": "Ask people about public libraries and a certain image springs to mind: dusty, old-fashioned, the sort of place you enjoyed as a child but, rather like a British seaside town, would you go there now? And anyway—aren't they all closing?\n\nThe reality is startlingly different, as I discovered when the culture department commissioned me to conduct an independent review of English public libraries, published yesterday. As I visited libraries up and down the country, I was surprised to learn there are more than twice the number of libraries (2,892) as there are branches of McDonald’s.\n\nEnter any one of them and you will find a hive of activity, while books are, and should always be, at the heart of any library, a multitude of other services are offered: employment advice, language classes or digital access and support.\n\nThere are libraries with business and intellectual property centres, which can help business owners and entrepreneurs. Many have nurses on site to carry out basic health checks, with a link to the GP’s surgery, there are libraries where young people can borrow a Fifa-standard football free.\n\nIn return for all of this, you’ll be asked for precisely nothing. There will be no charge and you will never be asked to justify or explain yourself, you will simply be welcomed in, offered help if you need it, and left alone if you do not. There is no other institution, public or private, that can say the same.\n\nYet still our libraries are often overlooked and underappreciated. There is an overall decline in visits and many are struggling as local authorities come under continued financial pressure.\n\nThe number of libraries that have closed since 2010 is disputed. An annual survey by the Chartered Institute of Public Finance and Accountancy puts it at nearly 800 across the UK; official statistics held by the Arts Council record 230 in England. It is, of course, 230 libraries too many. So if we are to protect our libraries for future generations, we must raise awareness of them and the work they do.\n\nThe review recommends a national branding campaign to give libraries a stronger physical presence, the reintroduction of a scheme to enable members to use their card in any library in the country, and automatic memberships for children. If we don’t use them, we will end up losing them. And for those who haven’t been to a library for some time, they may be surprised by what they find.",
     "questions": [
       {
         "num": 21,
@@ -9258,18 +9258,18 @@ const READINGS = [
       },
       {
         "num": 22,
-        "stem": "According to Para.3&4 , the author finds that libraries.",
+        "stem": "According to Paragraphs 3&4, the author finds that libraries.",
         "options": [
           "A. boast desirable book collections.",
           "B. keep detailed visitor records.",
-          "C. preform diversified functions.",
+          "C. perform diversified functions.",
           "D. attract mostly young readers."
         ],
         "answer": "C"
       },
       {
         "num": 23,
-        "stem": "It is implied in Para. 5 that libraries should.",
+        "stem": "It is implied in Paragraph 5 that libraries should.",
         "options": [
           "A. be given greater attention.",
           "B. impose stricter visit limits.",
@@ -9280,7 +9280,7 @@ const READINGS = [
       },
       {
         "num": 24,
-        "stem": "The statistics mentioned in P6 show.",
+        "stem": "The statistics mentioned in Paragraph 6 show.",
         "options": [
           "A. the crisis faced by libraries.",
           "B. the advancement of libraries.",
@@ -9313,7 +9313,7 @@ const READINGS = [
     "year": 2026,
     "type": "英语二",
     "textNum": 2,
-    "content": "According to our research, around one in five workers in the UK talk to AI like a friend, looking for guidance on personal and professional problems. Our data shows that engaging with AI like this can leave us feeling heard and less isolated. But, with this newfound connection, many of us share sensitive, sometimes highly confidential informational, even though over a third of people don’t realize that AI platforms may not be very good at keeping our secrets.\n\nFor business, the implications are worrying. Consider Microsoft Copilot, for example. It gains Microsoft broad rights to the data inputted or outputted by any user – rights to use this data in any way it sees fit; it can even share it with third parties. This means that any way it sees fit, it can even share it with third parties. This means that any sensitive business information could potentially be exposed to the world. Employers are taking note and taking action. According to our research, 25% have decided to either outright ban AI or regulate its use within their organizations. But even with these policies in place, some employees choose to break the rules. They have their reasons – around 63% of them report that using AI increases their productivity, and some even feel AI offers more help than their human colleagues.\n\nThe situation presents a delicate balance between leveraging AI for its productivity gains and risking confidential data exposure. Employers need to manage AI tools with the same level of care as any other form of data sharing or storage. There's also a knowledge gap that needs to be addressed — 40% of individuals surveyed are unsure about who retains ownership over the content produced by AI. By instilling best practices in AI engagement and creating policies that evolve with the technology, business can positively shift the AI landscape.\n\nWith AI's potential to simplify our professional lives, do the admin and enhance the work experience. It's up to us to navigate its usage cautiously so it supports us without compromising our privacy. There's no need to back away from progress, as long as we're equipped with the knowledge and tools to make sure AI remains a friend. And this is where the challenge lies. There are so many products out there, being promoted with huge advertising and marketing budgets, that it's easy to fall victim. But by building a culture of digital responsibility within our business, we can create a future where AI can help us without spilling the beans.",
+    "content": "According to our research, around one in five workers in the UK talk to AI like a friend, looking for guidance on personal and professional problems. Our data shows that engaging with AI like this can leave us feeling heard and less isolated. But, with this newfound connection, many of us share sensitive, sometimes highly confidential information, even though over a third of people don’t realise that AI platforms may not be very good at keeping our secrets…secret.\n\nFor businesses, the implications are worrying. Consider Microsoft Copilot, for example. It gains Microsoft broad rights to the data inputted or outputted by any user – rights to use this data in any way it sees fit; it can even share it with third parties. This means that any sensitive business information could potentially be exposed to the world. Employers are taking note and taking action. According to our research, 25% have decided to either outright ban AI or regulate its use within their organisations. But even with these policies in place, some employees choose to break the rules. They have their reasons – around 63% of them report that using AI increases their productivity, and some even feel AI offers more help than their human colleagues.\n\nThe situation presents a delicate balance between leveraging AI for its productivity gains and risking confidential data exposure. Employers need to manage AI tools with the same level of care as any other form of data sharing or storage. There's also a knowledge gap that needs to be addressed — 40% of individuals surveyed are unsure about who retains ownership over the content produced by AI. By instilling best practices in AI engagement and creating policies that evolve with the technology, businesses can positively shift the AI landscape.\n\nWith AI's potential to simplify our professional lives, do the admin and enhance the work experience. It's up to us to navigate its usage cautiously so it supports us without compromising our privacy. There's no need to back away from progress, as long as we're equipped with the knowledge and tools to make sure AI remains a friend. And this is where the challenge lies. There are so many products out there, being promoted with huge advertising and marketing budgets, that it's easy to fall victim. But by building a culture of digital responsibility within our businesses, we can create a future where AI can help us without spilling the beans.",
     "questions": [
       {
         "num": 26,
@@ -9453,7 +9453,7 @@ const READINGS = [
     "year": 2026,
     "type": "英语二",
     "textNum": 4,
-    "content": "In 2023, Chicago lost one of its most beloved street festivals. The Silver Room Block Party, staged by Hyde Park community leader Eric Williams, announced it would not return in 2024. What began as a small neighborhood gathering blossomed into a massive cultural event welcoming tens of thousands of people each year over nearly two decades before abruptly shutting down.\n\nWilliams pointed to rising production costs and declining attendee donations as primary reasons the Silver Room Block Party could not continue, highlighting a reality that all street festival organizers face right now. The cost of producing a street festival in Chicago has skyrocketed. Security, entertainment, portable restrooms, insurance and even basics such as fencing and staffing have all become significantly more expensive. At the same time, donations at festival gates have dropped dramatically.\n\nChicago’s summer festivals are about more than just entertainment; they are economic engines that directly benefit the neighborhoods they’re in and the city of Chicago as whole. Street festivals drive foot traffic to local businesses and foster the kind of cultural vibrancy that makes our city special.\n\nWe often hear people ask why we solicit donations at our entry points, especially when the city’s largest festivals like the Chicago Jazz Festival do not request donations. The fact is, unlike those large, city-produced music festivals, your neighborhood street festivals receive no city funding and rely on a combination of sponsorships, vendor fees and gate donations to cover their costs.\n\nWicker Park Fest has long been one of Chicago’s most anticipated summer festivals, drawing upward of 70,000 attendees for a full weekend of live indie music, local art, small business vendors and, most importantly, community connection. In 2024, Wicker Park Fest saw record-breaking attendance. Despite the turnout, gate donations reached their lowest point in our history. This year, we’ve been forced to scale back the footprint of the fest. We are eliminating a stage, booking fewer performers and making additional cuts to reduce our costs, all while striving to keep the festival as vibrant as ever, as supportive of local artists and businesses, and as true to Wicker Park’s unique spirit and reputation as festgoers have come to expect.\n\nThis summer, as you enjoy your favorite neighborhood street festival, I hope you’ll remember that they exist because of community support. A thriving summer festival season doesn't’t happen by accident; It happens when we all chip in.",
+    "content": "In 2023, Chicago lost one of its most beloved street festivals. The Silver Room Block Party, staged by Hyde Park community leader Eric Williams, announced it would not return in 2024. What began as a small neighborhood gathering blossomed into a massive cultural event welcoming tens of thousands of people each year over nearly two decades before abruptly shutting down.\n\nWilliams pointed to rising production costs and declining attendee donations as primary reasons the Silver Room Block Party could not continue, highlighting a reality that all street festival organizers face right now. The cost of producing a street festival in Chicago has skyrocketed. Security, entertainment, portable restrooms, insurance and even basics such as fencing and staffing have all become significantly more expensive. At the same time, donations at festival gates have dropped dramatically.\n\nChicago’s summer festivals are about more than just entertainment; they are economic engines that directly benefit the neighborhoods they’re in and the city of Chicago as a whole. Street festivals drive foot traffic to local businesses and foster the kind of cultural vibrancy that makes our city special.\n\nWe often hear people ask why we solicit donations at our entry points, especially when the city’s largest festivals like the Chicago Jazz Festival do not request donations. The fact is, unlike those large, city-produced music festivals, your neighborhood street festivals receive no city funding and rely on a combination of sponsorships, vendor fees and gate donations to cover their costs.\n\nWicker Park Fest has long been one of Chicago’s most anticipated summer festivals, drawing upward of 70,000 attendees for a full weekend of live indie music, local art, small business vendors and, most importantly, community connection. In 2024, Wicker Park Fest saw record-breaking attendance. Despite the turnout, gate donations reached their lowest point in our history. This year, we’ve been forced to scale back the footprint of the fest. We are eliminating a stage, booking fewer performers and making additional cuts to reduce our costs, all while striving to keep the festival as vibrant as ever, as supportive of local artists and businesses, and as true to Wicker Park’s unique spirit and reputation as festgoers have come to expect.\n\nThis summer, as you enjoy your favorite neighborhood street festival, I hope you’ll remember that they exist because of community support. A thriving summer festival season doesn't happen by accident; it happens when we all chip in.",
     "questions": [
       {
         "num": 36,

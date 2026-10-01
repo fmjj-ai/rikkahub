@@ -599,8 +599,35 @@
       el.innerHTML = renderMarkdown(content);
     }
     function toast(msg) { const t=$('toast'); t.textContent=msg; t.style.display='block'; clearTimeout(window.__toastTimer); window.__toastTimer=setTimeout(()=>t.style.display='none',2200); }
-    function normalizeWord(w) { return String(w || '').replace(/^[^A-Za-z]+|[^A-Za-z]+$/g, '').toLowerCase(); }
-    function lookup(word) { return DICT_DATA[word] || DICT_DATA[word.toLowerCase()] || ''; }
+    function normalizeWord(w) { return String(w || '').replace(/^[^A-Za-z]+|[^A-Za-z]+$/g, '').toLowerCase().replace(/’/g, "'"); }
+    function lookup(word) {
+      const w = String(word || '').toLowerCase().replace(/’/g, "'");
+      const hit = k => (k && DICT_DATA[k]) || '';
+      let r = hit(w) || hit(w.replace(/'/g, '’'));
+      if (r) return r;
+      // 所有格剥离：artist's / artists'
+      if (w.endsWith("'s")) r = hit(w.slice(0, -2));
+      else if (w.endsWith("s'")) r = hit(w.slice(0, -1));
+      if (r) return r;
+      // 规则屈折还原：ies/ied→y、es、ed、ing、s、er、est、ly（含双写尾字母回退）
+      const cand = [];
+      if (w.endsWith('ies') || w.endsWith('ied')) cand.push(w.slice(0, -3) + 'y');
+      if (w.endsWith('es')) cand.push(w.slice(0, -2), w.slice(0, -1));
+      if (w.endsWith('ed')) { const b = w.slice(0, -2); cand.push(b, b + 'e', b.slice(0, -1)); }
+      if (w.endsWith('ing')) { const b = w.slice(0, -3); cand.push(b, b + 'e', b.slice(0, -1)); }
+      if (w.endsWith('s')) cand.push(w.slice(0, -1));
+      if (w.endsWith('est')) { const b = w.slice(0, -3); cand.push(b, b + 'e'); if (b.endsWith('i')) cand.push(b.slice(0, -1) + 'y'); }
+      if (w.endsWith('er')) { const b = w.slice(0, -2); cand.push(b, b + 'e'); if (b.endsWith('i')) cand.push(b.slice(0, -1) + 'y'); }
+      if (w.endsWith('ily')) cand.push(w.slice(0, -3) + 'y');
+      else if (w.endsWith('ly')) cand.push(w.slice(0, -2));
+      for (const f of cand) { r = hit(f) || hit(f.replace(/'/g, '’')); if (r) return r; }
+      // 连字符复合词：拆段查词拼接释义
+      if (w.includes('-')) {
+        const parts = w.split('-').map(p => stripPhonetic(lookup(p))).filter(Boolean);
+        if (parts.length) return parts.join(' / ');
+      }
+      return '';
+    }
     function stripPhonetic(s) {
       return cleanText(s || '')
         .replace(/\\r\\n/g, '\n')
@@ -801,7 +828,7 @@
       $('yearSelect').value = String(r.year); fillTexts(true); $('textSelect').value = String(r.textNum); renderReading();
     }
     function wrapWords(text) {
-      return esc(text).replace(/([A-Za-z][A-Za-z'\-]*)/g, m => `<span class="word" onclick="onWord(event, '${esc(normalizeWord(m))}')">${m}</span>`);
+      return esc(text).replace(/([A-Za-z][A-Za-z'’\-]*)/g, m => `<span class="word" onclick="onWord(event, '${esc(normalizeWord(m))}')">${m}</span>`);
     }
     function renderOptionText(opt, qi) {
       const raw = String(opt || '');
