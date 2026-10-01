@@ -1,6 +1,5 @@
 package me.rerere.rikkahub.ui.components.ai
 
-import android.content.res.Configuration
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -28,7 +27,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
@@ -65,7 +63,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -145,9 +142,6 @@ fun ChatInput(
 
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
-    val configuration = LocalConfiguration.current
-    val isTabletLandscape = configuration.smallestScreenWidthDp >= 600 &&
-        configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
     // 键盘弹出时让底部两角变直角，贴合 IME
     val imeVisible = WindowInsets.isImeVisible
@@ -258,6 +252,7 @@ fun ChatInput(
                             modifier = Modifier
                                 .weight(1f)
                                 .horizontalScroll(rememberScrollState()),
+                            verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(2.dp)
                         ) {
                             // Model Picker
@@ -313,8 +308,6 @@ fun ChatInput(
                                     usage = contextUsage,
                                     model = model,
                                     onClick = onContextUsageClick,
-                                    // 仅平板横屏微调圆环，与旁边按钮在视觉上对齐。
-                                    modifier = if (isTabletLandscape) Modifier.offset(y = 4.dp) else Modifier,
                                 )
                             }
 
