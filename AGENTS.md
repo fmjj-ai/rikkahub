@@ -16,6 +16,8 @@
 构建应用需要在 `app/` 下提供 `google-services.json`（用于 Firebase）。
 `web` 模块会在 `preBuild` 阶段构建 `web-ui/` 并复制静态资源，需要本地可用 `pnpm`。
 
+构建/打包结束后执行 `./gradlew --stop`，关闭残留的 Gradle/Kotlin daemon 进程，避免占用内存。
+
 ## Coding Style & Naming Conventions
 
 本仓库使用 `.editorconfig` 统一格式：
