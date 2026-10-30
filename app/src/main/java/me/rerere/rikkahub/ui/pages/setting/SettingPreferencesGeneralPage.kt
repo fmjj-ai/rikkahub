@@ -1,5 +1,8 @@
 package me.rerere.rikkahub.ui.pages.setting
 
+import android.content.Intent
+import android.os.PowerManager
+import android.provider.Settings
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -21,8 +24,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import me.rerere.rikkahub.R
 import me.rerere.rikkahub.data.datastore.DisplaySetting
@@ -71,6 +77,17 @@ fun SettingPreferencesGeneralPage(vm: SettingVM = koinViewModel()) {
                     "create_new_conversation_on_start",
                     true
                 )
+                val context = LocalContext.current
+                val powerManager = remember { context.getSystemService(PowerManager::class.java) }
+                var ignoringBatteryOptimizations by remember {
+                    mutableStateOf(powerManager?.isIgnoringBatteryOptimizations(context.packageName) == true)
+                }
+                LifecycleResumeEffect(Unit) {
+                    // 页面回到前台时刷新电池优化白名单状态
+                    ignoringBatteryOptimizations =
+                        powerManager?.isIgnoringBatteryOptimizations(context.packageName) == true
+                    onPauseOrDispose { }
+                }
                 CardGroup(
                     modifier = Modifier.padding(horizontal = 8.dp),
                 ) {
@@ -253,6 +270,50 @@ fun SettingPreferencesGeneralPage(vm: SettingVM = koinViewModel()) {
                             }
                         )
                     }
+                    item(
+                        headlineContent = { Text(stringResource(R.string.setting_display_page_background_keep_alive)) },
+                        supportingContent = {
+                            Text(
+                                stringResource(
+                                    when {
+                                        !displaySetting.enableBackgroundKeepAlive ->
+                                            R.string.setting_display_page_background_keep_alive_desc
+
+                                        ignoringBatteryOptimizations ->
+                                            R.string.setting_display_page_background_keep_alive_allowed
+
+                                        else ->
+                                            R.string.setting_display_page_background_keep_alive_suggest
+                                    }
+                                )
+                            )
+                        },
+                        trailingContent = {
+                            Switch(
+                                checked = displaySetting.enableBackgroundKeepAlive,
+                                onCheckedChange = { checked ->
+                                    updateDisplaySetting(displaySetting.copy(enableBackgroundKeepAlive = checked))
+                                    if (checked) {
+                                        // 逐级降级跳转到系统电池设置页，全部失败则静默忽略
+                                        val intents = listOf(
+                                            Intent(
+                                                Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
+                                                "package:${context.packageName}".toUri()
+                                            ),
+                                            Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS),
+                                            Intent(
+                                                Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                                                "package:${context.packageName}".toUri()
+                                            ),
+                                        )
+                                        for (intent in intents) {
+                                            if (runCatching { context.startActivity(intent) }.isSuccess) break
+                                        }
+                                    }
+                                }
+                            )
+                        },
+                    )
                 }
             }
 

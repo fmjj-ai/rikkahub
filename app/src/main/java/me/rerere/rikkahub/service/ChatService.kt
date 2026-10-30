@@ -2,11 +2,14 @@ package me.rerere.rikkahub.service
 
 import android.app.Application
 import android.content.Context
+import android.content.Intent
+import android.os.PowerManager
 import android.util.Log
 import androidx.core.net.toUri
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -16,6 +19,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
@@ -96,6 +100,8 @@ import java.util.concurrent.ConcurrentHashMap
 import kotlin.uuid.Uuid
 
 private const val TAG = "ChatService"
+private const val WAKELOCK_TIMEOUT_MS = 15 * 60 * 1000L
+private const val WAKELOCK_TAG = "rikkahub:chat-generation"
 
 internal fun backgroundTextGenerationParams(
     model: Model,
@@ -157,6 +163,74 @@ class ChatService(
 ) {
     // workspace 系统提示注入 (依赖 workspaceRepository, 故在类内构造)
     private val workspaceReminderTransformer = WorkspaceReminderTransformer(workspaceRepository)
+
+    // ---- 后台生成保活 ----
+
+    private val keepAliveLock = Any()
+    private val keepAliveJobs = ConcurrentHashMap.newKeySet<Job>()
+    private var pendingStopJob: Job? = null
+
+    private val wakeLock: PowerManager.WakeLock by lazy {
+        (context.getSystemService(Context.POWER_SERVICE) as PowerManager)
+            .newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKELOCK_TAG)
+            .apply { setReferenceCounted(false) }
+    }
+
+    // 运行中关闭开关时立即停止前台服务并释放 WakeLock
+    init {
+        appScope.launch {
+            settingsStore.settingsFlow
+                .distinctUntilChangedBy { it.displaySetting.enableBackgroundKeepAlive }
+                .collect { settings ->
+                    if (!settings.displaySetting.enableBackgroundKeepAlive) {
+                        synchronized(keepAliveLock) {
+                            pendingStopJob?.cancel()
+                            pendingStopJob = null
+                            stopKeepAliveLocked()
+                        }
+                    }
+                }
+        }
+    }
+
+    private fun Job.trackKeepAlive(): Job {
+        synchronized(keepAliveLock) {
+            pendingStopJob?.cancel()
+            pendingStopJob = null
+            keepAliveJobs.add(this)
+            if (settingsStore.settingsFlow.value.displaySetting.enableBackgroundKeepAlive) {
+                runCatching {
+                    context.startForegroundService(Intent(context, ChatGenerationService::class.java))
+                }.onFailure { Log.w(TAG, "startForegroundService failed (background start?)", it) }
+                ensureWakeLockLocked()
+            }
+        }
+        invokeOnCompletion {
+            synchronized(keepAliveLock) {
+                keepAliveJobs.remove(this)
+                if (keepAliveJobs.isEmpty()) scheduleStopLocked()
+            }
+        }
+        return this
+    }
+
+    // 集合空后延迟 1.5s 二次确认，吸收 cancel 旧 job 与注册新 job 的交错窗口
+    private fun scheduleStopLocked() {
+        pendingStopJob = appScope.launch {
+            delay(1500)
+            synchronized(keepAliveLock) {
+                if (keepAliveJobs.isEmpty()) stopKeepAliveLocked()
+            }
+        }
+    }
+
+    private fun stopKeepAliveLocked() {
+        context.stopService(Intent(context, ChatGenerationService::class.java))
+        releaseWakeLockLocked()
+    }
+
+    private fun ensureWakeLockLocked() { if (!wakeLock.isHeld) wakeLock.acquire(WAKELOCK_TIMEOUT_MS) }
+    private fun releaseWakeLockLocked() { if (wakeLock.isHeld) wakeLock.release() }
 
     // 统一会话管理
     private val sessions = ConcurrentHashMap<Uuid, ConversationSession>()
@@ -248,7 +322,7 @@ class ChatService(
         } finally {
             removeConversationReference(conversationId)
         }
-    }
+    }.trackKeepAlive()
 
     // ---- 对话状态访问 ----
 
@@ -363,7 +437,7 @@ class ChatService(
                 addError(e, conversationId, title = context.getString(R.string.error_title_send_message))
             }
         }
-        session.setJob(job)
+        session.setJob(job.trackKeepAlive())
     }
 
     private fun preprocessUserInputParts(parts: List<UIMessagePart>, assistant: Assistant): List<UIMessagePart> {
@@ -423,7 +497,7 @@ class ChatService(
             }
         }
 
-        session.setJob(job)
+        session.setJob(job.trackKeepAlive())
     }
 
     // ---- 处理工具调用审批 ----
@@ -486,7 +560,7 @@ class ChatService(
             }
         }
 
-        session.setJob(job)
+        session.setJob(job.trackKeepAlive())
     }
 
     // ---- 处理消息补全 ----
@@ -913,7 +987,7 @@ class ChatService(
                 session.processingStatus.value = null
             }
         }
-        session.setJob(job)
+        session.setJob(job.trackKeepAlive())
         job.start()
         return job
     }
@@ -955,7 +1029,15 @@ class ChatService(
             "additional_context" to additionalPrompt,
             "locale" to Locale.getDefault().displayName,
         )
-        val inputBudget = minOf(32_000, model.contextWindow - outputBudget - prompt("").estimateTokens() - 512)
+        // 单次压缩请求的输入上限动态跟随当前聊天模型的自动压缩阈值（模型设置里的“自动压缩上下文”），
+        // 每次压缩都会重新读取，用户改完设置后下次压缩立即生效；触发自动压缩时待压缩历史不会超过该阈值，
+        // 因此正常情况下第一次压缩只需要一个请求，不再按固定的 32k 切块。
+        val promptTokens = prompt("").estimateTokens()
+        val autoCompressTokenLimit = chatModel.autoCompressThreshold
+        val inputBudget = minOf(
+            autoCompressTokenLimit,
+            model.contextWindow - outputBudget - promptTokens - 512,
+        )
         check(inputBudget >= 128) { "压缩模型的上下文容量不足，请调整模型设置" }
         // 展开完整附件和 OCR；不再把每条消息截成 2,000 字符。
         val source = activeMessages.take(boundary + 1).transforms(
@@ -1103,7 +1185,7 @@ class ChatService(
                 clearTranslationField(conversationId, message.id)
                 addError(e, conversationId, title = context.getString(R.string.error_title_translate_message))
             }
-        }
+        }.trackKeepAlive()
     }
 
     private fun updateTranslationField(

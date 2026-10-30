@@ -15,8 +15,8 @@ class ContextWindowTest {
     @Test
     fun `old model settings receive defaults and custom values survive serialization`() {
         val old = json.decodeFromString<Model>("""{"modelId":"old"}""")
-        assertEquals(472_000, old.contextWindow)
-        assertEquals(272_000, old.autoCompressThreshold)
+        assertEquals(1_000_000, old.contextWindow)
+        assertEquals(472_000, old.autoCompressThreshold)
         val custom = old.copy(contextWindowTokens = 164_000, autoCompressThresholdTokens = 100_000)
         assertEquals(custom, json.decodeFromString<Model>(json.encodeToString(custom)))
         assertFalse(custom.copy(autoCompressThresholdTokens = 200_000).hasValidContextSettings)
@@ -27,7 +27,7 @@ class ContextWindowTest {
     @Test
     fun `invalid imported settings use finite positive budgets`() {
         val invalid = model.copy(contextWindowTokens = -1, autoCompressThresholdTokens = Int.MAX_VALUE)
-        assertEquals(472_000, invalid.contextWindow)
+        assertEquals(1_000_000, invalid.contextWindow)
         assertEquals(invalid.contextWindow, invalid.autoCompressThreshold)
     }
 

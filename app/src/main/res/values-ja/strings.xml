@@ -427,6 +427,7 @@
   <string name="notification_channel_chat_completed">チャット完了</string>
   <string name="notification_channel_chat_live_update">チャット生成の進行状況</string>
   <string name="notification_channel_web_server">Webサーバー</string>
+  <string name="notification_chat_generation_foreground">応答を生成中</string>
   <string name="notification_live_update_chip_thinking">考え中</string>
   <string name="notification_live_update_chip_tool">ツール</string>
   <string name="notification_live_update_chip_writing">書き込み中</string>
@@ -626,6 +627,10 @@
   <string name="setting_display_page_auto_collapse_thinking_title">思考を自動折りたたむ</string>
   <string name="setting_display_page_auto_play_tts_desc">アシスタントのメッセージ生成完了後にTTSを自動再生</string>
   <string name="setting_display_page_auto_play_tts_title">生成後にTTSを自動再生</string>
+  <string name="setting_display_page_background_keep_alive">バックグラウンド生成を維持</string>
+  <string name="setting_display_page_background_keep_alive_allowed">バックグラウンド実行が許可されています</string>
+  <string name="setting_display_page_background_keep_alive_desc">バックグラウンドや画面オフの状態でも生成を継続します。有効にすると、バックグラウンド実行を許可するためのシステム設定が開きます</string>
+  <string name="setting_display_page_background_keep_alive_suggest">システム設定でバックグラウンドのバッテリー使用を許可してください（一部の機種では手動設定が必要です）</string>
   <string name="setting_display_page_chat_font_family_default">デフォルト</string>
   <string name="setting_display_page_chat_font_family_monospace">等幅</string>
   <string name="setting_display_page_chat_font_family_serif">明朝体</string>

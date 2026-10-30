@@ -427,6 +427,7 @@
   <string name="notification_channel_chat_completed">聊天完成</string>
   <string name="notification_channel_chat_live_update">聊天生成進度</string>
   <string name="notification_channel_web_server">網頁伺服器</string>
+  <string name="notification_chat_generation_foreground">正在生成回覆</string>
   <string name="notification_live_update_chip_thinking">思考中</string>
   <string name="notification_live_update_chip_tool">工具</string>
   <string name="notification_live_update_chip_writing">正在書寫</string>
@@ -626,6 +627,10 @@
   <string name="setting_display_page_auto_collapse_thinking_title">自動折疊思考</string>
   <string name="setting_display_page_auto_play_tts_desc">助理訊息產生完成後自動播放語音</string>
   <string name="setting_display_page_auto_play_tts_title">產生後自動播放 TTS</string>
+  <string name="setting_display_page_background_keep_alive">背景生成保活</string>
+  <string name="setting_display_page_background_keep_alive_allowed">已允許背景執行</string>
+  <string name="setting_display_page_background_keep_alive_desc">切換背景或鎖屏時保持生成繼續；開啟時將跳轉系統設定以允許背景執行</string>
+  <string name="setting_display_page_background_keep_alive_suggest">建議到系統設定允許背景高耗電（部分機型需手動開啟）</string>
   <string name="setting_display_page_chat_font_family_default">預設</string>
   <string name="setting_display_page_chat_font_family_monospace">等寬字體</string>
   <string name="setting_display_page_chat_font_family_serif">Serif</string>

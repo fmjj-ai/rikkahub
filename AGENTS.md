@@ -86,6 +86,14 @@
   processing after generation completes.
   (app/src/main/java/me/rerere/rikkahub/data/ai/transformers/Transformer.kt)
 
+- **ChatGenerationService**: A foreground service that keeps chat generation alive while generation tasks are running.
+  It posts a persistent notification on the
+  `CHAT_LIVE_UPDATE_NOTIFICATION_CHANNEL_ID` channel to prevent the process from being frozen or losing network access
+  when the app is backgrounded or the screen is off. It is started/stopped in tandem with the keepAlive task set in
+  ChatService (which also holds the partial wake lock), supports an `ACTION_STOP` intent, and is gated by the
+  `settings.displaySetting.enableBackgroundKeepAlive` setting. (
+  app/src/main/java/me/rerere/rikkahub/service/ChatGenerationService.kt)
+
 ## Internationalization
 
 - String resources are usually located in `app/src/main/res/values*/strings.xml`; feature modules such as `search`

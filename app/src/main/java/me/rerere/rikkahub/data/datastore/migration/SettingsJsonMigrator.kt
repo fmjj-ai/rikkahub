@@ -61,6 +61,12 @@ object SettingsJsonMigrator {
                 }
             }
 
+            // V4: 将仍使用旧默认值的模型升级到新的上下文 / 自动压缩阈值
+            root["providers"]?.let { element ->
+                val migrated = migrateProviderModelDefaults(JsonInstant.encodeToString(element))
+                root["providers"] = JsonInstant.parseToJsonElement(migrated)
+            }
+
             JsonInstant.encodeToString(JsonObject(root))
         }.onFailure {
             Log.e(TAG, "migrate: Failed to migrate settings JSON, using original", it)

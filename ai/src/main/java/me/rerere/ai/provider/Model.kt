@@ -28,8 +28,8 @@ data class Model(
         get() = contextWindowTokens > 0 && autoCompressThresholdTokens in 1..contextWindowTokens
 }
 
-const val DEFAULT_CONTEXT_WINDOW_TOKENS = 472_000
-const val DEFAULT_AUTO_COMPRESS_THRESHOLD_TOKENS = 272_000
+const val DEFAULT_CONTEXT_WINDOW_TOKENS = 1_000_000
+const val DEFAULT_AUTO_COMPRESS_THRESHOLD_TOKENS = 472_000
 
 @Serializable
 enum class ModelType {

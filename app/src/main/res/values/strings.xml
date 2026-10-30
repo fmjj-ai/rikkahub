@@ -430,6 +430,7 @@
   <string name="notification_channel_chat_completed">Chat Completed</string>
   <string name="notification_channel_chat_live_update">Chat Generation Progress</string>
   <string name="notification_channel_web_server">Web Server</string>
+  <string name="notification_chat_generation_foreground">Generating response</string>
   <string name="notification_live_update_chip_thinking">Thinking</string>
   <string name="notification_live_update_chip_tool">Tool</string>
   <string name="notification_live_update_chip_writing">Writing</string>
@@ -656,6 +657,10 @@
   <string name="setting_display_page_auto_collapse_thinking_title">Auto Collapse Thinking</string>
   <string name="setting_display_page_auto_play_tts_desc">Automatically play TTS after assistant message generation completes</string>
   <string name="setting_display_page_auto_play_tts_title">Auto-play TTS After Generation</string>
+  <string name="setting_display_page_background_keep_alive">Background keep-alive</string>
+  <string name="setting_display_page_background_keep_alive_allowed">Background running allowed</string>
+  <string name="setting_display_page_background_keep_alive_desc">Keep generation running in background or with screen off; enabling opens system settings to allow background running</string>
+  <string name="setting_display_page_background_keep_alive_suggest">Allow background battery usage in system settings (some devices require manual setup)</string>
   <string name="setting_display_page_chat_font_family_default">Default</string>
   <string name="setting_display_page_chat_font_family_custom">Custom</string>
   <string name="setting_display_page_chat_font_family_monospace">Monospace</string>

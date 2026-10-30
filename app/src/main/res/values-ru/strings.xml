@@ -427,6 +427,7 @@
   <string name="notification_channel_chat_completed">Чат завершён</string>
   <string name="notification_channel_chat_live_update">Прогресс генерации чата</string>
   <string name="notification_channel_web_server">Веб-сервер</string>
+  <string name="notification_chat_generation_foreground">Генерация ответа</string>
   <string name="notification_live_update_chip_thinking">Думает</string>
   <string name="notification_live_update_chip_tool">Инструмент</string>
   <string name="notification_live_update_chip_writing">Идёт запись</string>
@@ -626,6 +627,10 @@
   <string name="setting_display_page_auto_collapse_thinking_title">Автоматически сворачивать мысли</string>
   <string name="setting_display_page_auto_play_tts_desc">Автоматически воспроизводить TTS после завершения генерации ответа ассистента</string>
   <string name="setting_display_page_auto_play_tts_title">Автовоспроизведение TTS после генерации</string>
+  <string name="setting_display_page_background_keep_alive">Генерация в фоновом режиме</string>
+  <string name="setting_display_page_background_keep_alive_allowed">Фоновая работа разрешена</string>
+  <string name="setting_display_page_background_keep_alive_desc">Продолжать генерацию в фоновом режиме или при выключенном экране; при включении откроются системные настройки для разрешения фоновой работы</string>
+  <string name="setting_display_page_background_keep_alive_suggest">Разрешите фоновое использование батареи в настройках системы (на некоторых устройствах нужно включить вручную)</string>
   <string name="setting_display_page_chat_font_family_default">По умолчанию</string>
   <string name="setting_display_page_chat_font_family_monospace">Моноширинный</string>
   <string name="setting_display_page_chat_font_family_serif">С засечками</string>

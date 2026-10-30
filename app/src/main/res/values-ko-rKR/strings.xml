@@ -427,6 +427,7 @@
   <string name="notification_channel_chat_completed">채팅 완료</string>
   <string name="notification_channel_chat_live_update">채팅 생성 진행률</string>
   <string name="notification_channel_web_server">웹 서버</string>
+  <string name="notification_chat_generation_foreground">응답 생성 중</string>
   <string name="notification_live_update_chip_thinking">생각 중</string>
   <string name="notification_live_update_chip_tool">도구</string>
   <string name="notification_live_update_chip_writing">작성 중</string>
@@ -626,6 +627,10 @@
   <string name="setting_display_page_auto_collapse_thinking_title">사고 자동 접기</string>
   <string name="setting_display_page_auto_play_tts_desc">어시스턴트 메시지 생성 완료 후 TTS 자동 재생</string>
   <string name="setting_display_page_auto_play_tts_title">생성 후 TTS 자동 재생</string>
+  <string name="setting_display_page_background_keep_alive">백그라운드 생성 유지</string>
+  <string name="setting_display_page_background_keep_alive_allowed">백그라운드 실행 허용됨</string>
+  <string name="setting_display_page_background_keep_alive_desc">백그라운드 또는 화면이 꺼진 상태에서도 생성을 계속 실행합니다. 활성화하면 백그라운드 실행을 허용하기 위해 시스템 설정으로 이동합니다</string>
+  <string name="setting_display_page_background_keep_alive_suggest">시스템 설정에서 백그라운드 배터리 사용을 허용하세요 (일부 기기에서는 수동 설정이 필요합니다)</string>
   <string name="setting_display_page_chat_font_family_default">기본</string>
   <string name="setting_display_page_chat_font_family_monospace">고정폭</string>
   <string name="setting_display_page_chat_font_family_serif">명조체</string>
