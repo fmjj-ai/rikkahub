@@ -26,7 +26,7 @@ import me.rerere.ai.ui.ImageGenerationItem
 import me.rerere.common.android.appTempFolder
 import me.rerere.rikkahub.data.datastore.SettingsStore
 import me.rerere.rikkahub.data.datastore.findModelById
-import me.rerere.rikkahub.data.datastore.findProvider
+import me.rerere.rikkahub.data.datastore.resolveEndpoint
 import me.rerere.rikkahub.data.db.entity.GenMediaEntity
 import me.rerere.rikkahub.data.files.FilesManager
 import me.rerere.rikkahub.data.repository.GenMediaRepository
@@ -146,11 +146,10 @@ class ImgGenVM(
                 val model = settings.findModelById(settings.imageGenerationModelId)
                     ?: throw IllegalStateException("No model selected")
 
-                val provider = model.findProvider(settings.providers)
-                    ?: throw IllegalStateException("Provider not found")
+                val provider = model.resolveEndpoint(settings.providers)
+                    ?: throw IllegalStateException("Provider not found or protocol not configured")
 
-                val providerSetting = settings.providers.find { it.id == provider.id }
-                    ?: throw IllegalStateException("Provider setting not found")
+                val providerSetting = provider
 
                 val requestPrompt = _prompt.value
                 val params = ImageGenerationParams(
@@ -193,11 +192,10 @@ class ImgGenVM(
                 val model = settings.findModelById(settings.imageGenerationModelId)
                     ?: throw IllegalStateException("No model selected")
 
-                val provider = model.findProvider(settings.providers)
-                    ?: throw IllegalStateException("Provider not found")
+                val provider = model.resolveEndpoint(settings.providers)
+                    ?: throw IllegalStateException("Provider not found or protocol not configured")
 
-                val providerSetting = settings.providers.find { it.id == provider.id }
-                    ?: throw IllegalStateException("Provider setting not found")
+                val providerSetting = provider
 
                 val requestPrompt = _prompt.value
                 val sourceImages = _referenceImages.value

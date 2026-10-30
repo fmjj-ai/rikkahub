@@ -22,7 +22,10 @@ import me.rerere.ai.core.MessageRole
 import me.rerere.ai.core.ReasoningLevel
 import me.rerere.ai.provider.Model
 import me.rerere.ai.provider.ModelType
+import me.rerere.ai.provider.ProviderProtocol
 import me.rerere.ai.provider.ProviderSetting
+import me.rerere.ai.provider.isConfigured
+import me.rerere.ai.provider.protocolOf
 import me.rerere.rikkahub.AppScope
 import me.rerere.rikkahub.data.ai.mcp.McpServerConfig
 import me.rerere.rikkahub.data.ai.prompts.DEFAULT_COMPRESS_PROMPT
@@ -305,6 +308,10 @@ class SettingsStore(
                         )
 
                         is ProviderSetting.Claude -> provider.copy(
+                            models = provider.models.distinctBy { model -> model.id }
+                        )
+
+                        is ProviderSetting.MultiProtocol -> provider.copy(
                             models = provider.models.distinctBy { model -> model.id }
                         )
                     }
@@ -726,6 +733,30 @@ fun Model.findProvider(providers: List<ProviderSetting>, checkOverwrite: Boolean
         return providerOverwrite.copyProvider(models = emptyList())
     }
     return provider
+}
+
+/** 模型实际使用的协议：覆盖配置优先，其次模型字段，最后服务商默认协议。 */
+fun Model.effectiveProtocol(providers: List<ProviderSetting>): ProviderProtocol? {
+    val provider = findProvider(providers, checkOverwrite = true) ?: return null
+    return provider.protocolOf(this)
+}
+
+/**
+ * 解析模型真正发请求使用的单协议配置。
+ *
+ * 多协议服务商按 [Model.protocol] / defaultProtocol 取对应 endpoint；未填 Key 时返回 null，
+ * 由调用方给出“某某协议未配置”的明确错误，避免静默走错协议。
+ */
+fun Model.resolveEndpoint(providers: List<ProviderSetting>): ProviderSetting? {
+    val provider = findProvider(providers, checkOverwrite = true) ?: return null
+    return when (provider) {
+        is ProviderSetting.MultiProtocol -> {
+            val protocol = this.protocol ?: provider.defaultProtocol
+            provider.endpointOrNull(protocol)?.takeIf { it.isConfigured() }
+        }
+
+        else -> provider
+    }
 }
 
 private fun Model.findModelProviderFromList(providers: List<ProviderSetting>): ProviderSetting? {

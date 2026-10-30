@@ -2,6 +2,7 @@ package me.rerere.rikkahub
 
 import me.rerere.ai.provider.BalanceOption
 import me.rerere.ai.provider.Model
+import me.rerere.ai.provider.ProviderProtocol
 import me.rerere.ai.provider.ProviderSetting
 import me.rerere.rikkahub.ui.components.ui.decodeProviderSetting
 import me.rerere.rikkahub.ui.components.ui.encodeForShare
@@ -40,8 +41,8 @@ class ShareSheetTest {
         assertEquals("Test OpenAI", decodedOpenAI.name)
         assertEquals("sk-test-key", decodedOpenAI.apiKey)
         assertEquals("https://api.openai.com/v1", decodedOpenAI.baseUrl)
-        assertEquals(1, decodedOpenAI.models.size)
-        assertEquals("gpt-4", decodedOpenAI.models[0].displayName)
+        // 分享二维码不携带模型列表，只同步服务商配置
+        assertTrue(decodedOpenAI.models.isEmpty())
     }
 
     @Test
@@ -158,5 +159,41 @@ class ShareSheetTest {
             assertEquals(original.name, decoded.name)
             assertEquals(original.enabled, decoded.enabled)
         }
+    }
+
+    @Test
+    fun `encode and decode should preserve multi protocol endpoints`() {
+        val original = ProviderSetting.MultiProtocol(
+            name = "万物",
+            baseUrl = "https://www.aiwanwu.cc/v1",
+            defaultProtocol = ProviderProtocol.OPENAI,
+            openai = ProviderSetting.OpenAI(
+                apiKey = "openai-key",
+                baseUrl = "https://www.aiwanwu.cc/v1",
+            ),
+            claude = ProviderSetting.Claude(
+                apiKey = "claude-key",
+                baseUrl = "https://www.aiwanwu.cc/v1",
+            ),
+            models = listOf(
+                Model(
+                    modelId = "claude-sonnet",
+                    displayName = "Claude",
+                    protocol = ProviderProtocol.CLAUDE,
+                )
+            ),
+        )
+
+        val decoded = decodeProviderSetting(original.encodeForShare())
+
+        assertTrue(decoded is ProviderSetting.MultiProtocol)
+        val multi = decoded as ProviderSetting.MultiProtocol
+        assertEquals(original.id, multi.id)
+        assertEquals("万物", multi.name)
+        assertEquals("https://www.aiwanwu.cc/v1", multi.baseUrl)
+        assertEquals(ProviderProtocol.OPENAI, multi.defaultProtocol)
+        assertEquals("openai-key", multi.openai?.apiKey)
+        assertEquals("claude-key", multi.claude?.apiKey)
+        assertTrue(multi.models.isEmpty())
     }
 }

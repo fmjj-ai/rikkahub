@@ -18,6 +18,7 @@ import me.rerere.ai.core.TokenUsage
 import me.rerere.ai.provider.Modality
 import me.rerere.ai.provider.Model
 import me.rerere.ai.provider.ModelAbility
+import me.rerere.ai.provider.ProviderProtocol
 import me.rerere.ai.provider.ProviderSetting
 import me.rerere.ai.ui.UIMessage
 import me.rerere.ai.ui.UIMessagePart
@@ -570,6 +571,13 @@ object ChatboxImporter {
         is ProviderSetting.OpenAI -> "openai"
         is ProviderSetting.Google -> "gemini"
         is ProviderSetting.Claude -> "claude"
+        is ProviderSetting.MultiProtocol -> configuredProtocols().firstOrNull()?.let { protocol ->
+            when (protocol) {
+                ProviderProtocol.OPENAI -> "openai"
+                ProviderProtocol.GOOGLE -> "gemini"
+                ProviderProtocol.CLAUDE -> "claude"
+            }
+        } ?: "openai"
     }
 
     private fun millisToLocalDateTime(timestamp: Long?) =

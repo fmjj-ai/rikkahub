@@ -69,7 +69,7 @@ import me.rerere.rikkahub.Screen
 import me.rerere.rikkahub.data.ai.mcp.McpManager
 import me.rerere.rikkahub.data.datastore.Settings
 import me.rerere.rikkahub.data.datastore.getCurrentChatModel
-import me.rerere.rikkahub.data.datastore.findProvider
+import me.rerere.rikkahub.data.datastore.resolveEndpoint
 import me.rerere.rikkahub.data.db.entity.WorkspaceEntity
 import me.rerere.rikkahub.data.model.Assistant
 import me.rerere.rikkahub.data.model.Conversation
@@ -106,7 +106,7 @@ internal fun FilesPicker(
     onPickFile: () -> Unit,
 ) {
     val settings = LocalSettings.current
-    val provider = settings.getCurrentChatModel()?.findProvider(providers = settings.providers)
+    val provider = settings.getCurrentChatModel()?.resolveEndpoint(settings.providers)
     val navController = LocalNavController.current
     val workspaceRepository: WorkspaceRepository = koinInject()
     val workspaces by workspaceRepository.listFlow().collectAsState(initial = emptyList())

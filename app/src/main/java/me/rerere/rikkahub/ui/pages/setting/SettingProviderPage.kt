@@ -56,6 +56,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -68,6 +69,7 @@ import me.rerere.ai.provider.ProviderSetting
 import me.rerere.rikkahub.R
 import me.rerere.rikkahub.Screen
 import me.rerere.rikkahub.data.datastore.DEFAULT_PROVIDERS
+import me.rerere.rikkahub.data.datastore.mergeBaseUrl
 import me.rerere.rikkahub.ui.components.nav.BackButton
 import me.rerere.rikkahub.ui.components.ui.AutoAIIcon
 import me.rerere.rikkahub.ui.components.ui.Tag
@@ -77,6 +79,7 @@ import me.rerere.rikkahub.ui.context.LocalNavController
 import me.rerere.rikkahub.ui.context.LocalToaster
 import me.rerere.rikkahub.ui.hooks.useEditState
 import me.rerere.rikkahub.ui.pages.setting.components.ProviderConfigure
+import me.rerere.rikkahub.ui.pages.setting.components.ProviderMergeSheet
 import me.rerere.rikkahub.ui.theme.CustomColors
 import me.rerere.rikkahub.utils.ImageUtils
 import me.rerere.rikkahub.utils.plus
@@ -89,9 +92,21 @@ import kotlin.uuid.Uuid
 fun SettingProviderPage(vm: SettingVM = koinViewModel()) {
     val settings by vm.settings.collectAsStateWithLifecycle()
     val navController = LocalNavController.current
+    val toaster = LocalToaster.current
+    val context = LocalContext.current
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     var searchQuery by remember { mutableStateOf("") }
+    var showMergeSheet by remember { mutableStateOf(false) }
     val lazyListState = rememberLazyListState()
+    val mergeGroups = remember(settings.providers) {
+        settings.providers
+            .filter { !it.builtIn }
+            .filter { it.mergeBaseUrl().isNotBlank() }
+            .groupBy { it.mergeBaseUrl().trim().trimEnd('/').lowercase() }
+            .values
+            .filter { it.size > 1 }
+            .toList()
+    }
     val visibleBuiltInProviderIds = remember {
         DEFAULT_PROVIDERS
             .filter { provider -> provider.name == "DeepSeek" || provider.name == "月之暗面" }
@@ -185,6 +200,37 @@ fun SettingProviderPage(vm: SettingVM = koinViewModel()) {
                 shape = CircleShape,
             )
 
+            if (mergeGroups.isNotEmpty()) {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 4.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = CustomColors.listItemColors.containerColor
+                    ),
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        Text(
+                            text = stringResource(
+                                R.string.setting_provider_page_merge_same_url,
+                                mergeGroups.sumOf { it.size }
+                            ),
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier.weight(1f),
+                        )
+                        TextButton(onClick = { showMergeSheet = true }) {
+                            Text(stringResource(R.string.setting_provider_page_merge_open))
+                        }
+                    }
+                }
+            }
+
 
             LazyColumn(
                 modifier = Modifier
@@ -234,6 +280,25 @@ fun SettingProviderPage(vm: SettingVM = koinViewModel()) {
                 }
             }
         }
+    }
+
+    if (showMergeSheet) {
+        ProviderMergeSheet(
+            groups = mergeGroups,
+            onDismiss = { showMergeSheet = false },
+            onMerge = { primary, others, merged ->
+                val otherIds = others.map { it.id }.toSet()
+                val newProviders = settings.providers
+                    .map { if (it.id == primary.id) merged else it }
+                    .filter { it.id !in otherIds }
+                vm.updateSettings(settings.copy(providers = newProviders))
+                showMergeSheet = false
+                toaster.show(
+                    context.getString(R.string.setting_provider_page_merge_success),
+                    type = ToastType.Success
+                )
+            }
+        )
     }
 }
 
@@ -452,7 +517,13 @@ private fun AddButton(onAdd: (ProviderSetting) -> Unit) {
 
     IconButton(
         onClick = {
-            dialogState.open(ProviderSetting.OpenAI())
+            dialogState.open(
+                ProviderSetting.MultiProtocol(
+                    name = "",
+                    baseUrl = "",
+                    openai = ProviderSetting.OpenAI(apiKey = "", baseUrl = ""),
+                )
+            )
         }
     ) {
         Icon(HugeIcons.Add01, "Add")
@@ -551,6 +622,20 @@ private fun ProviderItem(
                                 provider.models.size
                             )
                         )
+                    }
+                    if (provider is ProviderSetting.MultiProtocol) {
+                        val protocols = provider.configuredProtocols()
+                        if (protocols.isEmpty()) {
+                            Tag(type = TagType.WARNING) {
+                                Text(stringResource(R.string.setting_provider_page_no_protocol_configured))
+                            }
+                        } else {
+                            protocols.forEach { protocol ->
+                                Tag(type = TagType.INFO) {
+                                    Text(protocol.displayName)
+                                }
+                            }
+                        }
                     }
                     if (provider.name == "AiHubMix") {
                         Tag(type = TagType.INFO) {

@@ -20,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,7 +31,11 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.dokar.sonner.ToastType
 import me.rerere.ai.provider.ClaudePromptCacheTtl
+import me.rerere.ai.provider.ProviderProtocol
 import me.rerere.ai.provider.ProviderSetting
+import me.rerere.ai.provider.effectiveDefaultProtocol
+import me.rerere.ai.provider.isConfigured
+import me.rerere.ai.provider.withBaseUrl
 import me.rerere.rikkahub.R
 import me.rerere.rikkahub.data.datastore.DEFAULT_PROVIDERS
 import me.rerere.hugeicons.HugeIcons
@@ -47,6 +52,18 @@ import kotlin.reflect.KClass
 
 @Composable
 fun ProviderConfigure(
+    provider: ProviderSetting,
+    modifier: Modifier = Modifier,
+    onEdit: (provider: ProviderSetting) -> Unit
+) {
+    when (provider) {
+        is ProviderSetting.MultiProtocol -> ProviderConfigureMulti(provider, modifier, onEdit)
+        else -> ProviderConfigureSingle(provider, modifier, onEdit)
+    }
+}
+
+@Composable
+private fun ProviderConfigureSingle(
     provider: ProviderSetting,
     modifier: Modifier = Modifier,
     onEdit: (provider: ProviderSetting) -> Unit
@@ -72,25 +89,202 @@ fun ProviderConfigure(
         }
 
         when (provider) {
-            is ProviderSetting.OpenAI -> ProviderConfigureOpenAI(provider, onEdit)
-            is ProviderSetting.Google -> ProviderConfigureGoogle(provider, onEdit)
-            is ProviderSetting.Claude -> ProviderConfigureClaude(provider, onEdit)
+            is ProviderSetting.OpenAI -> ProviderConfigureOpenAI(provider, onEdit = { onEdit(it) })
+            is ProviderSetting.Google -> ProviderConfigureGoogle(provider, onEdit = { onEdit(it) })
+            is ProviderSetting.Claude -> ProviderConfigureClaude(provider, onEdit = { onEdit(it) })
+            is ProviderSetting.MultiProtocol -> Unit
         }
     }
 }
 
+@Composable
+private fun ProviderConfigureMulti(
+    provider: ProviderSetting.MultiProtocol,
+    modifier: Modifier = Modifier,
+    onEdit: (provider: ProviderSetting) -> Unit
+) {
+    var selectedProtocol by rememberSaveable(provider.id) {
+        mutableStateOf(provider.effectiveDefaultProtocol())
+    }
+    val endpoint = provider.endpointConfig(selectedProtocol)
+        ?: provider.blankEndpoint(selectedProtocol)
+
+    Column(
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = modifier
+    ) {
+        OutlinedTextField(
+            value = provider.name,
+            onValueChange = { onEdit(provider.copy(name = it.trim())) },
+            label = { Text(stringResource(R.string.setting_provider_page_name)) },
+            modifier = Modifier.fillMaxWidth(),
+        )
+
+        OutlinedTextField(
+            value = provider.baseUrl,
+            onValueChange = { onEdit(provider.withBaseUrl(it.trim())) },
+            label = { Text(stringResource(R.string.setting_provider_page_api_base_url)) },
+            modifier = Modifier.fillMaxWidth(),
+            isError = provider.baseUrl.isNotBlank() && !provider.baseUrl.isValidBaseUrl(),
+        )
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(stringResource(R.string.setting_provider_page_enable))
+            Switch(
+                checked = provider.enabled,
+                onCheckedChange = { onEdit(provider.copy(enabled = it)) }
+            )
+        }
+
+        SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+            ProviderProtocol.entries.forEachIndexed { index, protocol ->
+                SegmentedButton(
+                    shape = SegmentedButtonDefaults.itemShape(index, ProviderProtocol.entries.size),
+                    label = { Text(protocol.displayName) },
+                    selected = selectedProtocol == protocol,
+                    onClick = { selectedProtocol = protocol },
+                )
+            }
+        }
+
+        Text(
+            text = stringResource(R.string.setting_provider_page_multi_protocol_hint),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+
+        when (selectedProtocol) {
+            ProviderProtocol.OPENAI -> ProviderConfigureOpenAI(
+                provider = endpoint as ProviderSetting.OpenAI,
+                onEdit = { onEdit(provider.storeEndpoint(ProviderProtocol.OPENAI, it)) },
+                showName = false,
+                showBaseUrl = false,
+                showEnabled = false,
+            )
+
+            ProviderProtocol.GOOGLE -> ProviderConfigureGoogle(
+                provider = endpoint as ProviderSetting.Google,
+                onEdit = { onEdit(provider.storeEndpoint(ProviderProtocol.GOOGLE, it)) },
+                showName = false,
+                showBaseUrl = false,
+                showEnabled = false,
+            )
+
+            ProviderProtocol.CLAUDE -> ProviderConfigureClaude(
+                provider = endpoint as ProviderSetting.Claude,
+                onEdit = { onEdit(provider.storeEndpoint(ProviderProtocol.CLAUDE, it)) },
+                showName = false,
+                showBaseUrl = false,
+                showEnabled = false,
+            )
+        }
+
+        if (provider.endpointConfig(selectedProtocol) == null || !endpoint.isConfigured()) {
+            Text(
+                text = stringResource(
+                    R.string.setting_provider_page_protocol_not_configured,
+                    selectedProtocol.displayName
+                ),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+}
+
+private fun ProviderSetting.MultiProtocol.blankEndpoint(protocol: ProviderProtocol): ProviderSetting {
+    return when (protocol) {
+        ProviderProtocol.OPENAI -> ProviderSetting.OpenAI(
+            id = id,
+            name = name,
+            baseUrl = baseUrl,
+            models = emptyList(),
+            description = {},
+            shortDescription = {},
+        )
+
+        ProviderProtocol.GOOGLE -> ProviderSetting.Google(
+            id = id,
+            name = name,
+            baseUrl = baseUrl,
+            models = emptyList(),
+            description = {},
+            shortDescription = {},
+        )
+
+        ProviderProtocol.CLAUDE -> ProviderSetting.Claude(
+            id = id,
+            name = name,
+            baseUrl = baseUrl,
+            models = emptyList(),
+            description = {},
+            shortDescription = {},
+        )
+    }
+}
+
+private fun ProviderSetting.MultiProtocol.storeEndpoint(
+    protocol: ProviderProtocol,
+    endpoint: ProviderSetting,
+): ProviderSetting {
+    val synced = when (endpoint) {
+        is ProviderSetting.OpenAI -> endpoint.copy(
+            id = id,
+            name = name,
+            models = emptyList(),
+            balanceOption = balanceOption,
+            baseUrl = baseUrl.ifBlank { endpoint.baseUrl },
+            builtIn = false,
+            description = {},
+            shortDescription = {},
+        )
+
+        is ProviderSetting.Google -> endpoint.copy(
+            id = id,
+            name = name,
+            models = emptyList(),
+            balanceOption = balanceOption,
+            baseUrl = baseUrl.ifBlank { endpoint.baseUrl },
+            builtIn = false,
+            description = {},
+            shortDescription = {},
+        )
+
+        is ProviderSetting.Claude -> endpoint.copy(
+            id = id,
+            name = name,
+            models = emptyList(),
+            balanceOption = balanceOption,
+            baseUrl = baseUrl.ifBlank { endpoint.baseUrl },
+            builtIn = false,
+            description = {},
+            shortDescription = {},
+        )
+
+        is ProviderSetting.MultiProtocol -> endpoint
+    }
+    return withEndpoint(protocol, synced)
+}
+
 fun ProviderSetting.convertTo(type: KClass<out ProviderSetting>): ProviderSetting {
     if (this::class == type) return this
+    if (this is ProviderSetting.MultiProtocol) return this
 
     val apiKey = when (this) {
         is ProviderSetting.OpenAI -> this.apiKey
         is ProviderSetting.Google -> this.apiKey
         is ProviderSetting.Claude -> this.apiKey
+        is ProviderSetting.MultiProtocol -> ""
     }
     val sourceBaseUrl = when (this) {
         is ProviderSetting.OpenAI -> this.baseUrl
         is ProviderSetting.Google -> this.baseUrl
         is ProviderSetting.Claude -> this.baseUrl
+        is ProviderSetting.MultiProtocol -> this.baseUrl
     }
     val targetDefaultBaseUrl = when (type) {
         ProviderSetting.OpenAI::class -> ProviderSetting.OpenAI().baseUrl
@@ -124,35 +318,42 @@ fun ProviderSetting.convertTo(type: KClass<out ProviderSetting>): ProviderSettin
 }
 
 internal fun ProviderSetting.defaultBaseUrlForReset(): String {
+    if (this is ProviderSetting.MultiProtocol) return baseUrl
     val defaultProvider = DEFAULT_PROVIDERS.find { it.id == id }
     if (defaultProvider != null) {
         when (this) {
             is ProviderSetting.OpenAI -> if (defaultProvider is ProviderSetting.OpenAI) return defaultProvider.baseUrl
             is ProviderSetting.Google -> if (defaultProvider is ProviderSetting.Google) return defaultProvider.baseUrl
             is ProviderSetting.Claude -> if (defaultProvider is ProviderSetting.Claude) return defaultProvider.baseUrl
+            is ProviderSetting.MultiProtocol -> Unit
         }
     }
     return when (this) {
         is ProviderSetting.OpenAI -> ProviderSetting.OpenAI().baseUrl
         is ProviderSetting.Google -> ProviderSetting.Google().baseUrl
         is ProviderSetting.Claude -> ProviderSetting.Claude().baseUrl
+        is ProviderSetting.MultiProtocol -> baseUrl
     }
 }
 
 internal fun ProviderSetting.resetBaseUrlToDefault(): ProviderSetting {
+    if (this is ProviderSetting.MultiProtocol) return this
     val defaultBaseUrl = defaultBaseUrlForReset()
     return when (this) {
         is ProviderSetting.OpenAI -> this.copy(baseUrl = defaultBaseUrl)
         is ProviderSetting.Google -> this.copy(baseUrl = defaultBaseUrl)
         is ProviderSetting.Claude -> this.copy(baseUrl = defaultBaseUrl)
+        is ProviderSetting.MultiProtocol -> this
     }
 }
 
 internal fun ProviderSetting.isUsingDefaultBaseUrl(): Boolean {
+    if (this is ProviderSetting.MultiProtocol) return false
     val baseUrl = when (this) {
         is ProviderSetting.OpenAI -> this.baseUrl
         is ProviderSetting.Google -> this.baseUrl
         is ProviderSetting.Claude -> this.baseUrl
+        is ProviderSetting.MultiProtocol -> this.baseUrl
     }
     return baseUrl == defaultBaseUrlForReset()
 }
@@ -201,18 +402,23 @@ private val OFFICIAL_PROVIDER_HOSTS = setOf(
 @Composable
 private fun ProviderConfigureOpenAI(
     provider: ProviderSetting.OpenAI,
-    onEdit: (provider: ProviderSetting.OpenAI) -> Unit
+    onEdit: (provider: ProviderSetting.OpenAI) -> Unit,
+    showName: Boolean = true,
+    showBaseUrl: Boolean = true,
+    showEnabled: Boolean = true,
 ) {
     val toaster = LocalToaster.current
 
     provider.description()
 
-    OutlinedTextField(
-        value = provider.name,
-        onValueChange = { onEdit(provider.copy(name = it.trim())) },
-        label = { Text(stringResource(R.string.setting_provider_page_name)) },
-        modifier = Modifier.fillMaxWidth(),
-    )
+    if (showName) {
+        OutlinedTextField(
+            value = provider.name,
+            onValueChange = { onEdit(provider.copy(name = it.trim())) },
+            label = { Text(stringResource(R.string.setting_provider_page_name)) },
+            modifier = Modifier.fillMaxWidth(),
+        )
+    }
 
     var keyVisible by remember { mutableStateOf(false) }
     OutlinedTextField(
@@ -229,13 +435,15 @@ private fun ProviderConfigureOpenAI(
         },
     )
 
-    OutlinedTextField(
-        value = provider.baseUrl,
-        onValueChange = { onEdit(provider.copy(baseUrl = it.trim())) },
-        label = { Text(stringResource(R.string.setting_provider_page_api_base_url)) },
-        modifier = Modifier.fillMaxWidth(),
-        isError = provider.baseUrl.isNotBlank() && !provider.baseUrl.isValidBaseUrl(),
-    )
+    if (showBaseUrl) {
+        OutlinedTextField(
+            value = provider.baseUrl,
+            onValueChange = { onEdit(provider.copy(baseUrl = it.trim())) },
+            label = { Text(stringResource(R.string.setting_provider_page_api_base_url)) },
+            modifier = Modifier.fillMaxWidth(),
+            isError = provider.baseUrl.isNotBlank() && !provider.baseUrl.isValidBaseUrl(),
+        )
+    }
 
     if (!provider.useResponseApi) {
         OutlinedTextField(
@@ -247,16 +455,18 @@ private fun ProviderConfigureOpenAI(
         )
     }
 
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(stringResource(R.string.setting_provider_page_enable))
-        Switch(
-            checked = provider.enabled,
-            onCheckedChange = { onEdit(provider.copy(enabled = it)) }
-        )
+    if (showEnabled) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(stringResource(R.string.setting_provider_page_enable))
+            Switch(
+                checked = provider.enabled,
+                onCheckedChange = { onEdit(provider.copy(enabled = it)) }
+            )
+        }
     }
 
     val responseAPIWarning = stringResource(R.string.setting_provider_page_response_api_warning)
@@ -293,17 +503,22 @@ private fun ProviderConfigureOpenAI(
 @Composable
 private fun ProviderConfigureClaude(
     provider: ProviderSetting.Claude,
-    onEdit: (provider: ProviderSetting.Claude) -> Unit
+    onEdit: (provider: ProviderSetting.Claude) -> Unit,
+    showName: Boolean = true,
+    showBaseUrl: Boolean = true,
+    showEnabled: Boolean = true,
 ) {
     provider.description()
 
-    OutlinedTextField(
-        value = provider.name,
-        onValueChange = { onEdit(provider.copy(name = it.trim())) },
-        label = { Text(stringResource(R.string.setting_provider_page_name)) },
-        modifier = Modifier.fillMaxWidth(),
-        maxLines = 3,
-    )
+    if (showName) {
+        OutlinedTextField(
+            value = provider.name,
+            onValueChange = { onEdit(provider.copy(name = it.trim())) },
+            label = { Text(stringResource(R.string.setting_provider_page_name)) },
+            modifier = Modifier.fillMaxWidth(),
+            maxLines = 3,
+        )
+    }
 
     var keyVisible by remember { mutableStateOf(false) }
     OutlinedTextField(
@@ -320,24 +535,28 @@ private fun ProviderConfigureClaude(
         },
     )
 
-    OutlinedTextField(
-        value = provider.baseUrl,
-        onValueChange = { onEdit(provider.copy(baseUrl = it.trim())) },
-        label = { Text(stringResource(R.string.setting_provider_page_api_base_url)) },
-        modifier = Modifier.fillMaxWidth(),
-        isError = provider.baseUrl.isNotBlank() && !provider.baseUrl.isValidBaseUrl(),
-    )
-
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(stringResource(R.string.setting_provider_page_enable))
-        Switch(
-            checked = provider.enabled,
-            onCheckedChange = { onEdit(provider.copy(enabled = it)) }
+    if (showBaseUrl) {
+        OutlinedTextField(
+            value = provider.baseUrl,
+            onValueChange = { onEdit(provider.copy(baseUrl = it.trim())) },
+            label = { Text(stringResource(R.string.setting_provider_page_api_base_url)) },
+            modifier = Modifier.fillMaxWidth(),
+            isError = provider.baseUrl.isNotBlank() && !provider.baseUrl.isValidBaseUrl(),
         )
+    }
+
+    if (showEnabled) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(stringResource(R.string.setting_provider_page_enable))
+            Switch(
+                checked = provider.enabled,
+                onCheckedChange = { onEdit(provider.copy(enabled = it)) }
+            )
+        }
     }
 
     Row(
@@ -380,7 +599,10 @@ private fun ProviderConfigureClaude(
 @Composable
 private fun ProviderConfigureGoogle(
     provider: ProviderSetting.Google,
-    onEdit: (provider: ProviderSetting.Google) -> Unit
+    onEdit: (provider: ProviderSetting.Google) -> Unit,
+    showName: Boolean = true,
+    showBaseUrl: Boolean = true,
+    showEnabled: Boolean = true,
 ) {
     val context = LocalContext.current
     val toaster = LocalToaster.current
@@ -409,12 +631,14 @@ private fun ProviderConfigureGoogle(
 
     provider.description()
 
-    OutlinedTextField(
-        value = provider.name,
-        onValueChange = { onEdit(provider.copy(name = it.trim())) },
-        label = { Text(stringResource(R.string.setting_provider_page_name)) },
-        modifier = Modifier.fillMaxWidth(),
-    )
+    if (showName) {
+        OutlinedTextField(
+            value = provider.name,
+            onValueChange = { onEdit(provider.copy(name = it.trim())) },
+            label = { Text(stringResource(R.string.setting_provider_page_name)) },
+            modifier = Modifier.fillMaxWidth(),
+        )
+    }
 
     if (!(provider.vertexAI && provider.useServiceAccount)) {
         var keyVisible by remember { mutableStateOf(false) }
@@ -433,7 +657,7 @@ private fun ProviderConfigureGoogle(
         )
     }
 
-    if (!provider.vertexAI) {
+    if (showBaseUrl && !provider.vertexAI) {
         OutlinedTextField(
             value = provider.baseUrl,
             onValueChange = { onEdit(provider.copy(baseUrl = it.trim())) },
@@ -448,16 +672,18 @@ private fun ProviderConfigureGoogle(
         )
     }
 
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(stringResource(R.string.setting_provider_page_enable))
-        Switch(
-            checked = provider.enabled,
-            onCheckedChange = { onEdit(provider.copy(enabled = it)) }
-        )
+    if (showEnabled) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(stringResource(R.string.setting_provider_page_enable))
+            Switch(
+                checked = provider.enabled,
+                onCheckedChange = { onEdit(provider.copy(enabled = it)) }
+            )
+        }
     }
 
     Row(

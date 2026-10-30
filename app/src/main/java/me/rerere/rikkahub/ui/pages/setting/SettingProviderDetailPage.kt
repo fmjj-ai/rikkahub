@@ -90,6 +90,9 @@ import androidx.compose.ui.util.fastFilter
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dokar.sonner.ToastType
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import me.rerere.ai.provider.BuiltInTools
 import me.rerere.ai.provider.Modality
@@ -97,8 +100,12 @@ import me.rerere.ai.provider.Model
 import me.rerere.ai.provider.ModelAbility
 import me.rerere.ai.provider.ModelType
 import me.rerere.ai.provider.ProviderManager
+import me.rerere.ai.provider.ProviderProtocol
 import me.rerere.ai.provider.ProviderSetting
 import me.rerere.ai.provider.TextGenerationParams
+import me.rerere.ai.provider.effectiveDefaultProtocol
+import me.rerere.ai.provider.isConfigured
+import me.rerere.ai.provider.toMultiProtocol
 import me.rerere.ai.registry.ModelRegistry
 import me.rerere.ai.ui.UIMessage
 import me.rerere.rikkahub.R
@@ -261,8 +268,14 @@ private fun SettingProviderConfigPage(
     onEdit: (ProviderSetting) -> Unit,
     onDelete: () -> Unit
 ) {
-    var internalProvider by remember(provider) { mutableStateOf(provider) }
+    var internalProvider by remember(provider) {
+        mutableStateOf(if (provider.builtIn) provider else provider.toMultiProtocol())
+    }
     var showDeleteDialog by remember { mutableStateOf(false) }
+    val openAiEndpoint = when (val current = internalProvider) {
+        is ProviderSetting.MultiProtocol -> current.endpointOrNull(ProviderProtocol.OPENAI)
+        else -> current
+    } as? ProviderSetting.OpenAI
 
     Column(
         modifier = Modifier
@@ -279,13 +292,16 @@ private fun SettingProviderConfigPage(
             }
         )
 
-        if (internalProvider is ProviderSetting.OpenAI) {
+        if (openAiEndpoint != null) {
             SettingProviderBalanceOption(
                 provider = internalProvider,
                 balanceOption = internalProvider.balanceOption,
                 onEdit = { internalProvider = internalProvider.copyProvider(balanceOption = it) }
             )
-            ProviderBalanceText(providerSetting = provider, style = MaterialTheme.typography.labelSmall)
+            ProviderBalanceText(
+                providerSetting = openAiEndpoint.copy(balanceOption = internalProvider.balanceOption),
+                style = MaterialTheme.typography.labelSmall
+            )
         }
 
         Row(
@@ -309,16 +325,18 @@ private fun SettingProviderConfigPage(
                 }
             }
 
-            IconButton(
-                onClick = {
-                    internalProvider = internalProvider.resetBaseUrlToDefault()
-                },
-                enabled = !internalProvider.isUsingDefaultBaseUrl(),
-            ) {
-                Icon(
-                    imageVector = HugeIcons.Refresh03,
-                    contentDescription = stringResource(R.string.setting_model_page_reset_to_default)
-                )
+            if (internalProvider !is ProviderSetting.MultiProtocol) {
+                IconButton(
+                    onClick = {
+                        internalProvider = internalProvider.resetBaseUrlToDefault()
+                    },
+                    enabled = !internalProvider.isUsingDefaultBaseUrl(),
+                ) {
+                    Icon(
+                        imageVector = HugeIcons.Refresh03,
+                        contentDescription = stringResource(R.string.setting_model_page_reset_to_default)
+                    )
+                }
             }
 
             Button(
@@ -331,7 +349,7 @@ private fun SettingProviderConfigPage(
         }
 
         // 硅基流动图标
-        if (provider is ProviderSetting.OpenAI && provider.baseUrl.contains("siliconflow.cn")) {
+        if (openAiEndpoint?.baseUrl?.contains("siliconflow.cn") == true) {
             SiliconFlowPowerByIcon(
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
@@ -380,22 +398,80 @@ private fun SettingProviderModelPage(
     )
 }
 
+private data class ProtocolModelGroup(
+    val protocol: ProviderProtocol,
+    val models: List<Model>,
+)
+
+private data class AvailableModels(
+    val groups: List<ProtocolModelGroup> = emptyList(),
+    val errors: Map<ProviderProtocol, String> = emptyMap(),
+) {
+    val allModels: List<Model> get() = groups.flatMap { it.models }
+}
+
+private fun Model.sameSelection(other: Model): Boolean {
+    return modelId == other.modelId && protocol == other.protocol
+}
+
+private fun Model.withRegistryMetadata(): Model = copy(
+    inputModalities = ModelRegistry.MODEL_INPUT_MODALITIES.getData(modelId),
+    outputModalities = ModelRegistry.MODEL_OUTPUT_MODALITIES.getData(modelId),
+    abilities = ModelRegistry.MODEL_ABILITIES.getData(modelId),
+)
+
+private suspend fun loadAvailableModels(
+    providerManager: ProviderManager,
+    providerSetting: ProviderSetting,
+): AvailableModels = coroutineScope {
+    if (providerSetting is ProviderSetting.MultiProtocol) {
+        val protocols = providerSetting.configuredProtocols()
+        val results = protocols.map { protocol ->
+            async {
+                val result = runCatching {
+                    val endpoint = providerSetting.endpointOrNull(protocol)
+                        ?: error("Protocol endpoint missing: $protocol")
+                    providerManager.getProviderByType(endpoint)
+                        .listModels(endpoint)
+                        .sortedBy { it.modelId }
+                        .map { it.copy(protocol = protocol) }
+                        .distinctBy { it.modelId }
+                }
+                protocol to result
+            }
+        }.awaitAll()
+        AvailableModels(
+            groups = results.mapNotNull { (protocol, result) ->
+                result.getOrNull()?.let { ProtocolModelGroup(protocol, it) }
+            },
+            errors = results.mapNotNull { (protocol, result) ->
+                result.exceptionOrNull()?.let { protocol to (it.message ?: "Unknown error") }
+            }.toMap(),
+        )
+    } else {
+        val protocol = ProviderProtocol.of(providerSetting) ?: ProviderProtocol.OPENAI
+        val result = runCatching {
+            providerManager.getProviderByType(providerSetting)
+                .listModels(providerSetting)
+                .sortedBy { it.modelId }
+                .distinctBy { it.modelId }
+        }
+        AvailableModels(
+            groups = result.getOrNull()?.let { listOf(ProtocolModelGroup(protocol, it)) } ?: emptyList(),
+            errors = result.exceptionOrNull()?.let { mapOf(protocol to (it.message ?: "Unknown error")) }
+                ?: emptyMap(),
+        )
+    }
+}
+
 @Composable
 private fun ModelList(
     providerSetting: ProviderSetting,
     onUpdateProvider: (ProviderSetting) -> Unit
 ) {
     val providerManager = koinInject<ProviderManager>()
-    val modelList by produceState(emptyList(), providerSetting) {
-        runCatching {
-            println("loading models...")
-            value = providerManager.getProviderByType(providerSetting)
-                .listModels(providerSetting)
-                .sortedBy { it.modelId }
-                .toList()
-        }.onFailure {
-            it.printStackTrace()
-        }
+    val available by produceState(AvailableModels(), providerSetting) {
+        value = loadAvailableModels(providerManager, providerSetting)
     }
     var expanded by rememberSaveable { mutableStateOf(true) }
     val lazyListState = rememberLazyListState()
@@ -477,7 +553,7 @@ private fun ModelList(
                 .offset(y = -ScreenOffset),
         ) {
             AddModelButton(
-                models = modelList,
+                available = available,
                 selectedModels = providerSetting.models,
                 onAddModel = {
                     onUpdateProvider(providerSetting.addModel(it))
@@ -502,6 +578,13 @@ private fun ModelSettingsForm(
 ) {
     val pagerState = rememberPagerState { 3 }
     val scope = rememberCoroutineScope()
+    val overrideBaseProvider = when (parentProvider) {
+        is ProviderSetting.MultiProtocol -> parentProvider.endpointOrNull(
+            model.protocol ?: parentProvider.defaultProtocol
+        )
+
+        else -> parentProvider
+    }
 
     fun setModelId(id: String) {
         val inputModality = ModelRegistry.MODEL_INPUT_MODALITIES.getData(id)
@@ -597,6 +680,14 @@ private fun ModelSettingsForm(
                             }
                         )
 
+                        if (parentProvider is ProviderSetting.MultiProtocol) {
+                            ModelProtocolSelector(
+                                model = model,
+                                provider = parentProvider,
+                                onModelChange = onModelChange,
+                            )
+                        }
+
                         ModelTypeSelector(
                             selectedType = model.type,
                             onTypeSelected = {
@@ -642,7 +733,7 @@ private fun ModelSettingsForm(
                             onUpdateProviderOverride = { providerOverride ->
                                 onModelChange(model.copy(providerOverwrite = providerOverride))
                             },
-                            parentProvider = parentProvider
+                            parentProvider = overrideBaseProvider
                         )
 
                         CustomHeaders(
@@ -671,6 +762,50 @@ private fun ModelSettingsForm(
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun ModelProtocolSelector(
+    model: Model,
+    provider: ProviderSetting.MultiProtocol,
+    onModelChange: (Model) -> Unit,
+) {
+    val selected = model.protocol ?: provider.effectiveDefaultProtocol()
+    Text(
+        text = stringResource(R.string.setting_provider_page_protocol),
+        style = MaterialTheme.typography.titleSmall,
+    )
+    SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+        ProviderProtocol.entries.forEachIndexed { index, protocol ->
+            SegmentedButton(
+                shape = SegmentedButtonDefaults.itemShape(index, ProviderProtocol.entries.size),
+                selected = selected == protocol,
+                enabled = model.providerOverwrite == null,
+                onClick = { onModelChange(model.copy(protocol = protocol)) },
+                label = { Text(protocol.displayName) },
+            )
+        }
+    }
+    when {
+        model.providerOverwrite != null -> {
+            Text(
+                text = stringResource(R.string.setting_provider_page_provider_override_protocol_disabled),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+
+        provider.endpointOrNull(selected)?.isConfigured() != true -> {
+            Text(
+                text = stringResource(
+                    R.string.setting_provider_page_protocol_not_configured,
+                    selected.displayName
+                ),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+            )
         }
     }
 }
@@ -722,7 +857,7 @@ private fun ModelContextSettings(model: Model, onModelChange: (Model) -> Unit) {
 
 @Composable
 private fun AddModelButton(
-    models: List<Model>,
+    available: AvailableModels,
     selectedModels: List<Model>,
     expanded: Boolean,
     onAddModel: (Model) -> Unit,
@@ -738,19 +873,11 @@ private fun AddModelButton(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         ModelPicker(
-            models = models,
+            available = available,
+            showProtocolHeaders = parentProvider is ProviderSetting.MultiProtocol,
             selectedModels = selectedModels,
             onModelSelected = { model ->
-                val inputModalities = ModelRegistry.MODEL_INPUT_MODALITIES.getData(model.modelId)
-                val outputModalities = ModelRegistry.MODEL_OUTPUT_MODALITIES.getData(model.modelId)
-                val abilities = ModelRegistry.MODEL_ABILITIES.getData(model.modelId)
-                onAddModel(
-                    model.copy(
-                        inputModalities = inputModalities,
-                        outputModalities = outputModalities,
-                        abilities = abilities
-                    )
-                )
+                onAddModel(model.withRegistryMetadata())
             },
             onModelDeselected = { model ->
                 onRemoveModel(model)
@@ -758,15 +885,11 @@ private fun AddModelButton(
             onAllModelSelected = {
                 onUpdateProvider(
                     parentProvider.copyProvider(
-                        models = parentProvider.models + it.filter { model ->
-                            parentProvider.models.none { existing -> existing.modelId == model.modelId }
-                        }.map { model ->
-                            model.copy(
-                                inputModalities = ModelRegistry.MODEL_INPUT_MODALITIES.getData(model.modelId),
-                                outputModalities = ModelRegistry.MODEL_OUTPUT_MODALITIES.getData(model.modelId),
-                                abilities = ModelRegistry.MODEL_ABILITIES.getData(model.modelId)
-                            )
-                        }
+                        models = parentProvider.models + it
+                            .filter { model ->
+                                parentProvider.models.none { existing -> existing.sameSelection(model) }
+                            }
+                            .map { model -> model.withRegistryMetadata() }
                     )
                 )
             },
@@ -774,7 +897,7 @@ private fun AddModelButton(
                 onUpdateProvider(
                     parentProvider.copyProvider(
                         models = parentProvider.models.filter { model ->
-                            filteredModels.none { filtered -> filtered.modelId == model.modelId }
+                            filteredModels.none { filtered -> filtered.sameSelection(model) }
                         }
                     )
                 )
@@ -783,7 +906,9 @@ private fun AddModelButton(
 
         Button(
             onClick = {
-                dialogState.open(Model())
+                val protocol = (parentProvider as? ProviderSetting.MultiProtocol)
+                    ?.effectiveDefaultProtocol()
+                dialogState.open(Model(protocol = protocol))
             }
         ) {
             Row(
@@ -884,7 +1009,8 @@ private fun AddModelButton(
 
 @Composable
 private fun ModelPicker(
-    models: List<Model>,
+    available: AvailableModels,
+    showProtocolHeaders: Boolean,
     selectedModels: List<Model>,
     onModelSelected: (Model) -> Unit,
     onModelDeselected: (Model) -> Unit,
@@ -899,16 +1025,20 @@ private fun ModelPicker(
         ) {
             var filterText by remember { mutableStateOf("") }
             val filterKeywords = filterText.split(" ").filter { it.isNotBlank() }
-            val filteredModels = models.fastFilter {
-                if (filterKeywords.isEmpty()) {
-                    true
-                } else {
-                    filterKeywords.all { keyword ->
-                        it.modelId.contains(keyword, ignoreCase = true) ||
-                            it.displayName.contains(keyword, ignoreCase = true)
+            val filteredGroups = available.groups.mapNotNull { group ->
+                val filtered = group.models.fastFilter {
+                    if (filterKeywords.isEmpty()) {
+                        true
+                    } else {
+                        filterKeywords.all { keyword ->
+                            it.modelId.contains(keyword, ignoreCase = true) ||
+                                it.displayName.contains(keyword, ignoreCase = true)
+                        }
                     }
                 }
+                if (filtered.isEmpty()) null else group.copy(models = filtered)
             }
+            val filteredModels = filteredGroups.flatMap { it.models }
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -931,7 +1061,7 @@ private fun ModelPicker(
                     )
 
                     val unselectedCount = filteredModels.count { model ->
-                        selectedModels.none { it.modelId == model.modelId }
+                        selectedModels.none { it.sameSelection(model) }
                     }
 
                     TextButton(
@@ -959,67 +1089,55 @@ private fun ModelPicker(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     contentPadding = PaddingValues(8.dp),
                 ) {
-                    items(filteredModels) {
-                        Card {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(
-                                    8.dp
-                                ),
+                    filteredGroups.forEach { group ->
+                        if (showProtocolHeaders) {
+                            item(key = "protocol-header-${group.protocol.name}") {
+                                Text(
+                                    text = stringResource(
+                                        R.string.setting_provider_page_protocol_models,
+                                        group.protocol.displayName,
+                                        group.models.size
+                                    ),
+                                    style = MaterialTheme.typography.titleSmall,
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                )
+                            }
+                        }
+                        items(group.models, key = { "${it.modelId}:${it.protocol?.name}" }) { model ->
+                            val selected = selectedModels.any { it.sameSelection(model) }
+                            ModelPickerRow(
+                                model = model,
+                                selected = selected,
+                                showProtocolTag = showProtocolHeaders,
+                                onToggle = {
+                                    if (selected) {
+                                        selectedModels.firstOrNull { it.sameSelection(model) }
+                                            ?.let(onModelDeselected)
+                                    } else {
+                                        onModelSelected(model)
+                                    }
+                                },
+                            )
+                        }
+                    }
+                    if (available.errors.isNotEmpty()) {
+                        item(key = "protocol-fetch-errors") {
+                            Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(8.dp),
+                                    .padding(horizontal = 8.dp, vertical = 4.dp),
+                                verticalArrangement = Arrangement.spacedBy(2.dp),
                             ) {
-                                AutoAIIcon(
-                                    it.modelId,
-                                    Modifier.size(32.dp)
-                                )
-                                Column(
-                                    verticalArrangement = Arrangement.spacedBy(
-                                        4.dp
-                                    ),
-                                    modifier = Modifier.weight(1f),
-                                ) {
+                                available.errors.forEach { (protocol, message) ->
                                     Text(
-                                        text = it.modelId,
-                                        style = MaterialTheme.typography.titleSmall,
+                                        text = stringResource(
+                                            R.string.setting_provider_page_fetch_models_failed,
+                                            protocol.displayName,
+                                            message
+                                        ),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.error,
                                     )
-
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(2.dp)
-                                    ) {
-                                        val modelMeta = remember(it) {
-                                            it.copy(
-                                                inputModalities = ModelRegistry.MODEL_INPUT_MODALITIES.getData(it.modelId),
-                                                outputModalities = ModelRegistry.MODEL_OUTPUT_MODALITIES.getData(it.modelId),
-                                                abilities = ModelRegistry.MODEL_ABILITIES.getData(it.modelId),
-                                            )
-                                        }
-                                        ModelModalityTag(
-                                            model = modelMeta,
-                                        )
-                                        ModelAbilityTag(
-                                            model = modelMeta,
-                                        )
-                                    }
-                                }
-                                IconButton(
-                                    onClick = {
-                                        if (selectedModels.any { model -> model.modelId == it.modelId }) {
-                                            // 从selectedModels中计算出要删除的model，因为删除需要id匹配，而不是ModelId
-                                            onModelDeselected(selectedModels.firstOrNull { model -> model.modelId == it.modelId }
-                                                ?: it)
-                                        } else {
-                                            onModelSelected(it)
-                                        }
-                                    }
-                                ) {
-                                    if (selectedModels.any { model -> model.modelId == it.modelId }) {
-                                        Icon(HugeIcons.Cancel01, null)
-                                    } else {
-                                        Icon(HugeIcons.Add01, null)
-                                    }
                                 }
                             }
                         }
@@ -1041,9 +1159,9 @@ private fun ModelPicker(
     }
     BadgedBox(
         badge = {
-            if (models.isNotEmpty()) {
+            if (available.allModels.isNotEmpty()) {
                 Badge {
-                    Text(models.size.toString())
+                    Text(available.allModels.size.toString())
                 }
             }
         }
@@ -1054,6 +1172,60 @@ private fun ModelPicker(
             }
         ) {
             Icon(HugeIcons.Package01, null)
+        }
+    }
+}
+
+@Composable
+private fun ModelPickerRow(
+    model: Model,
+    selected: Boolean,
+    showProtocolTag: Boolean,
+    onToggle: () -> Unit,
+) {
+    Card {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp),
+        ) {
+            AutoAIIcon(
+                model.modelId,
+                Modifier.size(32.dp)
+            )
+            Column(
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                modifier = Modifier.weight(1f),
+            ) {
+                Text(
+                    text = model.modelId,
+                    style = MaterialTheme.typography.titleSmall,
+                )
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    val protocol = model.protocol
+                    if (showProtocolTag && protocol != null) {
+                        Tag(type = TagType.INFO) {
+                            Text(protocol.displayName)
+                        }
+                    }
+                    val modelMeta = remember(model) { model.withRegistryMetadata() }
+                    ModelModalityTag(model = modelMeta)
+                    ModelAbilityTag(model = modelMeta)
+                }
+            }
+            IconButton(onClick = onToggle) {
+                if (selected) {
+                    Icon(HugeIcons.Cancel01, null)
+                } else {
+                    Icon(HugeIcons.Add01, null)
+                }
+            }
         }
     }
 }
@@ -1372,6 +1544,22 @@ private fun ModelCard(
                                     model.providerOverwrite?.javaClass?.simpleName ?: model.providerOverwrite?.name
                                     ?: "ProviderOverwrite"
                                 )
+                            }
+                        }
+                        if (parentProvider is ProviderSetting.MultiProtocol) {
+                            val protocol = model.protocol ?: parentProvider.defaultProtocol
+                            Tag(type = TagType.INFO) {
+                                Text(protocol.displayName)
+                            }
+                            if (parentProvider.endpointOrNull(protocol)?.isConfigured() != true) {
+                                Tag(type = TagType.WARNING) {
+                                    Text(
+                                        stringResource(
+                                            R.string.setting_provider_page_protocol_not_configured,
+                                            protocol.displayName
+                                        )
+                                    )
+                                }
                             }
                         }
                         ModelTypeTag(model = model)

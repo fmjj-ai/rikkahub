@@ -17,6 +17,11 @@ data class Model(
     val abilities: List<ModelAbility> = emptyList(),
     val tools: Set<BuiltInTools> = emptySet(),
     val providerOverwrite: ProviderSetting? = null,
+    /**
+     * 多协议服务商下，这个模型走哪个协议。
+     * null = 跟随服务商的 defaultProtocol；单协议（旧 typed）服务商忽略此字段。
+     */
+    val protocol: ProviderProtocol? = null,
     val contextWindowTokens: Int = DEFAULT_CONTEXT_WINDOW_TOKENS,
     val autoCompressThresholdTokens: Int = DEFAULT_AUTO_COMPRESS_THRESHOLD_TOKENS,
 ) {

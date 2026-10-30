@@ -47,11 +47,15 @@ class ProviderManager(client: OkHttpClient, context: Context) {
      * @return Provider实例，如果不存在则返回null
      */
     fun <T : ProviderSetting> getProviderByType(setting: T): Provider<T> {
+        require(setting !is ProviderSetting.MultiProtocol) {
+            "Multi-protocol provider must be resolved to a protocol endpoint before requesting"
+        }
         @Suppress("UNCHECKED_CAST")
         return when (setting) {
             is ProviderSetting.OpenAI -> getProvider("openai")
             is ProviderSetting.Google -> getProvider("google")
             is ProviderSetting.Claude -> getProvider("claude")
+            is ProviderSetting.MultiProtocol -> error("Unreachable")
         } as Provider<T>
     }
 }

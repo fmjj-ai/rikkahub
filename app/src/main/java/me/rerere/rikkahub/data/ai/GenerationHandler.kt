@@ -49,7 +49,7 @@ import me.rerere.rikkahub.data.ai.tools.ToolCallContext
 import me.rerere.rikkahub.data.ai.tools.buildMemoryTools
 import me.rerere.rikkahub.data.datastore.Settings
 import me.rerere.rikkahub.data.datastore.findModelById
-import me.rerere.rikkahub.data.datastore.findProvider
+import me.rerere.rikkahub.data.datastore.resolveEndpoint
 import me.rerere.rikkahub.data.model.Assistant
 import me.rerere.rikkahub.data.model.AssistantMemory
 import me.rerere.rikkahub.data.repository.MemoryRepository
@@ -92,7 +92,8 @@ class GenerationHandler(
         workspaceCwd: String? = null,
         compressContext: suspend (List<UIMessage>) -> List<UIMessage> = { it },
     ): Flow<GenerationChunk> = flow {
-        val provider = model.findProvider(settings.providers) ?: error("Provider not found")
+        val provider = model.resolveEndpoint(settings.providers)
+            ?: error("Provider not found or protocol not configured for model ${model.modelId}")
         val providerImpl = providerManager.getProviderByType(provider)
 
         var messages: List<UIMessage> = messages
@@ -548,8 +549,8 @@ class GenerationHandler(
     ): Flow<String> = flow {
         val model = settings.providers.findModelById(settings.translateModeId)
             ?: error("Translation model not found")
-        val provider = model.findProvider(settings.providers)
-            ?: error("Translation provider not found")
+        val provider = model.resolveEndpoint(settings.providers)
+            ?: error("Translation provider not found or protocol not configured")
 
         val providerHandler = providerManager.getProviderByType(provider)
 

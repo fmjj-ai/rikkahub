@@ -237,6 +237,126 @@ sealed class ProviderSetting {
         }
     }
 
+    /**
+     * 多协议服务商：一个中转站/站点下，同时保存 OpenAI、Google、Claude 三份协议配置。
+     * 模型统一放在父级 [models]，每个模型通过 [Model.protocol] 选择协议。
+     */
+    @Serializable
+    @SerialName("multi")
+    data class MultiProtocol(
+        override var id: Uuid = Uuid.random(),
+        override var enabled: Boolean = true,
+        override var name: String = "New Provider",
+        override var models: List<Model> = emptyList(),
+        override val balanceOption: BalanceOption = BalanceOption(),
+        @Transient override val builtIn: Boolean = false,
+        @Transient override val description: @Composable (() -> Unit) = {},
+        @Transient override val shortDescription: @Composable (() -> Unit) = {},
+        /** 服务商级共享地址；三个协议都使用它。 */
+        val baseUrl: String = "",
+        val defaultProtocol: ProviderProtocol = ProviderProtocol.OPENAI,
+        val openai: ProviderSetting.OpenAI? = null,
+        val google: ProviderSetting.Google? = null,
+        val claude: ProviderSetting.Claude? = null,
+    ) : ProviderSetting() {
+        override fun addModel(model: Model): ProviderSetting {
+            return copy(models = models + model)
+        }
+
+        override fun editModel(model: Model): ProviderSetting {
+            return copy(models = models.map { if (it.id == model.id) model.copy() else it })
+        }
+
+        override fun delModel(model: Model): ProviderSetting {
+            return copy(models = models.filter { it.id != model.id })
+        }
+
+        override fun moveMove(from: Int, to: Int): ProviderSetting {
+            return copy(models = models.toMutableList().apply {
+                val model = removeAt(from)
+                add(to, model)
+            })
+        }
+
+        override fun copyProvider(
+            id: Uuid,
+            enabled: Boolean,
+            name: String,
+            models: List<Model>,
+            balanceOption: BalanceOption,
+            builtIn: Boolean,
+            description: @Composable (() -> Unit),
+            shortDescription: @Composable (() -> Unit),
+        ): ProviderSetting {
+            return copy(
+                id = id,
+                enabled = enabled,
+                name = name,
+                models = models,
+                balanceOption = balanceOption,
+                builtIn = builtIn,
+                description = description,
+                shortDescription = shortDescription,
+                openai = openai?.copy(
+                    id = id,
+                    enabled = enabled,
+                    name = name,
+                    models = emptyList(),
+                    balanceOption = balanceOption,
+                    builtIn = false,
+                    description = {},
+                    shortDescription = {},
+                ),
+                google = google?.copy(
+                    id = id,
+                    enabled = enabled,
+                    name = name,
+                    models = emptyList(),
+                    balanceOption = balanceOption,
+                    builtIn = false,
+                    description = {},
+                    shortDescription = {},
+                ),
+                claude = claude?.copy(
+                    id = id,
+                    enabled = enabled,
+                    name = name,
+                    models = emptyList(),
+                    balanceOption = balanceOption,
+                    builtIn = false,
+                    description = {},
+                    shortDescription = {},
+                ),
+            )
+        }
+
+        fun endpointConfig(protocol: ProviderProtocol): ProviderSetting? = when (protocol) {
+            ProviderProtocol.OPENAI -> openai
+            ProviderProtocol.GOOGLE -> google
+            ProviderProtocol.CLAUDE -> claude
+        }
+
+        /** 取某个协议的 typed 配置（带父级 id/name/models/URL），未配置返回 null。 */
+        fun endpointOrNull(protocol: ProviderProtocol): ProviderSetting? {
+            return endpointConfig(protocol)?.asEndpointOf(this)
+        }
+
+        fun hasEndpoint(protocol: ProviderProtocol): Boolean = endpointConfig(protocol) != null
+
+        fun configuredProtocols(): List<ProviderProtocol> {
+            return ProviderProtocol.entries.filter { endpointOrNull(it)?.isConfigured() == true }
+        }
+
+        /** 更新某个协议的配置；用于配置页保存。 */
+        fun withEndpoint(protocol: ProviderProtocol, setting: ProviderSetting?): MultiProtocol {
+            return when (protocol) {
+                ProviderProtocol.OPENAI -> copy(openai = setting as? ProviderSetting.OpenAI)
+                ProviderProtocol.GOOGLE -> copy(google = setting as? ProviderSetting.Google)
+                ProviderProtocol.CLAUDE -> copy(claude = setting as? ProviderSetting.Claude)
+            }
+        }
+    }
+
     companion object {
         val Types by lazy {
             listOf(
@@ -246,4 +366,151 @@ sealed class ProviderSetting {
             )
         }
     }
+}
+
+private fun ProviderSetting.asEndpointOf(parent: ProviderSetting.MultiProtocol): ProviderSetting {
+    return when (this) {
+        is ProviderSetting.OpenAI -> copy(
+            id = parent.id,
+            enabled = parent.enabled,
+            name = parent.name,
+            models = parent.models,
+            balanceOption = parent.balanceOption,
+            builtIn = false,
+            description = {},
+            shortDescription = {},
+            baseUrl = parent.baseUrl.ifBlank { baseUrl },
+        )
+
+        is ProviderSetting.Google -> copy(
+            id = parent.id,
+            enabled = parent.enabled,
+            name = parent.name,
+            models = parent.models,
+            balanceOption = parent.balanceOption,
+            builtIn = false,
+            description = {},
+            shortDescription = {},
+            baseUrl = parent.baseUrl.ifBlank { baseUrl },
+        )
+
+        is ProviderSetting.Claude -> copy(
+            id = parent.id,
+            enabled = parent.enabled,
+            name = parent.name,
+            models = parent.models,
+            balanceOption = parent.balanceOption,
+            builtIn = false,
+            description = {},
+            shortDescription = {},
+            baseUrl = parent.baseUrl.ifBlank { baseUrl },
+        )
+
+        is ProviderSetting.MultiProtocol -> this
+    }
+}
+
+/** 协议配置是否已经可以发请求：Key 已填（Google 也接受 Vertex Service Account）。 */
+fun ProviderSetting.isConfigured(): Boolean = when (this) {
+    is ProviderSetting.OpenAI -> apiKey.isNotBlank() && baseUrl.isNotBlank()
+    is ProviderSetting.Claude -> apiKey.isNotBlank() && baseUrl.isNotBlank()
+    is ProviderSetting.Google -> (apiKey.isNotBlank() && baseUrl.isNotBlank()) ||
+        (vertexAI && useServiceAccount && projectId.isNotBlank() &&
+            serviceAccountEmail.isNotBlank() && privateKey.isNotBlank())
+
+    is ProviderSetting.MultiProtocol -> configuredProtocols().isNotEmpty()
+}
+
+/** 模型实际使用的协议；旧 typed 服务商直接由其类型决定。 */
+fun ProviderSetting.protocolOf(model: Model): ProviderProtocol? = when (this) {
+    is ProviderSetting.MultiProtocol -> model.protocol ?: defaultProtocol
+    is ProviderSetting.OpenAI -> ProviderProtocol.OPENAI
+    is ProviderSetting.Google -> ProviderProtocol.GOOGLE
+    is ProviderSetting.Claude -> ProviderProtocol.CLAUDE
+}
+
+/**
+ * 把旧的单协议服务商升级为多协议服务商，已有模型显式写入原协议，保证升级后行为不变。
+ */
+fun ProviderSetting.toMultiProtocol(): ProviderSetting.MultiProtocol = when (this) {
+    is ProviderSetting.MultiProtocol -> this
+
+    is ProviderSetting.OpenAI -> ProviderSetting.MultiProtocol(
+        id = id,
+        enabled = enabled,
+        name = name,
+        models = models.withExplicitProtocol(ProviderProtocol.OPENAI),
+        balanceOption = balanceOption,
+        builtIn = builtIn,
+        description = description,
+        shortDescription = shortDescription,
+        baseUrl = baseUrl,
+        defaultProtocol = ProviderProtocol.OPENAI,
+        openai = copy(
+            models = emptyList(),
+            balanceOption = balanceOption,
+            builtIn = false,
+            description = {},
+            shortDescription = {},
+        ),
+    )
+
+    is ProviderSetting.Google -> ProviderSetting.MultiProtocol(
+        id = id,
+        enabled = enabled,
+        name = name,
+        models = models.withExplicitProtocol(ProviderProtocol.GOOGLE),
+        balanceOption = balanceOption,
+        builtIn = builtIn,
+        description = description,
+        shortDescription = shortDescription,
+        baseUrl = baseUrl,
+        defaultProtocol = ProviderProtocol.GOOGLE,
+        google = copy(
+            models = emptyList(),
+            balanceOption = balanceOption,
+            builtIn = false,
+            description = {},
+            shortDescription = {},
+        ),
+    )
+
+    is ProviderSetting.Claude -> ProviderSetting.MultiProtocol(
+        id = id,
+        enabled = enabled,
+        name = name,
+        models = models.withExplicitProtocol(ProviderProtocol.CLAUDE),
+        balanceOption = balanceOption,
+        builtIn = builtIn,
+        description = description,
+        shortDescription = shortDescription,
+        baseUrl = baseUrl,
+        defaultProtocol = ProviderProtocol.CLAUDE,
+        claude = copy(
+            models = emptyList(),
+            balanceOption = balanceOption,
+            builtIn = false,
+            description = {},
+            shortDescription = {},
+        ),
+    )
+}
+
+private fun List<Model>.withExplicitProtocol(protocol: ProviderProtocol): List<Model> {
+    return map { model -> if (model.protocol == null) model.copy(protocol = protocol) else model }
+}
+
+/** 更新服务商级共享地址，同时同步到已有协议配置。 */
+fun ProviderSetting.MultiProtocol.withBaseUrl(url: String): ProviderSetting.MultiProtocol {
+    return copy(
+        baseUrl = url,
+        openai = openai?.copy(baseUrl = url),
+        google = google?.copy(baseUrl = url),
+        claude = claude?.copy(baseUrl = url),
+    )
+}
+
+/** 手动添加模型时的默认协议：优先第一个已配置协议，其次 defaultProtocol。 */
+fun ProviderSetting.MultiProtocol.effectiveDefaultProtocol(): ProviderProtocol {
+    return configuredProtocols().firstOrNull() ?: defaultProtocol
 }

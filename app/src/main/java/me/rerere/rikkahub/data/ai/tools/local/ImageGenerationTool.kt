@@ -28,7 +28,7 @@ import me.rerere.common.android.appTempFolder
 import me.rerere.rikkahub.data.ai.tools.ToolCallContext
 import me.rerere.rikkahub.data.datastore.SettingsStore
 import me.rerere.rikkahub.data.datastore.findImageGenerationModel
-import me.rerere.rikkahub.data.datastore.findProvider
+import me.rerere.rikkahub.data.datastore.resolveEndpoint
 import me.rerere.rikkahub.data.db.entity.GenMediaEntity
 import me.rerere.rikkahub.data.files.FilesManager
 import me.rerere.rikkahub.data.repository.GenMediaRepository
@@ -154,8 +154,8 @@ private suspend fun generateImage(
         val settings = settingsStore.settingsFlow.first()
         val model = settings.findImageGenerationModel()
             ?: return errorOutput("尚未配置生图模型（设置 → 模型，把生图模型设为 IMAGE 类型），无法画图。请提示用户先去配置。")
-        val provider = model.findProvider(settings.providers)
-            ?: return errorOutput("找不到生图模型对应的服务商配置，请提示用户检查模型设置。")
+        val provider = model.resolveEndpoint(settings.providers)
+            ?: return errorOutput("找不到生图模型对应的服务商或协议未配置，请提示用户检查模型设置。")
 
         val params = ImageGenerationParams(
             model = model,

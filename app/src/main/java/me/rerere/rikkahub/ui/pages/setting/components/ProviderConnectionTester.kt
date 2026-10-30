@@ -38,6 +38,7 @@ import me.rerere.ai.provider.ModelType
 import me.rerere.ai.provider.ProviderManager
 import me.rerere.ai.provider.ProviderSetting
 import me.rerere.ai.provider.TextGenerationParams
+import me.rerere.ai.provider.isConfigured
 import me.rerere.ai.ui.UIMessage
 import me.rerere.ai.ui.UIMessagePart
 import me.rerere.hugeicons.HugeIcons
@@ -119,20 +120,34 @@ fun ProviderConnectionTester(
             confirmButton = {
                 TextButton(
                     onClick = {
-                        if (model == null) return@TextButton
-                        val provider = providerManager.getProviderByType(internalProvider)
+                        val selectedModel = model ?: return@TextButton
+                        val endpoint = when (val provider = internalProvider) {
+                            is ProviderSetting.MultiProtocol -> provider.endpointOrNull(
+                                selectedModel.protocol ?: provider.defaultProtocol
+                            )?.takeIf { it.isConfigured() }
+
+                            else -> provider
+                        }
+                        if (endpoint == null) {
+                            val error = IllegalStateException("Selected protocol is not configured")
+                            nonStreamingState = UiState.Error(error)
+                            streamingState = UiState.Error(error)
+                            toolsState = UiState.Error(error)
+                            return@TextButton
+                        }
+                        val provider = providerManager.getProviderByType(endpoint)
                         resetStates()
                         scope.launch {
                             launch {
                                 runCatching {
                                     nonStreamingState = UiState.Loading
                                     val chunk = provider.generateText(
-                                        providerSetting = internalProvider,
+                                        providerSetting = endpoint,
                                         messages = listOf(UIMessage.system("You are a helpful assistant"), UIMessage.user("hello")),
                                         params = TextGenerationParams(
-                                            model = model!!,
-                                            customHeaders = model!!.customHeaders,
-                                            customBody = model!!.customBodies
+                                            model = selectedModel,
+                                            customHeaders = selectedModel.customHeaders,
+                                            customBody = selectedModel.customBodies
                                         )
                                     )
                                     val text = chunk.choices.firstOrNull()?.message?.parts
@@ -145,12 +160,12 @@ fun ProviderConnectionTester(
                                 runCatching {
                                     streamingState = UiState.Loading
                                     val flow = provider.streamText(
-                                        providerSetting = internalProvider,
+                                        providerSetting = endpoint,
                                         messages = listOf(UIMessage.system("You are a helpful assistant"), UIMessage.user("hello")),
                                         params = TextGenerationParams(
-                                            model = model!!,
-                                            customHeaders = model!!.customHeaders,
-                                            customBody = model!!.customBodies
+                                            model = selectedModel,
+                                            customHeaders = selectedModel.customHeaders,
+                                            customBody = selectedModel.customBodies
                                         )
                                     )
                                     flow.collect { chunk ->
@@ -170,13 +185,13 @@ fun ProviderConnectionTester(
                                         execute = { emptyList() }
                                     )
                                     val chunk = provider.generateText(
-                                        providerSetting = internalProvider,
+                                        providerSetting = endpoint,
                                         messages = listOf(UIMessage.system("You are a helpful assistant"), UIMessage.user("Use the get_current_time tool.")),
                                         params = TextGenerationParams(
-                                            model = model!!,
+                                            model = selectedModel,
                                             tools = listOf(testTool),
-                                            customHeaders = model!!.customHeaders,
-                                            customBody = model!!.customBodies
+                                            customHeaders = selectedModel.customHeaders,
+                                            customBody = selectedModel.customBodies
                                         )
                                     )
                                     val message = chunk.choices.firstOrNull()?.message

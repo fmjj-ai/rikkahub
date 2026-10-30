@@ -76,7 +76,7 @@ import me.rerere.rikkahub.data.event.AppEvent
 import me.rerere.rikkahub.data.event.AppEventBus
 import me.rerere.rikkahub.data.datastore.SettingsStore
 import me.rerere.rikkahub.data.datastore.findModelById
-import me.rerere.rikkahub.data.datastore.findProvider
+import me.rerere.rikkahub.data.datastore.resolveEndpoint
 import me.rerere.rikkahub.data.datastore.getAssistantById
 import me.rerere.rikkahub.data.datastore.getCurrentAssistant
 import me.rerere.rikkahub.data.datastore.getCurrentChatModel
@@ -871,7 +871,7 @@ class ChatService(
         runCatching {
             val settings = settingsStore.settingsFlow.first()
             val model = settings.findModelById(settings.titleModelId, fallback = settings.fastModelId) ?: return
-            val provider = model.findProvider(settings.providers) ?: return
+            val provider = model.resolveEndpoint(settings.providers) ?: return
 
             val providerHandler = providerManager.getProviderByType(provider)
             val result = providerHandler.generateText(
@@ -912,7 +912,7 @@ class ChatService(
             val settings = settingsStore.settingsFlow.first()
             if (!settings.enableSuggestion) return
             val model = settings.findModelById(settings.suggestionModelId, fallback = settings.fastModelId) ?: return
-            val provider = model.findProvider(settings.providers) ?: return
+            val provider = model.resolveEndpoint(settings.providers) ?: return
 
             sessions[conversationId]?.let { session ->
                 updateConversation(
@@ -1020,7 +1020,7 @@ class ChatService(
         val boundary = activeMessages.indexOfFirst { it.id == messages[originalBoundary].id }
         val settings = settingsStore.settingsFlow.first()
         val model = settings.findModelById(settings.compressModelId) ?: chatModel
-        val provider = model.findProvider(settings.providers) ?: error("找不到压缩模型的服务商")
+        val provider = model.resolveEndpoint(settings.providers) ?: error("找不到压缩模型的服务商或协议未配置")
         val providerHandler = providerManager.getProviderByType(provider)
         val outputBudget = targetTokens.coerceIn(128, (model.contextWindow / 4).coerceAtLeast(128))
         fun prompt(content: String) = settings.compressPrompt.applyPlaceholders(

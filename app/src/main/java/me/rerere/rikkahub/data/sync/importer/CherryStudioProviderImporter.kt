@@ -8,6 +8,7 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import me.rerere.ai.provider.Model
+import me.rerere.ai.provider.ProviderProtocol
 import me.rerere.ai.provider.ProviderSetting
 import me.rerere.ai.registry.ModelRegistry
 import me.rerere.common.http.jsonObjectOrNull
@@ -126,6 +127,20 @@ object CherryStudioProviderImporter {
             is ProviderSetting.OpenAI -> "openai|${provider.baseUrl}|${provider.apiKey}"
             is ProviderSetting.Google -> "google|${provider.baseUrl}|${provider.apiKey}"
             is ProviderSetting.Claude -> "claude|${provider.baseUrl}|${provider.apiKey}"
+            is ProviderSetting.MultiProtocol -> buildString {
+                append("multi|")
+                append(provider.baseUrl)
+                ProviderProtocol.entries.forEach { protocol ->
+                    val endpoint = provider.endpointConfig(protocol) ?: return@forEach
+                    val apiKey = when (endpoint) {
+                        is ProviderSetting.OpenAI -> endpoint.apiKey
+                        is ProviderSetting.Google -> endpoint.apiKey
+                        is ProviderSetting.Claude -> endpoint.apiKey
+                        is ProviderSetting.MultiProtocol -> ""
+                    }
+                    append("|${protocol.name}:$apiKey")
+                }
+            }
         }
     }
 }
