@@ -203,6 +203,12 @@ object ModelRegistry {
         toolReasoningAbility()
     }
 
+    private val CLAUDE_5 = defineModel {
+        tokens("claude", "5")
+        visionInput()
+        toolReasoningAbility()
+    }
+
     val CLAUDE_4_5 = defineModel {
         tokens("claude", "4", "5")
         visionInput()
@@ -238,6 +244,7 @@ object ModelRegistry {
             CLAUDE_SONNET_3_5,
             CLAUDE_SONNET_3_7,
             CLAUDE_4,
+            CLAUDE_5,
             CLAUDE_4_5,
             CLAUDE_SONNET_4_6,
             CLAUDE_OPUS_4_6,
@@ -527,6 +534,7 @@ object ModelRegistry {
         CLAUDE_SONNET_3_5,
         CLAUDE_SONNET_3_7,
         CLAUDE_4,
+        CLAUDE_5,
         CLAUDE_4_5,
         CLAUDE_SONNET_4_6,
         CLAUDE_OPUS_4_6,
