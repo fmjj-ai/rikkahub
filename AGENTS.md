@@ -18,6 +18,13 @@
 
 构建/打包结束后执行 `./gradlew --stop`，关闭残留的 Gradle/Kotlin daemon 进程，避免占用内存。
 
+Windows 下集成校验优先使用 `scripts/Invoke-IntegrationChecks.ps1`。脚本固定离线、单次 daemon、
+Kotlin 进程内编译和最多 2 个 worker，并在 `finally` 中执行 Gradle stop。不要一边长时间修改代码，
+一边留下已经完成的编译 daemon；不得按进程名批量终止 Java，只处理能确认归属本次构建的进程。
+
+最终验收构建期间冻结源码；构建过程中改文件可能收到上一份输入快照的错误，需先核对当前源文件，
+不要按旧错误反复修改或叠加启动构建。阶段验证结束后清理后台，再开始下一批修改。
+
 ## Coding Style & Naming Conventions
 
 本仓库使用 `.editorconfig` 统一格式：
@@ -28,12 +35,22 @@
 
 命名习惯：模块名为小写目录（如 `ai/`、`speech/`），Kotlin 类遵循 PascalCase，测试类以 `*Test` 结尾。
 
+扩展使用尾随 lambda 的 Kotlin/Compose API 时，新增可选参数放在最后一个回调之前，保留回调在参数列表末尾；
+修改后搜索所有调用方，避免原来的尾随 lambda 被解析为新增的 Boolean 等参数。
+
+Windows 下 Python 工具若需要向终端输出中文，使用本次调用的 `-X utf8` 显式统一输出编码，
+不要靠修改全局环境解决终端乱码，也不要把终端解码错误误判成源码文件损坏；文件仍需严格 UTF-8 校验。
+
 ## Testing Guidelines
 
 测试框架以 JUnit/AndroidX Test 为主。未设定强制覆盖率门槛，但新逻辑应配套新增/更新测试。测试文件命名建议：
 
 - 单元测试：`FooTest.kt`
 - 仪器测试：`FooInstrumentedTest.kt` 或 `*Test.kt`
+
+设置持久化回归应比较完整序列化字段，不直接用整份 `Settings.equals` 判断往返是否一致：
+提供商的 `@Transient` Compose 描述函数和部分非 data class 搜索选项使用引用相等。
+运行时对象身份是否保留应另写专项测试，不能为通过往返测试而覆盖用户默认值或删掉配置字段。
 
 ## Module Structure
 
@@ -90,7 +107,7 @@
   It posts a persistent notification on the
   `CHAT_LIVE_UPDATE_NOTIFICATION_CHANNEL_ID` channel to prevent the process from being frozen or losing network access
   when the app is backgrounded or the screen is off. It is started/stopped in tandem with the keepAlive task set in
-  ChatService (which also holds the partial wake lock), supports an `ACTION_STOP` intent, and is gated by the
+  ChatService; the foreground service owns the bounded partial wake lock, supports an `ACTION_STOP` intent, and is gated by the
   `settings.displaySetting.enableBackgroundKeepAlive` setting. (
   app/src/main/java/me/rerere/rikkahub/service/ChatGenerationService.kt)
 

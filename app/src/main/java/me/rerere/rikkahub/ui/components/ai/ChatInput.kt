@@ -155,12 +155,20 @@ fun ChatInput(
     }
 
     fun sendMessage() {
+        if (state.pendingGalleryImageCount > 0) {
+            toaster.show("图片正在添加，请稍候")
+            return
+        }
         focusManager.clearFocus(force = true)
         keyboardController?.hide()
         if (loading) onCancelClick() else onSendClick()
     }
 
     fun sendMessageWithoutAnswer() {
+        if (state.pendingGalleryImageCount > 0) {
+            toaster.show("图片正在添加，请稍候")
+            return
+        }
         focusManager.clearFocus(force = true)
         keyboardController?.hide()
         if (loading) onCancelClick() else onLongSendClick()

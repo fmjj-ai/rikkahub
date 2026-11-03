@@ -145,6 +145,10 @@ val dataSourceModule = module {
         get<AppDatabase>().folderDao()
     }
 
+    single { get<AppDatabase>().mediaCreationDao() }
+    single { me.rerere.mediagen.provider.MediaGenerationManager(get()) }
+    single { me.rerere.rikkahub.data.remote.RemoteFileStore(get(), get(), get<me.rerere.rikkahub.AppScope>()) }
+
     single {
         MessageFtsManager(get())
     }

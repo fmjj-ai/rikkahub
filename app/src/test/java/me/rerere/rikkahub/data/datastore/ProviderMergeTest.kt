@@ -4,6 +4,7 @@ import me.rerere.ai.provider.Model
 import me.rerere.ai.provider.ProviderProtocol
 import me.rerere.ai.provider.ProviderSetting
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import kotlin.uuid.Uuid
@@ -41,7 +42,7 @@ class ProviderMergeTest {
     }
 
     @Test
-    fun `same protocol conflict can keep the other key and dedupes models`() {
+    fun `same protocol conflict can choose key without losing independently referenced model ids`() {
         val primaryModel = Model(id = Uuid.random(), modelId = "gpt-4o", displayName = "GPT-4o")
         val otherModel = Model(id = Uuid.random(), modelId = "gpt-4o", displayName = "GPT-4o copy")
         val primary = ProviderSetting.OpenAI(
@@ -66,8 +67,9 @@ class ProviderMergeTest {
         val merged = plan.merged(mapOf(ProviderProtocol.OPENAI to chooseOther))
 
         assertEquals("key-b", merged.openai?.apiKey)
-        assertEquals(1, merged.models.size)
-        assertEquals(ProviderProtocol.OPENAI, merged.models.single().protocol)
+        assertEquals(2, merged.models.size)
+        assertEquals(setOf(primaryModel.id, otherModel.id), merged.models.map { it.id }.toSet())
+        assertTrue(merged.models.all { it.protocol == ProviderProtocol.OPENAI })
     }
 
     @Test
@@ -104,5 +106,73 @@ class ProviderMergeTest {
         assertEquals("https://primary.example.com/v1", merged.claude?.baseUrl)
         assertEquals("claude-key", merged.claude?.apiKey)
         assertEquals(setOf("gpt-4o", "claude-sonnet"), merged.models.map { it.modelId }.toSet())
+    }
+
+    @Test
+    fun `url grouping canonicalizes host but keeps path case`() {
+        val a = ProviderSetting.OpenAI(baseUrl = "HTTPS://Relay.Example:443/Api/V1/")
+        val b = ProviderSetting.Claude(baseUrl = "https://relay.example/Api/V1")
+        val different = b.copy(baseUrl = "https://relay.example/api/v1")
+        assertEquals(a.mergeUrlIdentity(), b.mergeUrlIdentity())
+        org.junit.Assert.assertNotEquals(a.mergeUrlIdentity(), different.mergeUrlIdentity())
+    }
+
+    @Test
+    fun `same key and url with different request strategies still conflict`() {
+        val a = ProviderSetting.OpenAI(apiKey = "same", baseUrl = "https://example.com/v1")
+        listOf(a.copy(useResponseApi = true), a.copy(chatCompletionsPath = "/custom/chat"),
+            a.copy(includeHistoryReasoning = false)).forEach { other ->
+            assertEquals(2, buildProviderMergePlan(a, listOf(other)).conflicts.single().options.size)
+        }
+    }
+
+    @Test
+    fun `independent model ids keep references and distinct context settings`() {
+        val aModel = Model(modelId = "same", contextWindowTokens = 1_000_000, autoCompressThresholdTokens = 472_000)
+        val bModel = Model(modelId = "same", contextWindowTokens = 200_000, autoCompressThresholdTokens = 80_000)
+        val a = ProviderSetting.OpenAI(models = listOf(aModel))
+        val b = ProviderSetting.OpenAI(models = listOf(bModel))
+        val settings = Settings(providers = listOf(a, b), favoriteModels = listOf(aModel.id, bModel.id),
+            fastModelId = bModel.id, imageGenerationModelId = aModel.id,
+            mediaGenerationProviders = listOf(me.rerere.mediagen.provider.MediaGenerationProviderSetting.MiniMax()))
+        val merged = buildProviderMergePlan(a, listOf(b)).merged()
+        val result = settings.applyProviderMerge(a, listOf(b), merged)
+        assertEquals(settings.favoriteModels, result.favoriteModels)
+        assertEquals(settings.fastModelId, result.fastModelId)
+        assertEquals(settings.mediaGenerationProviders, result.mediaGenerationProviders)
+        assertEquals(80_000, result.findModelById(bModel.id)?.autoCompressThresholdTokens)
+        assertEquals(472_000, result.findModelById(aModel.id)?.autoCompressThresholdTokens)
+    }
+
+    @Test
+    fun `same uuid with conflicting model configuration cannot be silently merged`() {
+        val model = Model(modelId = "same")
+        val a = ProviderSetting.OpenAI(models = listOf(model))
+        val b = a.copy(id = Uuid.random(), models = listOf(model.copy(contextWindowTokens = 99_000)))
+        assertTrue(runCatching { buildProviderMergePlan(a, listOf(b)).merged() }.isFailure)
+    }
+
+    @Test
+    fun `stale merge cannot restore removed or edited providers`() {
+        val a = ProviderSetting.OpenAI()
+        val b = ProviderSetting.Claude()
+        val merged = buildProviderMergePlan(a, listOf(b)).merged()
+        assertTrue(runCatching { Settings(providers = listOf(a)).applyProviderMerge(a, listOf(b), merged) }.isFailure)
+        assertTrue(runCatching {
+            Settings(providers = listOf(a.copy(apiKey = "changed"), b)).applyProviderMerge(a, listOf(b), merged)
+        }.isFailure)
+    }
+
+    @Test
+    fun `identical accepted merge may retry persistence but may not overwrite subsequent changes`() {
+        val a = ProviderSetting.OpenAI()
+        val b = ProviderSetting.Claude()
+        val merged = buildProviderMergePlan(a, listOf(b)).merged()
+        val accepted = Settings(providers = listOf(a, b)).applyProviderMerge(a, listOf(b), merged)
+        assertSame(accepted, accepted.applyProviderMerge(a, listOf(b), merged))
+        assertTrue(runCatching {
+            accepted.copy(providers = listOf(merged.copy(name = "external edit")))
+                .applyProviderMerge(a, listOf(b), merged)
+        }.isFailure)
     }
 }

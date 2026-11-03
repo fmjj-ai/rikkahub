@@ -230,7 +230,12 @@ class RouteActivity : ComponentActivity() {
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        // Navigate to the chat screen if a conversation ID is provided
+        intent.getStringExtra(me.rerere.rikkahub.service.MediaCreationForegroundService.EXTRA_MEDIA_SESSION_ID)
+            ?.takeIf { runCatching { Uuid.parse(it) }.isSuccess }?.let {
+                navStack?.add(Screen.MediaCreation(it))
+                return
+            }
+        // 通知打开指定会话。
         intent.getStringExtra("conversationId")?.let { text ->
             navStack?.add(Screen.Chat(text))
         }
@@ -257,7 +262,7 @@ class RouteActivity : ComponentActivity() {
         }
         val migrationState by DatabaseMigrationTracker.state.collectAsStateWithLifecycle()
 
-        val startScreen = Screen.Chat(
+        val defaultChatScreen = Screen.Chat(
             id = if (readBooleanPreference("create_new_conversation_on_start", true)) {
                 Uuid.random().toString()
             } else {
@@ -268,7 +273,11 @@ class RouteActivity : ComponentActivity() {
             }
         )
 
-        val backStack = rememberNavBackStack(startScreen)
+        val initialScreens = me.rerere.rikkahub.data.model.mediaCreationInitialScreens(
+            defaultChatScreen,
+            intent.getStringExtra(me.rerere.rikkahub.service.MediaCreationForegroundService.EXTRA_MEDIA_SESSION_ID),
+        )
+        val backStack = rememberNavBackStack(*initialScreens.toTypedArray())
         SideEffect { this@RouteActivity.navStack = backStack }
 
         ShareHandler(backStack)
@@ -439,6 +448,23 @@ class RouteActivity : ComponentActivity() {
                             entry<Screen.SettingProviderDetail> { key ->
                                 val id = Uuid.parse(key.providerId)
                                 SettingProviderDetailPage(id = id)
+                            }
+
+                            entry<Screen.MediaCreationSessions> {
+                                me.rerere.rikkahub.ui.pages.mediacreation.MediaCreationSessionsPage()
+                            }
+                            entry<Screen.MediaCreation> { key ->
+                                me.rerere.rikkahub.ui.pages.mediacreation.MediaCreationPage(key.sessionId)
+                            }
+                            entry<Screen.SettingMediaUpload> {
+                                me.rerere.rikkahub.ui.pages.setting.SettingMediaUploadPage()
+                            }
+                            entry<Screen.SettingMedia> {
+                                me.rerere.rikkahub.ui.pages.setting.SettingMediaPage()
+                            }
+
+                            entry<Screen.SettingMediaProviderDetail> { key ->
+                                me.rerere.rikkahub.ui.pages.setting.SettingMediaProviderDetailPage(Uuid.parse(key.providerId))
                             }
 
                             entry<Screen.SettingModels> {
@@ -665,6 +691,21 @@ sealed interface Screen : NavKey {
 
     @Serializable
     data class SettingProviderDetail(val providerId: String) : Screen
+
+    @Serializable
+    data object MediaCreationSessions : Screen
+
+    @Serializable
+    data class MediaCreation(val sessionId: String) : Screen
+
+    @Serializable
+    data object SettingMediaUpload : Screen
+
+    @Serializable
+    data object SettingMedia : Screen
+
+    @Serializable
+    data class SettingMediaProviderDetail(val providerId: String) : Screen
 
     @Serializable
     data object SettingModels : Screen

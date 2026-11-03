@@ -10,6 +10,7 @@ import java.io.File
 import java.net.HttpURLConnection
 import java.net.URL
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -44,17 +45,29 @@ class FilesManager(
         val resolvedName = displayName ?: getFileNameFromUri(uri) ?: "file"
         val resolvedMime = mimeType ?: getFileMimeType(uri) ?: "application/octet-stream"
         val target = createTargetFile(folder, resolvedName, resolvedMime)
-        context.contentResolver.openInputStream(uri)?.use { input ->
-            target.outputStream().use { output ->
-                input.copyTo(output)
+        try {
+            val input = context.contentResolver.openInputStream(uri) ?: error("无法读取所选文件")
+            input.use {
+                target.outputStream().use { output -> it.copyTo(output) }
             }
+            check(target.length() > 0) { "所选文件为空或已不可访问" }
+            createManagedFileEntity(
+                folder = folder,
+                file = target,
+                displayName = resolvedName,
+                mimeType = resolvedMime,
+            )
+        } catch (error: Throwable) {
+            // 仅清理本次 UUID 目标，避免权限撤回、磁盘满等错误留下半文件和孤立登记。
+            withContext(NonCancellable) {
+                runCatching { repository.deleteByPath(buildRelativePath(folder, target)) }
+                    .onFailure { error.addSuppressed(it) }
+                if (target.exists() && !target.delete()) {
+                    error.addSuppressed(java.io.IOException("未能清理未完成的导入文件"))
+                }
+            }
+            throw error
         }
-        createManagedFileEntity(
-            folder = folder,
-            file = target,
-            displayName = resolvedName,
-            mimeType = resolvedMime,
-        )
     }
 
     suspend fun saveManagedFromBytes(
@@ -487,6 +500,7 @@ data class SyncResult(
 )
 
 object FileFolders {
+    const val MEDIA_CREATION = "media_creation"
     const val UPLOAD = "upload"
     const val SKILLS = "skills"
     const val FONTS = "fonts"

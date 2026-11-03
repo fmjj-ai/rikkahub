@@ -190,15 +190,9 @@ fun SettingPreferencesGeneralPage(vm: SettingVM = koinViewModel()) {
                         },
                     )
                     item(
-                        headlineContent = { Text(stringResource(R.string.setting_display_page_skip_crop_image_title)) },
-                        supportingContent = { Text(stringResource(R.string.setting_display_page_skip_crop_image_desc)) },
-                        trailingContent = {
-                            Switch(
-                                checked = displaySetting.skipCropImage,
-                                onCheckedChange = {
-                                    updateDisplaySetting(displaySetting.copy(skipCropImage = it))
-                                }
-                            )
+                        headlineContent = { Text("图片附件编辑") },
+                        supportingContent = {
+                            Text("相册图片直接加入消息框，点击附件可裁剪；拍照暂保留拍摄后确认。")
                         },
                     )
                     item(

@@ -111,7 +111,6 @@ fun ErrorCard(
     val clipboard = LocalClipboard.current
     val navController = LocalNavController.current
     val scope = rememberCoroutineScope()
-    val checkTitleModelSettings = stringResource(R.string.chat_page_check_title_model_settings)
     val linkColor = MaterialTheme.colorScheme.primary
 
     // 5 秒后自动消失
@@ -152,12 +151,12 @@ fun ErrorCard(
                     color = MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.8f),
                     overflow = TextOverflow.Ellipsis,
                 )
-                if (error.solution == ChatErrorSolution.CheckTitleModelSettings) {
+                if (error.solution == ChatErrorSolution.CheckFastModelSettings) {
                     Text(
                         text = buildAnnotatedString {
                             withLink(
                                 LinkAnnotation.Clickable(
-                                    tag = "check_title_model_settings",
+                                    tag = "check_fast_model_settings",
                                     styles = TextLinkStyles(
                                         style = SpanStyle(
                                             color = linkColor,
@@ -169,7 +168,7 @@ fun ErrorCard(
                                     },
                                 )
                             ) {
-                                append(checkTitleModelSettings)
+                                append("检查快速模型设置")
                             }
                         },
                         style = MaterialTheme.typography.bodySmall,

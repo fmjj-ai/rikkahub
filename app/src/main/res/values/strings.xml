@@ -973,7 +973,6 @@
   <string name="setting_provider_page_protocol_not_configured">%1$s protocol is not configured</string>
   <string name="setting_provider_page_protocol_models">%1$s protocol (%2$d)</string>
   <string name="setting_provider_page_fetch_models_failed">Failed to fetch %1$s models: %2$s</string>
-  <string name="setting_provider_page_multi_protocol_hint">All three protocols are available by default. Protocols without an API key are skipped when fetching models.</string>
   <string name="setting_provider_page_no_protocol_configured">No protocol configured</string>
   <string name="setting_provider_page_provider_override_protocol_disabled">A provider override is active; protocol selection has no effect.</string>
   <string name="setting_provider_page_merge_same_url">Detected %1$d providers with the same URL</string>

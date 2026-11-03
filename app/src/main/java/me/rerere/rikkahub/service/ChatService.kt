@@ -2,14 +2,11 @@ package me.rerere.rikkahub.service
 
 import android.app.Application
 import android.content.Context
-import android.content.Intent
-import android.os.PowerManager
 import android.util.Log
 import androidx.core.net.toUri
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -42,7 +39,6 @@ import me.rerere.ai.ui.canResumeToolExecution
 import me.rerere.ai.ui.finishPendingTools
 import me.rerere.ai.ui.finishReasoning
 import me.rerere.ai.ui.isEmptyInputMessage
-import me.rerere.ai.ui.ContextCompaction
 import me.rerere.ai.ui.compressionTarget
 import me.rerere.ai.ui.compressContextText
 import me.rerere.ai.ui.compressionText
@@ -86,6 +82,8 @@ import me.rerere.rikkahub.data.model.Assistant
 import me.rerere.rikkahub.data.model.AssistantAffectScope
 import me.rerere.rikkahub.data.model.replaceRegexes
 import me.rerere.rikkahub.data.model.toMessageNode
+import me.rerere.rikkahub.data.model.insertContextCheckpoint
+import me.rerere.rikkahub.data.datastore.Settings
 import me.rerere.rikkahub.data.repository.ConversationRepository
 import me.rerere.rikkahub.data.repository.FolderRepository
 import me.rerere.rikkahub.data.repository.MemoryRepository
@@ -100,8 +98,6 @@ import java.util.concurrent.ConcurrentHashMap
 import kotlin.uuid.Uuid
 
 private const val TAG = "ChatService"
-private const val WAKELOCK_TIMEOUT_MS = 15 * 60 * 1000L
-private const val WAKELOCK_TAG = "rikkahub:chat-generation"
 
 internal fun backgroundTextGenerationParams(
     model: Model,
@@ -123,7 +119,7 @@ data class ChatError(
 )
 
 enum class ChatErrorSolution {
-    CheckTitleModelSettings,
+    CheckFastModelSettings,
 }
 
 private val inputTransformers by lazy {
@@ -167,70 +163,66 @@ class ChatService(
     // ---- 后台生成保活 ----
 
     private val keepAliveLock = Any()
-    private val keepAliveJobs = ConcurrentHashMap.newKeySet<Job>()
-    private var pendingStopJob: Job? = null
+    private data class KeepAliveRequest(
+        val generationId: Uuid,
+        val conversationId: Uuid,
+        var acquired: Boolean = false,
+    )
+    private val keepAliveJobs = ConcurrentHashMap<Job, KeepAliveRequest>()
 
-    private val wakeLock: PowerManager.WakeLock by lazy {
-        (context.getSystemService(Context.POWER_SERVICE) as PowerManager)
-            .newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKELOCK_TAG)
-            .apply { setReferenceCounted(false) }
-    }
-
-    // 运行中关闭开关时立即停止前台服务并释放 WakeLock
+    // 关闭时释放全部租约；运行中重新开启时为尚未结束的任务重新申请。
     init {
         appScope.launch {
             settingsStore.settingsFlow
                 .distinctUntilChangedBy { it.displaySetting.enableBackgroundKeepAlive }
                 .collect { settings ->
-                    if (!settings.displaySetting.enableBackgroundKeepAlive) {
-                        synchronized(keepAliveLock) {
-                            pendingStopJob?.cancel()
-                            pendingStopJob = null
-                            stopKeepAliveLocked()
+                    synchronized(keepAliveLock) {
+                        keepAliveJobs.forEach { (job, request) ->
+                            if (settings.displaySetting.enableBackgroundKeepAlive && !job.isCompleted) {
+                                acquireKeepAliveLocked(request)
+                            } else {
+                                releaseKeepAliveLocked(request)
+                            }
                         }
                     }
                 }
         }
     }
 
-    private fun Job.trackKeepAlive(): Job {
+    private fun Job.trackKeepAlive(conversationId: Uuid): Job {
+        val request = KeepAliveRequest(Uuid.random(), conversationId)
         synchronized(keepAliveLock) {
-            pendingStopJob?.cancel()
-            pendingStopJob = null
-            keepAliveJobs.add(this)
+            if (isCompleted) return this
+            keepAliveJobs[this] = request
             if (settingsStore.settingsFlow.value.displaySetting.enableBackgroundKeepAlive) {
-                runCatching {
-                    context.startForegroundService(Intent(context, ChatGenerationService::class.java))
-                }.onFailure { Log.w(TAG, "startForegroundService failed (background start?)", it) }
-                ensureWakeLockLocked()
+                acquireKeepAliveLocked(request)
             }
         }
         invokeOnCompletion {
             synchronized(keepAliveLock) {
-                keepAliveJobs.remove(this)
-                if (keepAliveJobs.isEmpty()) scheduleStopLocked()
+                keepAliveJobs.remove(this)?.let(::releaseKeepAliveLocked)
             }
         }
         return this
     }
 
-    // 集合空后延迟 1.5s 二次确认，吸收 cancel 旧 job 与注册新 job 的交错窗口
-    private fun scheduleStopLocked() {
-        pendingStopJob = appScope.launch {
-            delay(1500)
-            synchronized(keepAliveLock) {
-                if (keepAliveJobs.isEmpty()) stopKeepAliveLocked()
-            }
+    private fun acquireKeepAliveLocked(request: KeepAliveRequest) {
+        if (!request.acquired) {
+            request.acquired = ChatGenerationService.acquire(context, request.generationId, request.conversationId)
         }
     }
 
-    private fun stopKeepAliveLocked() {
-        context.stopService(Intent(context, ChatGenerationService::class.java))
-        releaseWakeLockLocked()
+    private fun releaseKeepAliveLocked(request: KeepAliveRequest) {
+        if (request.acquired) {
+            request.acquired = false
+            ChatGenerationService.release(context, request.generationId)
+        }
     }
 
-    private fun ensureWakeLockLocked() { if (!wakeLock.isHeld) wakeLock.acquire(WAKELOCK_TIMEOUT_MS) }
-    private fun releaseWakeLockLocked() { if (wakeLock.isHeld) wakeLock.release() }
+    internal fun cancelBackgroundGenerations(generationIds: Set<String>) {
+        keepAliveJobs.entries.filter { it.value.generationId.toString() in generationIds }
+            .forEach { it.key.cancel() }
+    }
 
     // 统一会话管理
     private val sessions = ConcurrentHashMap<Uuid, ConversationSession>()
@@ -322,7 +314,7 @@ class ChatService(
         } finally {
             removeConversationReference(conversationId)
         }
-    }.trackKeepAlive()
+    }.trackKeepAlive(conversationId)
 
     // ---- 对话状态访问 ----
 
@@ -437,7 +429,7 @@ class ChatService(
                 addError(e, conversationId, title = context.getString(R.string.error_title_send_message))
             }
         }
-        session.setJob(job.trackKeepAlive())
+        session.setJob(job.trackKeepAlive(conversationId))
     }
 
     private fun preprocessUserInputParts(parts: List<UIMessagePart>, assistant: Assistant): List<UIMessagePart> {
@@ -497,7 +489,7 @@ class ChatService(
             }
         }
 
-        session.setJob(job.trackKeepAlive())
+        session.setJob(job.trackKeepAlive(conversationId))
     }
 
     // ---- 处理工具调用审批 ----
@@ -560,7 +552,7 @@ class ChatService(
             }
         }
 
-        session.setJob(job.trackKeepAlive())
+        session.setJob(job.trackKeepAlive(conversationId))
     }
 
     // ---- 处理消息补全 ----
@@ -648,7 +640,7 @@ class ChatService(
                     } else {
                         session.processingStatus.value = context.getString(R.string.chat_page_compressing)
                         try {
-                            val compacted = compactMessages(messages, assistant, model)
+                            val compacted = compactMessages(messages, assistant, model, conversation = conversation)
                             saveCompactedMessages(conversationId, messages, compacted)
                             compacted
                         } finally {
@@ -656,54 +648,7 @@ class ChatService(
                         }
                     }
                 },
-                tools = buildList {
-                    if (assistant.enableWebSearch) {
-                        addAll(createSearchTools(settings))
-                    }
-                    addAll(localTools.getTools(assistant.localTools))
-                    if (assistant.enableRecentChatsReference) {
-                        addAll(createConversationTools(conversationRepo, assistant.id))
-                    }
-                    addAll(createWorkspaceToolsIfReady(assistant.workspaceId?.toString(), conversation.workspaceCwd))
-                    if (assistant.enabledSkills.isNotEmpty()) {
-                        addAll(
-                            createSkillTools(
-                                enabledSkills = assistant.enabledSkills,
-                                allSkills = skillManager.listSkills(),
-                            )
-                        )
-                    }
-                    mcpManager.getAllAvailableTools().also { allTools ->
-                        val invalidNames = allTools
-                            .map { it.second }
-                            .distinct()
-                            .filter { name -> name.isEmpty() || !name.all { it in 'a'..'z' || it in 'A'..'Z' || it in '0'..'9' } }
-                        if (invalidNames.isNotEmpty()) {
-                            addError(
-                                error = IllegalStateException(
-                                    context.getString(
-                                        R.string.error_mcp_invalid_server_name,
-                                        invalidNames.joinToString(", ")
-                                    )
-                                ),
-                                conversationId = conversationId,
-                            )
-                            return
-                        }
-                    }.forEach { (serverId, serverName, tool) ->
-                        add(
-                            Tool(
-                                name = "mcp__${serverName}__${tool.name}",
-                                description = tool.description ?: "",
-                                parameters = { tool.inputSchema },
-                                needsApproval = { tool.needsApproval },
-                                execute = {
-                                    mcpManager.callTool(serverId, tool.name, it.jsonObject)
-                                },
-                            )
-                        )
-                    }
-                },
+                tools = createChatTools(settings, assistant, conversation.workspaceCwd),
             ).onCompletion {
                 // 可能被取消了，或者意外结束，兜底更新
                 val updatedConversation = getConversationFlow(conversationId).value.copy(
@@ -870,8 +815,8 @@ class ChatService(
 
         runCatching {
             val settings = settingsStore.settingsFlow.first()
-            val model = settings.findModelById(settings.titleModelId, fallback = settings.fastModelId) ?: return
-            val provider = model.resolveEndpoint(settings.providers) ?: return
+            val model = settings.requireFastModel()
+            val provider = model.resolveEndpoint(settings.providers) ?: error("快速模型的提供商或协议未配置")
 
             val providerHandler = providerManager.getProviderByType(provider)
             val result = providerHandler.generateText(
@@ -884,23 +829,25 @@ class ChatService(
                                 .takeLast(4).joinToString("\n\n") { it.summaryAsText(maxLength = 500) })
                     ),
                 ),
-                params = backgroundTextGenerationParams(model),
+                params = backgroundTextGenerationParams(model, settings.fastModelReasoningLevel),
             )
 
-            // 生成完，conversation可能不是最新了，因此需要重新获取
-            conversationRepo.getConversationById(conversation.id)?.let {
+            // 后台生成期间会话可能继续变化，优先使用内存中的最新消息和文件夹归属。
+            if (!conversationRepo.existsConversationById(conversation.id)) return
+            (sessions[conversationId]?.state?.value ?: conversationRepo.getConversationById(conversation.id))?.let {
                 saveConversation(
                     conversationId,
-                    it.copy(title = result.choices[0].message?.toText()?.trim() ?: "")
+                    it.copy(title = result.choices.firstOrNull()?.message?.toText()?.trim().orEmpty())
                 )
             }
         }.onFailure {
+            if (it is CancellationException) throw it
             it.printStackTrace()
             addError(
                 error = it,
                 conversationId = conversationId,
                 title = context.getString(R.string.error_title_generate_title),
-                solution = ChatErrorSolution.CheckTitleModelSettings,
+                solution = ChatErrorSolution.CheckFastModelSettings,
             )
         }
     }
@@ -911,8 +858,8 @@ class ChatService(
         runCatching {
             val settings = settingsStore.settingsFlow.first()
             if (!settings.enableSuggestion) return
-            val model = settings.findModelById(settings.suggestionModelId, fallback = settings.fastModelId) ?: return
-            val provider = model.resolveEndpoint(settings.providers) ?: return
+            val model = settings.requireFastModel()
+            val provider = model.resolveEndpoint(settings.providers) ?: error("快速模型的提供商或协议未配置")
 
             sessions[conversationId]?.let { session ->
                 updateConversation(
@@ -932,15 +879,16 @@ class ChatService(
                                 .takeLast(8).joinToString("\n\n") { it.summaryAsText(maxLength = 500) }),
                     )
                 ),
-                params = backgroundTextGenerationParams(model),
+                params = backgroundTextGenerationParams(model, settings.fastModelReasoningLevel),
             )
             val suggestions =
-                result.choices[0].message?.toText()?.split("\n")?.map { it.trim() }
+                result.choices.firstOrNull()?.message?.toText()?.split("\n")?.map { it.trim() }
                     ?.filter { it.isNotBlank() } ?: emptyList()
 
-            val latestConversation = conversationRepo.getConversationById(conversationId)
-                ?: sessions[conversationId]?.state?.value
-                ?: conversation
+            val latestConversation = sessions[conversationId]?.state?.value
+                ?: conversationRepo.getConversationById(conversationId)
+                ?: return
+            if (!conversationRepo.existsConversationById(conversationId)) return
             saveConversation(
                 conversationId,
                 latestConversation.copy(
@@ -950,7 +898,37 @@ class ChatService(
                 )
             )
         }.onFailure {
-            it.printStackTrace()
+            if (it is CancellationException) throw it
+            addError(it, conversationId, "生成聊天建议失败", ChatErrorSolution.CheckFastModelSettings)
+        }
+    }
+
+    /** 正常聊天和压缩共用工具集合，保持协议请求前缀一致。 */
+    private suspend fun createChatTools(settings: Settings, assistant: Assistant, cwd: String?): List<Tool> {
+        val mcpTools = mcpManager.getAllAvailableTools()
+        val invalidNames = mcpTools.map { it.second }.distinct().filter { name ->
+            name.isEmpty() || !name.all { it in 'a'..'z' || it in 'A'..'Z' || it in '0'..'9' }
+        }
+        check(invalidNames.isEmpty()) {
+            context.getString(R.string.error_mcp_invalid_server_name, invalidNames.joinToString(", "))
+        }
+        return buildList {
+            if (assistant.enableWebSearch) addAll(createSearchTools(settings))
+            addAll(localTools.getTools(assistant.localTools))
+            if (assistant.enableRecentChatsReference) addAll(createConversationTools(conversationRepo, assistant.id))
+            addAll(createWorkspaceToolsIfReady(assistant.workspaceId?.toString(), cwd))
+            if (assistant.enabledSkills.isNotEmpty()) {
+                addAll(createSkillTools(assistant.enabledSkills, skillManager.listSkills()))
+            }
+            mcpTools.forEach { (serverId, serverName, tool) ->
+                add(Tool(
+                    name = "mcp__${serverName}__${tool.name}",
+                    description = tool.description ?: "",
+                    parameters = { tool.inputSchema },
+                    needsApproval = { tool.needsApproval },
+                    execute = { mcpManager.callTool(serverId, tool.name, it.jsonObject) },
+                ))
+            }
         }
     }
 
@@ -976,7 +954,8 @@ class ChatService(
                     ?: error("请先选择模型")
                 session.processingStatus.value = context.getString(R.string.chat_page_compressing)
                 val compacted = compactMessages(
-                    conversation.currentMessages, assistant, model, additionalPrompt, targetTokens, keepRecentMessages
+                    conversation.currentMessages, assistant, model, additionalPrompt, targetTokens, keepRecentMessages,
+                    conversation = conversation,
                 )
                 saveCompactedMessages(conversationId, conversation.currentMessages, compacted)
             } catch (e: CancellationException) {
@@ -987,7 +966,7 @@ class ChatService(
                 session.processingStatus.value = null
             }
         }
-        session.setJob(job.trackKeepAlive())
+        session.setJob(job.trackKeepAlive(conversationId))
         job.start()
         return job
     }
@@ -1003,7 +982,14 @@ class ChatService(
             originalMessages.contextFingerprint()) {
             "压缩期间对话已改变，请重新压缩"
         }
-        saveConversation(conversationId, latest.updateCurrentMessages(compactedMessages).copy(chatSuggestions = emptyList()))
+        val originalIds = originalMessages.mapTo(HashSet()) { it.id }
+        val pointIndex = compactedMessages.indexOfFirst { it.isContextCheckpoint && it.id !in originalIds }
+        check(pointIndex > 0) { "压缩没有产生有效检查点，原记录已保留" }
+        val updated = latest.insertContextCheckpoint(
+            afterMessageId = compactedMessages[pointIndex - 1].id,
+            checkpoint = compactedMessages[pointIndex],
+        ) ?: error("压缩期间历史或分支已改变，原记录已保留，请重新压缩")
+        saveConversation(conversationId, updated)
     }
 
     private suspend fun compactMessages(
@@ -1013,12 +999,36 @@ class ChatService(
         additionalPrompt: String = "",
         targetTokens: Int = 2_000,
         keepRecentMessages: Int = 4,
+        conversation: Conversation,
     ): List<UIMessage> = kotlinx.coroutines.withContext(Dispatchers.IO) {
         val activeMessages = messages.contextMessages()
         val originalBoundary = messages.compressionTarget(keepRecentMessages)
-            ?: error("至少需要两轮用户消息，最新一轮和工具调用会完整保留")
+            ?: error("暂无可压缩的早期历史；可调整保留条数，或选择全部活动上下文压缩")
         val boundary = activeMessages.indexOfFirst { it.id == messages[originalBoundary].id }
         val settings = settingsStore.settingsFlow.first()
+        val prefix = messages.take(originalBoundary + 1)
+        check(prefix.contextMessages().none { message -> message.getTools().any { !it.isExecuted } }) {
+            "请先完成或取消待处理工具调用，再压缩这部分历史。"
+        }
+        val memories = if (assistant.useGlobalMemory) memoryRepository.getGlobalMemories()
+            else memoryRepository.getMemoriesOfAssistant(assistant.id.toString())
+        val primarySummary = generationHandler.generateCompressionSummary(
+            settings, assistant, chatModel, prefix,
+            createChatTools(settings, assistant, conversation.workspaceCwd), memories, conversation,
+            inputTransformers + templateTransformer + workspaceReminderTransformer,
+            additionalPrompt, targetTokens,
+        )
+        fun withCheckpoint(summary: String): List<UIMessage> {
+            check(summary.estimateTokens() < prefix.contextMessages().estimateTokens()) {
+                "摘要未缩短上下文，原记录已保留。请调整压缩要求。"
+            }
+            val point = UIMessage.user(summary).copy(
+                isContextCheckpoint = true,
+                contextCheckpointHash = prefix.contextFingerprint(),
+            )
+            return prefix + point + messages.drop(originalBoundary + 1)
+        }
+        if (primarySummary != null) return@withContext withCheckpoint(primarySummary)
         val model = settings.findModelById(settings.compressModelId) ?: chatModel
         val provider = model.resolveEndpoint(settings.providers) ?: error("找不到压缩模型的服务商或协议未配置")
         val providerHandler = providerManager.getProviderByType(provider)
@@ -1060,13 +1070,7 @@ class ChatService(
 
         // 顺序分块避免同时发起大量请求；多块摘要再合并，确保压缩确实降低占用。
         val summary = compressContextText(source, inputBudget, ::summarize)
-        val compaction = ContextCompaction(
-            summary = summary,
-            prefixHash = messages.take(originalBoundary + 1).contextFingerprint(),
-        )
-        messages.mapIndexed { index, message ->
-            if (index == originalBoundary) message.copy(contextCompaction = compaction) else message
-        }
+        withCheckpoint(summary)
     }
 
     // ---- 对话状态更新 ----
@@ -1185,7 +1189,7 @@ class ChatService(
                 clearTranslationField(conversationId, message.id)
                 addError(e, conversationId, title = context.getString(R.string.error_title_translate_message))
             }
-        }.trackKeepAlive()
+        }.trackKeepAlive(conversationId)
     }
 
     private fun updateTranslationField(

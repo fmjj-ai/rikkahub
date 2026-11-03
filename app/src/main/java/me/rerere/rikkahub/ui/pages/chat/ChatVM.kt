@@ -47,6 +47,7 @@ import me.rerere.rikkahub.service.ChatError
 import me.rerere.rikkahub.service.ChatService
 import me.rerere.rikkahub.ui.hooks.writeStringPreference
 import me.rerere.rikkahub.ui.hooks.ChatInputState
+import me.rerere.rikkahub.ui.hooks.DraftImageImporter
 import me.rerere.rikkahub.utils.UiState
 import me.rerere.rikkahub.utils.UpdateChecker
 import java.util.Locale
@@ -71,6 +72,24 @@ class ChatVM(
 
     // 聊天输入状态 - 保存在 ViewModel 中避免 TransactionTooLargeException
     val inputState = ChatInputState()
+
+    private val _imageImportErrors = kotlinx.coroutines.flow.MutableSharedFlow<String>(extraBufferCapacity = 8)
+    val imageImportErrors: SharedFlow<String> = _imageImportErrors
+    private val galleryImporter = DraftImageImporter(
+        state = inputState,
+        scope = viewModelScope,
+        copyImage = { source ->
+            val saved = filesManager.saveManagedFromUri(
+                me.rerere.rikkahub.data.files.FileFolders.UPLOAD, source.toUri())
+            filesManager.getFile(saved).toUri().toString()
+        },
+        discardImage = { url -> withContext(Dispatchers.IO) { filesManager.deleteChatFiles(listOf(url.toUri())) } },
+        onError = { _imageImportErrors.tryEmit(it); Unit },
+    )
+
+    fun addGalleryImages(uris: List<android.net.Uri>) = galleryImporter.add(uris.map { it.toString() })
+
+    fun toggleGalleryImage(uri: android.net.Uri) = galleryImporter.toggle(uri.toString())
 
     // 异步任务 (从ChatService获取，响应式)
     val conversationJob: StateFlow<Job?> =

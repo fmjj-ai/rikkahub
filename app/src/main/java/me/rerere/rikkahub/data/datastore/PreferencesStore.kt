@@ -1,61 +1,27 @@
 package me.rerere.rikkahub.data.datastore
 
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.retryWhen
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import android.content.Context
 import android.util.Log
 import androidx.datastore.core.IOException
-import androidx.datastore.preferences.SharedPreferencesMigration
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import io.pebbletemplates.pebble.PebbleEngine
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.Transient
-import me.rerere.ai.core.MessageRole
 import me.rerere.ai.core.ReasoningLevel
-import me.rerere.ai.provider.Model
-import me.rerere.ai.provider.ModelType
-import me.rerere.ai.provider.ProviderProtocol
-import me.rerere.ai.provider.ProviderSetting
-import me.rerere.ai.provider.isConfigured
-import me.rerere.ai.provider.protocolOf
 import me.rerere.rikkahub.AppScope
-import me.rerere.rikkahub.data.ai.mcp.McpServerConfig
-import me.rerere.rikkahub.data.ai.prompts.DEFAULT_COMPRESS_PROMPT
-import me.rerere.rikkahub.data.ai.prompts.DEFAULT_OCR_PROMPT
-import me.rerere.rikkahub.data.ai.prompts.DEFAULT_SUGGESTION_PROMPT
-import me.rerere.rikkahub.data.ai.prompts.DEFAULT_TITLE_PROMPT
-import me.rerere.rikkahub.data.ai.prompts.DEFAULT_TRANSLATION_PROMPT
-import me.rerere.rikkahub.data.ai.prompts.LEARNING_MODE_PROMPT
-import me.rerere.asr.ASRProviderSetting
 import me.rerere.rikkahub.data.datastore.migration.PreferenceStoreV1Migration
 import me.rerere.rikkahub.data.datastore.migration.PreferenceStoreV2Migration
 import me.rerere.rikkahub.data.datastore.migration.PreferenceStoreV3Migration
 import me.rerere.rikkahub.data.datastore.migration.PreferenceStoreV4Migration
-import me.rerere.rikkahub.data.model.Assistant
-import me.rerere.rikkahub.data.model.Avatar
-import me.rerere.rikkahub.data.model.InjectionPosition
-import me.rerere.rikkahub.data.model.Lorebook
-import me.rerere.rikkahub.data.model.PromptInjection
-import me.rerere.rikkahub.data.model.QuickMessage
-import me.rerere.rikkahub.data.model.Tag
-import me.rerere.rikkahub.data.sync.s3.S3Config
-import me.rerere.rikkahub.ui.theme.CustomTheme
-import me.rerere.rikkahub.ui.theme.PresetThemes
-import me.rerere.rikkahub.utils.JsonInstant
-import me.rerere.rikkahub.utils.toMutableStateFlow
-import me.rerere.search.SearchCommonOptions
-import me.rerere.search.SearchServiceOptions
-import me.rerere.tts.provider.TTSProviderSetting
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.get
 import kotlin.uuid.Uuid
 
 private const val TAG = "PreferencesStore"
@@ -72,10 +38,18 @@ private val Context.settingsStore by preferencesDataStore(
     }
 )
 
-class SettingsStore(
-    context: Context,
-    scope: AppScope,
-) : KoinComponent {
+class SettingsStore internal constructor(
+    private val dataStore: androidx.datastore.core.DataStore<androidx.datastore.preferences.core.Preferences>,
+    scope: kotlinx.coroutines.CoroutineScope,
+    private val invalidateTemplates: () -> Unit = {},
+    private val reportLoadError: (Throwable) -> Unit = {},
+) {
+    constructor(context: Context, scope: AppScope) : this(
+        context.settingsStore,
+        scope,
+        { org.koin.core.context.GlobalContext.get().get<PebbleEngine>().templateCache.invalidateAll() },
+        { Log.e(TAG, "Failed to load settings", it); Unit },
+    )
     companion object {
         // 版本号
         val VERSION = intPreferencesKey("data_version")
@@ -109,6 +83,8 @@ class SettingsStore(
 
         // 提供商
         val PROVIDERS = stringPreferencesKey("providers")
+        val MEDIA_GENERATION_PROVIDERS = stringPreferencesKey("media_generation_providers")
+        val UPLOAD_S3_CONFIG = stringPreferencesKey("upload_s3_config")
 
         // 助手
         val SELECT_ASSISTANT = stringPreferencesKey("select_assistant")
@@ -159,283 +135,76 @@ class SettingsStore(
         val SPONSOR_ALERT_DISMISSED_AT = intPreferencesKey("sponsor_alert_dismissed_at")
     }
 
-    private val dataStore = context.settingsStore
+    private val state = kotlinx.coroutines.flow.MutableStateFlow(Settings.dummy())
+    private val loaded = kotlinx.coroutines.CompletableDeferred<Unit>()
+    private val stateLock = Any()
+    private val persistMutex = kotlinx.coroutines.sync.Mutex()
+    private var persisted: Settings? = null
 
-    val settingsFlowRaw = dataStore.data
-        .catch { exception ->
-            if (exception is IOException) {
-                emit(emptyPreferences())
-            } else {
-                throw exception
+    val settingsFlow: kotlinx.coroutines.flow.StateFlow<Settings> = state.asStateFlow()
+
+    // 保留旧读取入口，但加载后只观察内存，不再把滞后的磁盘快照写回界面。
+    val settingsFlowRaw: kotlinx.coroutines.flow.Flow<Settings> = kotlinx.coroutines.flow.flow {
+        awaitLoaded()
+        emitAll(settingsFlow)
+    }
+
+    init {
+        scope.launch(kotlinx.coroutines.Dispatchers.Default) {
+            try {
+                val settings = dataStore.data.retryWhen { error, attempt ->
+                    val retry = error is IOException &&
+                        error !is androidx.datastore.core.CorruptionException && attempt < 3
+                    if (retry) kotlinx.coroutines.delay(100L shl attempt.toInt())
+                    retry
+                }.first().toSettings().normalized()
+                invalidateTemplates()
+                state.value = settings
+                loaded.complete(Unit)
+            } catch (error: Throwable) {
+                // 读取失败不伪造空配置，任何写入都由 awaitLoaded 阻止。
+                loaded.completeExceptionally(error)
+                if (error is kotlinx.coroutines.CancellationException) throw error
+                reportLoadError(error)
             }
-        }.map { preferences ->
-            Settings(
-                favoriteModels = preferences[FAVORITE_MODELS]?.let {
-                    JsonInstant.decodeFromString(it)
-                } ?: emptyList(),
-                chatModelId = preferences[SELECT_MODEL]?.let { Uuid.parse(it) }
-                    ?: DEFAULT_AUTO_MODEL_ID,
-                fastModelId = preferences[FAST_MODEL]?.let { Uuid.parse(it) }
-                    ?: DEFAULT_AUTO_MODEL_ID,
-                fastModelReasoningLevel = preferences[FAST_MODEL_REASONING_LEVEL]
-                    ?.let { ReasoningLevel.valueOf(it) } ?: ReasoningLevel.AUTO,
-                titleModelId = preferences[TITLE_MODEL]?.let { Uuid.parse(it) },
-                translateModeId = preferences[TRANSLATE_MODEL]?.let { Uuid.parse(it) }
-                    ?: DEFAULT_AUTO_MODEL_ID,
-                enableSuggestion = preferences[ENABLE_SUGGESTION] != false,
-                suggestionModelId = preferences[SUGGESTION_MODEL]?.let { Uuid.parse(it) },
-                imageGenerationModelId = preferences[IMAGE_GENERATION_MODEL]?.let { Uuid.parse(it) } ?: Uuid.random(),
-                titlePrompt = preferences[TITLE_PROMPT] ?: DEFAULT_TITLE_PROMPT,
-                translatePrompt = preferences[TRANSLATION_PROMPT] ?: DEFAULT_TRANSLATION_PROMPT,
-                translateThinkingBudget = preferences[TRANSLATE_THINKING_BUDGET] ?: 0,
-                suggestionPrompt = preferences[SUGGESTION_PROMPT] ?: DEFAULT_SUGGESTION_PROMPT,
-                ocrModelId = preferences[OCR_MODEL]?.let { Uuid.parse(it) } ?: Uuid.random(),
-                ocrPrompt = preferences[OCR_PROMPT] ?: DEFAULT_OCR_PROMPT,
-                compressModelId = preferences[COMPRESS_MODEL]?.let { Uuid.parse(it) } ?: DEFAULT_AUTO_MODEL_ID,
-                compressPrompt = preferences[COMPRESS_PROMPT] ?: DEFAULT_COMPRESS_PROMPT,
-                assistantId = preferences[SELECT_ASSISTANT]?.let { Uuid.parse(it) }
-                    ?: DEFAULT_ASSISTANT_ID,
-                assistantTags = preferences[ASSISTANT_TAGS]?.let {
-                    JsonInstant.decodeFromString(it)
-                } ?: emptyList(),
-                providers = JsonInstant.decodeFromString(preferences[PROVIDERS] ?: "[]"),
-                assistants = JsonInstant.decodeFromString(preferences[ASSISTANTS] ?: "[]"),
-                dynamicColor = preferences[DYNAMIC_COLOR] != false,
-                themeId = preferences[THEME_ID] ?: PresetThemes[0].id,
-                customThemes = preferences[CUSTOM_THEMES]?.let {
-                    JsonInstant.decodeFromString(it)
-                } ?: emptyList(),
-                developerMode = preferences[DEVELOPER_MODE] == true,
-                displaySetting = JsonInstant.decodeFromString(preferences[DISPLAY_SETTING] ?: "{}"),
-                networkSetting = JsonInstant.decodeFromString(preferences[NETWORK_SETTING] ?: "{}"),
-                searchServices = preferences[SEARCH_SERVICES]?.let {
-                    JsonInstant.decodeFromString(it)
-                } ?: listOf(SearchServiceOptions.DEFAULT),
-                searchCommonOptions = preferences[SEARCH_COMMON]?.let {
-                    JsonInstant.decodeFromString(it)
-                } ?: SearchCommonOptions(),
-                searchServiceSelected = preferences[SEARCH_SELECTED] ?: 0,
-                mcpServers = preferences[MCP_SERVERS]?.let {
-                    JsonInstant.decodeFromString(it)
-                } ?: emptyList(),
-                webDavConfig = preferences[WEBDAV_CONFIG]?.let {
-                    JsonInstant.decodeFromString(it)
-                } ?: WebDavConfig(),
-                s3Config = preferences[S3_CONFIG]?.let {
-                    JsonInstant.decodeFromString(it)
-                } ?: S3Config(),
-                ttsProviders = preferences[TTS_PROVIDERS]?.let {
-                    JsonInstant.decodeFromString(it)
-                } ?: emptyList(),
-                selectedTTSProviderId = preferences[SELECTED_TTS_PROVIDER]?.let { Uuid.parse(it) }
-                    ?: DEFAULT_SYSTEM_TTS_ID,
-                asrProviders = preferences[ASR_PROVIDERS]?.let {
-                    JsonInstant.decodeFromString(it)
-                } ?: emptyList(),
-                selectedASRProviderId = preferences[SELECTED_ASR_PROVIDER]?.let { Uuid.parse(it) },
-                modeInjections = preferences[MODE_INJECTIONS]?.let {
-                    JsonInstant.decodeFromString(it)
-                } ?: emptyList(),
-                lorebooks = preferences[LOREBOOKS]?.let {
-                    JsonInstant.decodeFromString(it)
-                } ?: emptyList(),
-                quickMessages = preferences[QUICK_MESSAGES]?.let {
-                    JsonInstant.decodeFromString(it)
-                } ?: emptyList(),
-                webServerEnabled = preferences[WEB_SERVER_ENABLED] == true,
-                webServerPort = preferences[WEB_SERVER_PORT] ?: 8080,
-                webServerJwtEnabled = preferences[WEB_SERVER_JWT_ENABLED] == true,
-                webServerAccessPassword = preferences[WEB_SERVER_ACCESS_PASSWORD] ?: "",
-                webServerLocalhostOnly = preferences[WEB_SERVER_LOCALHOST_ONLY] == true,
-                backupReminderConfig = preferences[BACKUP_REMINDER_CONFIG]?.let {
-                    JsonInstant.decodeFromString(it)
-                } ?: BackupReminderConfig(),
-                launchCount = preferences[LAUNCH_COUNT] ?: 0,
-                sponsorAlertDismissedAt = preferences[SPONSOR_ALERT_DISMISSED_AT] ?: 0,
-            )
-        }
-        .map {
-            var providers = it.providers.ifEmpty { DEFAULT_PROVIDERS }.toMutableList()
-            DEFAULT_PROVIDERS.forEach { defaultProvider ->
-                if (providers.none { it.id == defaultProvider.id }) {
-                    providers.add(defaultProvider.copyProvider())
-                }
-            }
-            providers = providers.map { provider ->
-                val defaultProvider = DEFAULT_PROVIDERS.find { it.id == provider.id }
-                if (defaultProvider != null) {
-                    provider.copyProvider(
-                        builtIn = defaultProvider.builtIn,
-                        description = defaultProvider.description,
-                        shortDescription = defaultProvider.shortDescription,
-                    )
-                } else provider
-            }.toMutableList()
-            val assistants = it.assistants.ifEmpty { DEFAULT_ASSISTANTS }.toMutableList()
-            DEFAULT_ASSISTANTS.forEach { defaultAssistant ->
-                if (assistants.none { it.id == defaultAssistant.id }) {
-                    assistants.add(defaultAssistant.copy())
-                }
-            }
-            val ttsProviders = it.ttsProviders.ifEmpty { DEFAULT_TTS_PROVIDERS }.toMutableList()
-            DEFAULT_TTS_PROVIDERS.forEach { defaultTTSProvider ->
-                if (ttsProviders.none { provider -> provider.id == defaultTTSProvider.id }) {
-                    ttsProviders.add(defaultTTSProvider.copyProvider())
-                }
-            }
-            it.copy(
-                providers = providers,
-                assistants = assistants,
-                ttsProviders = ttsProviders,
-            )
-        }
-        .map { settings ->
-            // 去重并清理无效引用
-            val validMcpServerIds = settings.mcpServers.map { it.id }.toSet()
-            val validModeInjectionIds = settings.modeInjections.map { it.id }.toSet()
-            val validLorebookIds = settings.lorebooks.map { it.id }.toSet()
-            val validQuickMessageIds = settings.quickMessages.map { it.id }.toSet()
-            val asrProviders = settings.asrProviders.distinctBy { it.id }
-            settings.copy(
-                providers = settings.providers.distinctBy { it.id }.map { provider ->
-                    when (provider) {
-                        is ProviderSetting.OpenAI -> provider.copy(
-                            models = provider.models.distinctBy { model -> model.id }
-                        )
-
-                        is ProviderSetting.Google -> provider.copy(
-                            models = provider.models.distinctBy { model -> model.id }
-                        )
-
-                        is ProviderSetting.Claude -> provider.copy(
-                            models = provider.models.distinctBy { model -> model.id }
-                        )
-
-                        is ProviderSetting.MultiProtocol -> provider.copy(
-                            models = provider.models.distinctBy { model -> model.id }
-                        )
-                    }
-                },
-                assistants = settings.assistants.distinctBy { it.id }.map { assistant ->
-                    assistant.copy(
-                        // 过滤掉不存在的 MCP 服务器 ID
-                        mcpServers = assistant.mcpServers.filter { serverId ->
-                            serverId in validMcpServerIds
-                        }.toSet(),
-                        // 过滤掉不存在的模式注入 ID
-                        modeInjectionIds = assistant.modeInjectionIds.filter { id ->
-                            id in validModeInjectionIds
-                        }.toSet(),
-                        // 过滤掉不存在的 Lorebook ID
-                        lorebookIds = assistant.lorebookIds.filter { id ->
-                            id in validLorebookIds
-                        }.toSet(),
-                        // 过滤掉不存在的快捷消息 ID
-                        quickMessageIds = assistant.quickMessageIds.filter { id ->
-                            id in validQuickMessageIds
-                        }.toSet()
-                    )
-                },
-                ttsProviders = settings.ttsProviders.distinctBy { it.id },
-                asrProviders = asrProviders,
-                selectedASRProviderId = settings.selectedASRProviderId
-                    ?.takeIf { id -> asrProviders.any { provider -> provider.id == id } }
-                    ?: asrProviders.firstOrNull()?.id,
-                favoriteModels = settings.favoriteModels.filter { uuid ->
-                    settings.providers.flatMap { it.models }.any { it.id == uuid }
-                },
-                modeInjections = settings.modeInjections.distinctBy { it.id },
-                lorebooks = settings.lorebooks.distinctBy { it.id },
-                quickMessages = settings.quickMessages.distinctBy { it.id },
-            )
-        }
-        .onEach {
-            get<PebbleEngine>().templateCache.invalidateAll()
-        }
-
-    val settingsFlow = settingsFlowRaw
-        .distinctUntilChanged()
-        .toMutableStateFlow(scope, Settings.dummy())
-
-    suspend fun update(settings: Settings) {
-        if(settings.init) {
-            Log.w(TAG, "Cannot update dummy settings")
-            return
-        }
-        settingsFlow.value = settings
-        dataStore.edit { preferences ->
-            preferences[DYNAMIC_COLOR] = settings.dynamicColor
-            preferences[THEME_ID] = settings.themeId
-            preferences[CUSTOM_THEMES] = JsonInstant.encodeToString(settings.customThemes)
-            preferences[DEVELOPER_MODE] = settings.developerMode
-            preferences[DISPLAY_SETTING] = JsonInstant.encodeToString(settings.displaySetting)
-            preferences[NETWORK_SETTING] = JsonInstant.encodeToString(settings.networkSetting)
-
-            preferences[FAVORITE_MODELS] = JsonInstant.encodeToString(settings.favoriteModels)
-            preferences[SELECT_MODEL] = settings.chatModelId.toString()
-            preferences[FAST_MODEL] = settings.fastModelId.toString()
-            preferences[FAST_MODEL_REASONING_LEVEL] = settings.fastModelReasoningLevel.name
-            settings.titleModelId?.let {
-                preferences[TITLE_MODEL] = it.toString()
-            } ?: preferences.remove(TITLE_MODEL)
-            preferences[TRANSLATE_MODEL] = settings.translateModeId.toString()
-            preferences[ENABLE_SUGGESTION] = settings.enableSuggestion
-            settings.suggestionModelId?.let {
-                preferences[SUGGESTION_MODEL] = it.toString()
-            } ?: preferences.remove(SUGGESTION_MODEL)
-            preferences[IMAGE_GENERATION_MODEL] = settings.imageGenerationModelId.toString()
-            preferences[TITLE_PROMPT] = settings.titlePrompt
-            preferences[TRANSLATION_PROMPT] = settings.translatePrompt
-            preferences[TRANSLATE_THINKING_BUDGET] = settings.translateThinkingBudget
-            preferences[SUGGESTION_PROMPT] = settings.suggestionPrompt
-            preferences[OCR_MODEL] = settings.ocrModelId.toString()
-            preferences[OCR_PROMPT] = settings.ocrPrompt
-            preferences[COMPRESS_MODEL] = settings.compressModelId.toString()
-            preferences[COMPRESS_PROMPT] = settings.compressPrompt
-
-            preferences[PROVIDERS] = JsonInstant.encodeToString(settings.providers)
-
-            preferences[ASSISTANTS] = JsonInstant.encodeToString(settings.assistants)
-            preferences[SELECT_ASSISTANT] = settings.assistantId.toString()
-            preferences[ASSISTANT_TAGS] = JsonInstant.encodeToString(settings.assistantTags)
-
-            preferences[SEARCH_SERVICES] = JsonInstant.encodeToString(settings.searchServices)
-            preferences[SEARCH_COMMON] = JsonInstant.encodeToString(settings.searchCommonOptions)
-            preferences[SEARCH_SELECTED] = settings.searchServiceSelected.coerceIn(0, settings.searchServices.size - 1)
-
-            preferences[MCP_SERVERS] = JsonInstant.encodeToString(settings.mcpServers)
-            preferences[WEBDAV_CONFIG] = JsonInstant.encodeToString(settings.webDavConfig)
-            preferences[S3_CONFIG] = JsonInstant.encodeToString(settings.s3Config)
-            preferences[TTS_PROVIDERS] = JsonInstant.encodeToString(settings.ttsProviders)
-            settings.selectedTTSProviderId?.let {
-                preferences[SELECTED_TTS_PROVIDER] = it.toString()
-            } ?: preferences.remove(SELECTED_TTS_PROVIDER)
-            preferences[ASR_PROVIDERS] = JsonInstant.encodeToString(settings.asrProviders)
-            settings.selectedASRProviderId?.let {
-                preferences[SELECTED_ASR_PROVIDER] = it.toString()
-            } ?: preferences.remove(SELECTED_ASR_PROVIDER)
-            preferences[MODE_INJECTIONS] = JsonInstant.encodeToString(settings.modeInjections)
-            preferences[LOREBOOKS] = JsonInstant.encodeToString(settings.lorebooks)
-            preferences[QUICK_MESSAGES] = JsonInstant.encodeToString(settings.quickMessages)
-            preferences[WEB_SERVER_ENABLED] = settings.webServerEnabled
-            preferences[WEB_SERVER_PORT] = settings.webServerPort
-            preferences[WEB_SERVER_JWT_ENABLED] = settings.webServerJwtEnabled
-            preferences[WEB_SERVER_ACCESS_PASSWORD] = settings.webServerAccessPassword
-            preferences[WEB_SERVER_LOCALHOST_ONLY] = settings.webServerLocalhostOnly
-            preferences[BACKUP_REMINDER_CONFIG] = JsonInstant.encodeToString(settings.backupReminderConfig)
-            preferences[LAUNCH_COUNT] = settings.launchCount
-            preferences[SPONSOR_ALERT_DISMISSED_AT] = settings.sponsorAlertDismissedAt
         }
     }
 
+    suspend fun awaitLoaded(): Settings {
+        loaded.await()
+        return state.value
+    }
+
+    /** 旧整份替换入口仅为尚未迁移的调用方和备份恢复保留。普通修改应使用变换函数。 */
+    @Deprecated("普通修改请使用 update { latest -> latest.copy(...) }，避免旧快照覆盖新值")
+    suspend fun update(settings: Settings) {
+        if (settings.init) return
+        update { settings }
+    }
+
+    /** 基于最新内存值原子更新；页面取消后仍完成落盘。 */
     suspend fun update(fn: (Settings) -> Settings) {
-        update(fn(settingsFlow.value))
+        awaitLoaded()
+        synchronized(stateLock) {
+            val updated = fn(state.value)
+            if (updated.init) return
+            val normalized = updated.normalized()
+            state.value = if (normalized == updated) updated else normalized
+        }
+        invalidateTemplates()
+        withContext(kotlinx.coroutines.NonCancellable + kotlinx.coroutines.Dispatchers.Default) {
+            persistMutex.withLock {
+                val latest = state.value
+                if (latest !== persisted) {
+                    dataStore.edit { it.putSettings(latest, persisted) }
+                    persisted = latest
+                }
+            }
+        }
     }
 
     suspend fun updateAssistant(assistantId: Uuid) {
-        dataStore.edit { preferences ->
-            preferences[SELECT_ASSISTANT] = assistantId.toString()
-        }
+        update { it.copy(assistantId = assistantId) }
     }
 
     suspend fun updateAssistantModel(assistantId: Uuid, modelId: Uuid) {
@@ -517,309 +286,3 @@ class SettingsStore(
         }
     }
 }
-
-@Serializable
-data class Settings(
-    @Transient
-    val init: Boolean = false,
-    val dynamicColor: Boolean = true,
-    val themeId: String = PresetThemes[0].id,
-    val customThemes: List<CustomTheme> = emptyList(),
-    val developerMode: Boolean = false,
-    val displaySetting: DisplaySetting = DisplaySetting(),
-    val networkSetting: NetworkSetting = NetworkSetting(),
-    val favoriteModels: List<Uuid> = emptyList(),
-    val chatModelId: Uuid = Uuid.random(),
-    val fastModelId: Uuid = Uuid.random(),
-    val fastModelReasoningLevel: ReasoningLevel = ReasoningLevel.AUTO,
-    val titleModelId: Uuid? = null,
-    val imageGenerationModelId: Uuid = Uuid.random(),
-    val titlePrompt: String = DEFAULT_TITLE_PROMPT,
-    val translateModeId: Uuid = Uuid.random(),
-    val translatePrompt: String = DEFAULT_TRANSLATION_PROMPT,
-    val translateThinkingBudget: Int = 0,
-    val enableSuggestion: Boolean = true,
-    val suggestionModelId: Uuid? = null,
-    val suggestionPrompt: String = DEFAULT_SUGGESTION_PROMPT,
-    val ocrModelId: Uuid = Uuid.random(),
-    val ocrPrompt: String = DEFAULT_OCR_PROMPT,
-    val compressModelId: Uuid = Uuid.random(),
-    val compressPrompt: String = DEFAULT_COMPRESS_PROMPT,
-    val assistantId: Uuid = DEFAULT_ASSISTANT_ID,
-    val providers: List<ProviderSetting> = DEFAULT_PROVIDERS,
-    val assistants: List<Assistant> = DEFAULT_ASSISTANTS,
-    val assistantTags: List<Tag> = emptyList(),
-    val searchServices: List<SearchServiceOptions> = listOf(SearchServiceOptions.DEFAULT),
-    val searchCommonOptions: SearchCommonOptions = SearchCommonOptions(),
-    val searchServiceSelected: Int = 0,
-    val mcpServers: List<McpServerConfig> = emptyList(),
-    val webDavConfig: WebDavConfig = WebDavConfig(),
-    val s3Config: S3Config = S3Config(),
-    val ttsProviders: List<TTSProviderSetting> = DEFAULT_TTS_PROVIDERS,
-    val selectedTTSProviderId: Uuid = DEFAULT_SYSTEM_TTS_ID,
-    val asrProviders: List<ASRProviderSetting> = emptyList(),
-    val selectedASRProviderId: Uuid? = null,
-    val modeInjections: List<PromptInjection.ModeInjection> = DEFAULT_MODE_INJECTIONS,
-    val lorebooks: List<Lorebook> = emptyList(),
-    val quickMessages: List<QuickMessage> = emptyList(),
-    val webServerEnabled: Boolean = false,
-    val webServerPort: Int = 8080,
-    val webServerJwtEnabled: Boolean = false,
-    val webServerAccessPassword: String = "",
-    val webServerLocalhostOnly: Boolean = false,
-    val backupReminderConfig: BackupReminderConfig = BackupReminderConfig(),
-    val launchCount: Int = 0,
-    val sponsorAlertDismissedAt: Int = 0,
-) {
-    companion object {
-        // 构造一个用于初始化的settings, 但它不能用于保存，防止使用初始值存储
-        fun dummy() = Settings(init = true)
-    }
-}
-
-@Serializable
-data class NetworkSetting(
-    val userAgent: String = "",
-    val proxyUrl: String = "",
-    val proxyUsername: String = "",
-    val proxyPassword: String = "",
-    val enableAutoRetry: Boolean = true,
-)
-
-@Serializable
-enum class ChatFontFamily {
-    @SerialName("default")
-    DEFAULT,
-    @SerialName("serif")
-    SERIF,
-    @SerialName("monospace")
-    MONOSPACE,
-
-    @SerialName("custom")
-    CUSTOM,
-}
-
-@Serializable
-data class DisplaySetting(
-    val userAvatar: Avatar = Avatar.Dummy,
-    val userNickname: String = "",
-    val useAppIconStyleLoadingIndicator: Boolean = true,
-    val showUserAvatar: Boolean = true,
-    val showAssistantBubble: Boolean = false,
-    val bubbleOpacity: Float = 1.0f,
-    val showModelIcon: Boolean = true,
-    val showModelName: Boolean = true,
-    val showDateTimeInMessage: Boolean = false,
-    val showTokenUsage: Boolean = true,
-    val showThinkingContent: Boolean = true,
-    val autoCloseThinking: Boolean = true,
-    val showUpdates: Boolean = false, // 自建改版与上游版本线不一致，默认不提醒更新
-    val showMessageJumper: Boolean = true,
-    val messageJumperOnLeft: Boolean = false,
-    val fontSizeRatio: Float = 1.0f,
-    val enableMessageGenerationHapticEffect: Boolean = false,
-    val skipCropImage: Boolean = true,
-    val enableNotificationOnMessageGeneration: Boolean = false,
-    val enableLiveUpdateNotification: Boolean = false,
-    val codeBlockAutoWrap: Boolean = false,
-    val codeBlockAutoCollapse: Boolean = false,
-    val showLineNumbers: Boolean = false,
-    val ttsOnlyReadQuoted: Boolean = false,
-    val ttsOnlyReadOutsideBrackets: Boolean = false,
-    val autoPlayTTSAfterGeneration: Boolean = false,
-    val pasteLongTextAsFile: Boolean = false,
-    val pasteLongTextThreshold: Int = 1000,
-    val sendOnEnter: Boolean = false,
-    val enableAutoScroll: Boolean = true,
-    val enableLatexRendering: Boolean = true,
-    val enableBlurEffect: Boolean = false,
-    val chatFontFamily: ChatFontFamily = ChatFontFamily.DEFAULT,
-    val chatCustomFontPath: String = "",
-    val chatCustomFontName: String = "",
-    val enableVolumeKeyScroll: Boolean = false,
-    val volumeKeyScrollRatio: Float = 1.0f,
-    val enableBackgroundKeepAlive: Boolean = true,
-)
-
-@Serializable
-data class WebDavConfig(
-    val url: String = "",
-    val username: String = "",
-    val password: String = "",
-    val path: String = "rikkahub_backups",
-    val items: List<BackupItem> = listOf(
-        BackupItem.DATABASE,
-        BackupItem.FILES
-    ),
-) {
-    @Serializable
-    enum class BackupItem {
-        DATABASE,
-        FILES,
-    }
-}
-
-@Serializable
-data class BackupReminderConfig(
-    val enabled: Boolean = false,
-    val intervalDays: Int = 7,
-    val lastBackupTime: Long = 0L,
-)
-
-fun Settings.isNotConfigured() = providers.all { it.models.isEmpty() }
-
-fun Settings.findModelById(uuid: Uuid?, fallback: Uuid? = null): Model? {
-    if (uuid == null && fallback == null) return null
-    return uuid?.let { this.providers.findModelById(it) }
-        ?: fallback?.let { this.providers.findModelById(it) }
-}
-
-fun List<ProviderSetting>.findModelById(uuid: Uuid): Model? {
-    this.forEach { setting ->
-        setting.models.forEach { model ->
-            if (model.id == uuid) {
-                return model
-            }
-        }
-    }
-    return null
-}
-
-fun Settings.getCurrentChatModel(): Model? {
-    return findModelById(this.getCurrentAssistant().chatModelId ?: this.chatModelId)
-}
-
-/**
- * 解析「生图模型」。
- *
- * 优先使用用户在生图页显式选中的模型（[Settings.imageGenerationModelId]）；
- * 该字段默认是随机 UUID（未曾选择过），此时回退到**第一个标记为 IMAGE 类型的模型**，
- * 这样"把生图模型设为 IMAGE 类型"就足以开箱画图，不必再额外进生图页点一次。
- */
-fun Settings.findImageGenerationModel(): Model? {
-    findModelById(imageGenerationModelId)?.let { return it }
-    return providers.asSequence()
-        .flatMap { it.models.asSequence() }
-        .firstOrNull { it.type == ModelType.IMAGE }
-}
-
-fun Settings.getCurrentAssistant(): Assistant {
-    return this.assistants.find { it.id == assistantId } ?: this.assistants.first()
-}
-
-fun Settings.getAssistantById(id: Uuid): Assistant? {
-    return this.assistants.find { it.id == id }
-}
-
-fun Settings.getQuickMessagesOfAssistant(assistant: Assistant) =
-    quickMessages.filter { it.id in assistant.quickMessageIds }
-
-fun Settings.getSelectedTTSProvider(): TTSProviderSetting? {
-    return selectedTTSProviderId?.let { id ->
-        ttsProviders.find { it.id == id }
-    } ?: ttsProviders.firstOrNull()
-}
-
-fun Settings.getSelectedASRProvider(): ASRProviderSetting? {
-    return selectedASRProviderId?.let { id ->
-        asrProviders.find { it.id == id }
-    } ?: asrProviders.firstOrNull()
-}
-
-fun Model.findProvider(providers: List<ProviderSetting>, checkOverwrite: Boolean = true): ProviderSetting? {
-    val provider = findModelProviderFromList(providers) ?: return null
-    val providerOverwrite = this.providerOverwrite
-    if (checkOverwrite && providerOverwrite != null) {
-        return providerOverwrite.copyProvider(models = emptyList())
-    }
-    return provider
-}
-
-/** 模型实际使用的协议：覆盖配置优先，其次模型字段，最后服务商默认协议。 */
-fun Model.effectiveProtocol(providers: List<ProviderSetting>): ProviderProtocol? {
-    val provider = findProvider(providers, checkOverwrite = true) ?: return null
-    return provider.protocolOf(this)
-}
-
-/**
- * 解析模型真正发请求使用的单协议配置。
- *
- * 多协议服务商按 [Model.protocol] / defaultProtocol 取对应 endpoint；未填 Key 时返回 null，
- * 由调用方给出“某某协议未配置”的明确错误，避免静默走错协议。
- */
-fun Model.resolveEndpoint(providers: List<ProviderSetting>): ProviderSetting? {
-    val provider = findProvider(providers, checkOverwrite = true) ?: return null
-    return when (provider) {
-        is ProviderSetting.MultiProtocol -> {
-            val protocol = this.protocol ?: provider.defaultProtocol
-            provider.endpointOrNull(protocol)?.takeIf { it.isConfigured() }
-        }
-
-        else -> provider
-    }
-}
-
-private fun Model.findModelProviderFromList(providers: List<ProviderSetting>): ProviderSetting? {
-    providers.forEach { setting ->
-        setting.models.forEach { model ->
-            if (model.id == this.id) {
-                return setting
-            }
-        }
-    }
-    return null
-}
-
-internal val DEFAULT_ASSISTANT_ID = Uuid.parse("0950e2dc-9bd5-4801-afa3-aa887aa36b4e")
-internal val DEFAULT_ASSISTANTS = listOf(
-    Assistant(
-        id = DEFAULT_ASSISTANT_ID,
-        name = "",
-        systemPrompt = ""
-    ),
-    Assistant(
-        id = Uuid.parse("3d47790c-c415-4b90-9388-751128adb0a0"),
-        name = "",
-        systemPrompt = """
-            You are a helpful assistant, called {{char}}, based on model {{model_name}}.
-
-            ## Info
-            - Time: {{cur_datetime}}
-            - Locale: {{locale}}
-            - Timezone: {{timezone}}
-            - Device Info: {{device_info}}
-            - System Version: {{system_version}}
-            - User Nickname: {{user}}
-
-            ## Hint
-            - If the user does not specify a language, reply in the user's primary language.
-            - Remember to use Markdown syntax for formatting, and use latex for mathematical expressions.
-        """.trimIndent()
-    ),
-)
-
-val DEFAULT_SYSTEM_TTS_ID = Uuid.parse("026a01a2-c3a0-4fd5-8075-80e03bdef200")
-private val DEFAULT_TTS_PROVIDERS = listOf(
-    TTSProviderSetting.SystemTTS(
-        id = DEFAULT_SYSTEM_TTS_ID,
-        name = "",
-    ),
-    TTSProviderSetting.OpenAI(
-        id = Uuid.parse("e36b22ef-ca82-40ab-9e70-60cad861911c"),
-        name = "AiHubMix",
-        baseUrl = "https://aihubmix.com/v1",
-        model = "gpt-4o-mini-tts",
-        voice = "alloy",
-    )
-)
-
-internal val DEFAULT_ASSISTANTS_IDS = DEFAULT_ASSISTANTS.map { it.id }
-
-val DEFAULT_MODE_INJECTIONS = listOf(
-    PromptInjection.ModeInjection(
-        id = Uuid.parse("b87eaf16-f5cd-4ac1-9e4f-b11ae3a61d74"),
-        content = LEARNING_MODE_PROMPT,
-        position = InjectionPosition.AFTER_SYSTEM_PROMPT,
-        name = "Learning Mode"
-    )
-)

@@ -23,4 +23,18 @@ class SettingVM(
             settingsStore.update(settings)
         }
     }
+
+    fun updateSettings(transform: (Settings) -> Settings) {
+        viewModelScope.launch {
+            settingsStore.update(transform)
+        }
+    }
+
+    // 需要等待保存成功再关闭页面的编辑器使用此入口。
+    suspend fun saveSettings(transform: (Settings) -> Settings) {
+        settingsStore.update(transform)
+    }
+
+    // 编辑器处理写盘失败时需要直接读取事实来源，不能依赖 stateIn 的异步回流。
+    val latestSettings: Settings get() = settingsStore.settingsFlow.value
 }

@@ -15,13 +15,25 @@ class ChatInputState {
     var editingMessage by mutableStateOf<Uuid?>(null)
     private var editingParts: List<UIMessagePart>? = null
     private var editingAttachmentUrls: Set<String> = emptySet()
+    private var galleryImages by mutableStateOf<Map<String, GalleryImageSelection>>(emptyMap())
+    internal var attachmentRevision: Long = 0
+        private set
+
+    internal val selectedGallerySources: Set<String>
+        get() = galleryImages.filterValues { selection ->
+            selection.localUrl == null || messageContent.any { it is UIMessagePart.Image && it.url == selection.localUrl }
+        }.keys
+
+    internal val pendingGalleryImageCount: Int get() = galleryImages.values.count { it.localUrl == null }
 
     fun clearInput() {
+        attachmentRevision++
         textContent.setTextAndPlaceCursorAtEnd("")
         messageContent = emptyList()
         editingMessage = null
         editingParts = null
         editingAttachmentUrls = emptySet()
+        galleryImages = emptyMap()
     }
 
     fun isEditing() = editingMessage != null
@@ -35,6 +47,8 @@ class ChatInputState {
     }
 
     fun setContents(contents: List<UIMessagePart>) {
+        attachmentRevision++
+        galleryImages = emptyMap()
         val lastTextIndex = contents.indexOfLast { it is UIMessagePart.Text }
         val text = if (lastTextIndex >= 0) {
             (contents[lastTextIndex] as UIMessagePart.Text).text
@@ -74,7 +88,7 @@ class ChatInputState {
                         }
                     }
                 }
-                // Newly added attachments are appended in insertion order.
+                // 新增附件按加入顺序追加。
                 merged.addAll(remainingAttachments)
                 return merged
             }
@@ -93,6 +107,57 @@ class ChatInputState {
             newMessage.add(UIMessagePart.Image(uri.toString()))
         }
         messageContent = newMessage
+    }
+
+    internal fun beginGalleryImageImport(source: String): Uuid? {
+        if (source in selectedGallerySources) return null
+        val token = Uuid.random()
+        galleryImages = galleryImages + (source to GalleryImageSelection(token))
+        return token
+    }
+
+    internal fun isGalleryImageImportPending(source: String, token: Uuid): Boolean =
+        galleryImages[source]?.let { it.token == token && it.localUrl == null } == true
+
+    internal fun finishGalleryImageImport(source: String, token: Uuid, localUrl: String): Boolean {
+        if (!isGalleryImageImportPending(source, token)) return false
+        messageContent = messageContent + UIMessagePart.Image(localUrl)
+        galleryImages = galleryImages + (source to GalleryImageSelection(token, localUrl))
+        return true
+    }
+
+    internal fun cancelGalleryImageImport(source: String, token: Uuid) {
+        if (isGalleryImageImportPending(source, token)) galleryImages = galleryImages - source
+    }
+
+    internal fun deselectGalleryImage(source: String): UIMessagePart.Image? {
+        val localUrl = galleryImages[source]?.localUrl
+        galleryImages = galleryImages - source
+        val part = messageContent.filterIsInstance<UIMessagePart.Image>().firstOrNull { it.url == localUrl }
+        if (part != null) removeAttachment(part)
+        return part
+    }
+
+    internal fun removeAttachment(part: UIMessagePart) {
+        messageContent = messageContent.filterNot { it == part }
+        val url = part.attachmentUrlOrNull()
+        galleryImages = galleryImages.filterValues { it.localUrl != url }
+    }
+
+    /** 替换仍在当前草稿里的图片，不追加已被移除的旧结果；编辑历史消息时保持原内容顺序。 */
+    internal fun replaceImage(
+        original: UIMessagePart.Image,
+        localUrl: String,
+        expectedRevision: Long = attachmentRevision,
+    ): Boolean {
+        if (expectedRevision != attachmentRevision || original !in messageContent) return false
+        val replacement = original.copy(url = localUrl)
+        messageContent = messageContent.map { if (it == original) replacement else it }
+        editingParts = editingParts?.map { if (it == original) replacement else it }
+        galleryImages = galleryImages.mapValues { (_, selection) ->
+            if (selection.localUrl == original.url) selection.copy(localUrl = localUrl) else selection
+        }
+        return true
     }
 
     fun addVideos(uris: List<Uri>) {
@@ -139,3 +204,5 @@ class ChatInputState {
         }
     }
 }
+
+private data class GalleryImageSelection(val token: Uuid, val localUrl: String? = null)

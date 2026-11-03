@@ -24,6 +24,10 @@ data class S3Config(
     val isHttps: Boolean
         get() = endpoint.startsWith("https://")
 
+    /** 上传地址未写协议时使用 HTTPS，不改变旧备份配置的解析规则。 */
+    fun withHttpsByDefault(): S3Config =
+        if (endpoint.isBlank() || "://" in endpoint) this else copy(endpoint = "https://$endpoint")
+
     fun bucketUrl(): String {
         return if (pathStyle) {
             "${endpoint.trimEnd('/')}/$bucket"

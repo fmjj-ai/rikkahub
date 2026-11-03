@@ -46,6 +46,7 @@ private const val TAG = "RikkaHubApp"
 
 const val CHAT_COMPLETED_NOTIFICATION_CHANNEL_ID = "chat_completed"
 const val CHAT_LIVE_UPDATE_NOTIFICATION_CHANNEL_ID = "chat_live_update"
+const val MEDIA_CREATION_NOTIFICATION_CHANNEL_ID = "media_creation"
 const val WEB_SERVER_NOTIFICATION_CHANNEL_ID = "web_server"
 
 class RikkaHubApp : Application() {
@@ -88,6 +89,7 @@ class RikkaHubApp : Application() {
 
         // Increment launch count
         incrementLaunchCount()
+        get<me.rerere.rikkahub.service.MediaCreationService>().resumePending()
 
         // Composer.setDiagnosticStackTraceMode(ComposeStackTraceMode.Auto)
     }
@@ -96,8 +98,7 @@ class RikkaHubApp : Application() {
         get<AppScope>().launch {
             runCatching {
                 val store = get<SettingsStore>()
-                val current = store.settingsFlowRaw.first()
-                store.update(current.copy(launchCount = current.launchCount + 1))
+                store.update { it.copy(launchCount = it.launchCount + 1) }
                 Log.i(TAG, "incrementLaunchCount: ${store.settingsFlowRaw.first().launchCount}")
             }.onFailure {
                 Log.e(TAG, "incrementLaunchCount failed", it)
@@ -214,6 +215,11 @@ class RikkaHubApp : Application() {
             .setVibrationEnabled(false)
             .build()
         notificationManager.createNotificationChannel(chatLiveUpdateChannel)
+
+        notificationManager.createNotificationChannel(
+            NotificationChannelCompat.Builder(MEDIA_CREATION_NOTIFICATION_CHANNEL_ID, NotificationManagerCompat.IMPORTANCE_LOW)
+                .setName("媒体创作").setVibrationEnabled(false).build()
+        )
 
         val webServerChannel = NotificationChannelCompat
             .Builder(WEB_SERVER_NOTIFICATION_CHANNEL_ID, NotificationManagerCompat.IMPORTANCE_LOW)

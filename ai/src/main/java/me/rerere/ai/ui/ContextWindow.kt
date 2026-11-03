@@ -28,13 +28,26 @@ fun List<UIMessage>.contextFingerprint(): String {
 
 fun List<UIMessage>.contextMessages(): List<UIMessage> {
     for (index in indices.reversed()) {
+        val checkpoint = this[index]
+        if (checkpoint.isContextCheckpoint) {
+            if (checkpoint.toText().isNotBlank() && checkpoint.contextCheckpointHash != null &&
+                subList(0, index).contextFingerprint() == checkpoint.contextCheckpointHash
+            ) {
+                return listOf(checkpoint) + drop(index + 1).filterNot { it.isContextCheckpoint }
+            }
+            continue
+        }
         val compaction = this[index].contextCompaction ?: continue
         if (compaction.summary.isBlank()) continue
         if (subList(0, index + 1).contextFingerprint() == compaction.prefixHash) {
-            return listOf(UIMessage.user(compaction.summary).copy(id = compaction.summaryId)) + drop(index + 1)
+            return listOf(UIMessage.user(compaction.summary).copy(
+                id = compaction.summaryId,
+                isContextCheckpoint = true,
+            )) + drop(index + 1).filterNot { it.isContextCheckpoint }
         }
     }
-    return this
+    // 无效检查点仍可在时间线查看，但不把过期摘要当作真实用户指令发送。
+    return filterNot { it.isContextCheckpoint }
 }
 
 /** 只压缩完整的早期轮次，最后一轮用户消息及其全部工具调用始终保留。 */
@@ -50,6 +63,10 @@ fun List<UIMessage>.compressionBoundary(keepRecentMessages: Int = 4): Int? {
 /** 返回原始记录中的压缩终点，避免反复压缩只有摘要、没有新历史的上下文。 */
 fun List<UIMessage>.compressionTarget(keepRecentMessages: Int = 4): Int? {
     val active = contextMessages()
+    if (keepRecentMessages <= 0) {
+        val last = active.lastOrNull { !it.isContextCheckpoint } ?: return null
+        return indexOfFirst { it.id == last.id }.takeIf { it >= 0 }
+    }
     var boundary = active.compressionBoundary(keepRecentMessages) ?: return null
     if (none { it.id == active[boundary].id }) {
         boundary = active.indexOfLast { it.role == MessageRole.USER } - 1

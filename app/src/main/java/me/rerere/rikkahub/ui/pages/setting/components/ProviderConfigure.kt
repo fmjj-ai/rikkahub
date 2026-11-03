@@ -151,12 +151,6 @@ private fun ProviderConfigureMulti(
             }
         }
 
-        Text(
-            text = stringResource(R.string.setting_provider_page_multi_protocol_hint),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-
         when (selectedProtocol) {
             ProviderProtocol.OPENAI -> ProviderConfigureOpenAI(
                 provider = endpoint as ProviderSetting.OpenAI,

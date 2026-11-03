@@ -3,6 +3,8 @@ package me.rerere.rikkahub.ui.components.ai
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -61,7 +63,6 @@ import me.rerere.hugeicons.stroke.Folder01
 import me.rerere.hugeicons.stroke.Image02
 import me.rerere.hugeicons.stroke.MusicNote03
 import me.rerere.hugeicons.stroke.Package
-import me.rerere.hugeicons.stroke.Package01
 import me.rerere.hugeicons.stroke.Settings02
 import me.rerere.hugeicons.stroke.Video01
 import me.rerere.rikkahub.R
@@ -101,6 +102,7 @@ internal fun FilesPicker(
     onDismiss: () -> Unit,
     onTakePic: () -> Unit,
     onPickImage: () -> Unit,
+    onToggleGalleryImage: (android.net.Uri) -> Unit,
     onPickVideo: () -> Unit,
     onPickAudio: () -> Unit,
     onPickFile: () -> Unit,
@@ -114,6 +116,7 @@ internal fun FilesPicker(
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .verticalScroll(rememberScrollState())
             .padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         FlowRow(
@@ -125,14 +128,17 @@ internal fun FilesPicker(
 
             ImagePickButton(onClick = onPickImage)
 
+            FilePickButton(onClick = onPickFile)
+
             if (provider != null && provider is ProviderSetting.Google) {
                 VideoPickButton(onClick = onPickVideo)
 
                 AudioPickButton(onClick = onPickAudio)
             }
 
-            FilePickButton(onClick = onPickFile)
         }
+
+        RecentGalleryImages(state = state, onToggle = onToggleGalleryImage, onDone = onDismiss)
 
         HorizontalDivider(
             modifier = Modifier.fillMaxWidth()
@@ -206,36 +212,6 @@ internal fun FilesPicker(
                 .clip(MaterialTheme.shapes.large)
                 .clickable {
                     onShowInjectionSheetChange(true)
-                },
-        )
-
-        // Compress History Button
-        ListItem(
-            leadingContent = {
-                Icon(
-                    imageVector = HugeIcons.Package01,
-                    contentDescription = stringResource(R.string.chat_page_compress_context),
-                )
-            },
-            headlineContent = {
-                Text(stringResource(R.string.chat_page_compress_context))
-            },
-            trailingContent = {
-                if (conversation.messageNodes.isNotEmpty()) {
-                    Text(
-                        text = stringResource(R.string.chat_page_message_count, conversation.messageNodes.size),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-            },
-            colors = ListItemDefaults.colors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainer
-            ),
-            modifier = Modifier
-                .clip(MaterialTheme.shapes.large)
-                .clickable {
-                    onShowCompressDialogChange(true)
                 },
         )
 

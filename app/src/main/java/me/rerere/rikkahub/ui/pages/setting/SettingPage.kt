@@ -190,6 +190,12 @@ fun SettingPage(vm: SettingVM = koinViewModel()) {
                         headlineContent = { Text(stringResource(R.string.setting_page_providers)) },
                     )
                     item(
+                        onClick = { navController.navigate(Screen.MediaCreationSessions) },
+                        leadingContent = { Icon(HugeIcons.ImageUpload, null) },
+                        supportingContent = { Text("独立图片与视频创作，保留聊天生图") },
+                        headlineContent = { Text("媒体创作") },
+                    )
+                    item(
                         onClick = { navController.navigate(Screen.SettingSearch) },
                         leadingContent = { Icon(HugeIcons.GlobalSearch, null) },
                         supportingContent = { Text(stringResource(R.string.setting_page_search_service_desc)) },

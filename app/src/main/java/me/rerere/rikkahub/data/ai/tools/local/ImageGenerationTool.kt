@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.update
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonArray
@@ -33,6 +34,7 @@ import me.rerere.rikkahub.data.db.entity.GenMediaEntity
 import me.rerere.rikkahub.data.files.FilesManager
 import me.rerere.rikkahub.data.repository.GenMediaRepository
 import java.io.File
+import kotlin.uuid.Uuid
 
 /** 生图工具名，与 UI 渲染器、工具级系统提示共用 */
 const val IMAGE_GENERATION_TOOL_NAME = "draw_image"
@@ -68,12 +70,11 @@ object ImageGenerationProgress {
     val previews: StateFlow<Map<String, String>> = _previews.asStateFlow()
 
     fun update(toolCallId: String, previewUrl: String) {
-        _previews.value = _previews.value + (toolCallId to previewUrl)
+        _previews.update { it + (toolCallId to previewUrl) }
     }
 
     fun clear(toolCallId: String) {
-        if (toolCallId !in _previews.value) return
-        _previews.value = _previews.value - toolCallId
+        _previews.update { it - toolCallId }
     }
 }
 
@@ -234,9 +235,7 @@ private fun errorOutput(message: String): List<UIMessagePart> = listOf(
 )
 
 /**
- * 落盘并登记图库，路径与命名规则和独立生图页面保持一致
- * （`files/images/<timestamp>_<模型名>_0.png` + `GenMediaEntity` 记录），
- * 因此两处入口共用同一份数据。
+ * 落盘并登记现有图库。文件名不再包含可能带路径分隔符的模型显示名，避免越界和同毫秒碰撞。
  */
 private suspend fun saveGeneratedImage(
     filesManager: FilesManager,
@@ -247,7 +246,7 @@ private suspend fun saveGeneratedImage(
 ): File {
     val imagesDir = filesManager.getImagesDir()
     val timestamp = System.currentTimeMillis()
-    val imageFile = File(imagesDir, "${timestamp}_${modelName}_0.png")
+    val imageFile = File(imagesDir, newGeneratedImageFileName(timestamp))
     val createdFile = filesManager.createImageFileFromBase64(base64Data, imageFile.absolutePath)
     genMediaRepository.insertMedia(
         GenMediaEntity(
@@ -260,3 +259,5 @@ private suspend fun saveGeneratedImage(
     )
     return createdFile
 }
+
+internal fun newGeneratedImageFileName(timestamp: Long): String = "${timestamp}_${Uuid.random()}.png"

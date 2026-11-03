@@ -52,6 +52,8 @@ import me.rerere.rikkahub.data.datastore.findModelById
 import me.rerere.rikkahub.data.datastore.resolveEndpoint
 import me.rerere.rikkahub.data.model.Assistant
 import me.rerere.rikkahub.data.model.AssistantMemory
+import me.rerere.rikkahub.data.model.Conversation
+import me.rerere.rikkahub.data.ai.prompts.buildCompressPrompt
 import me.rerere.rikkahub.data.repository.MemoryRepository
 import me.rerere.rikkahub.utils.applyPlaceholders
 import java.util.Locale
@@ -75,6 +77,23 @@ class GenerationHandler(
     private val json: Json,
     private val memoryRepo: MemoryRepository,
 ) {
+    private fun completeTools(assistant: Assistant, tools: List<Tool>): List<Tool> = buildList {
+        if (assistant.enableMemory) {
+            val memoryAssistantId = if (assistant.useGlobalMemory) {
+                MemoryRepository.GLOBAL_MEMORY_ID
+            } else {
+                assistant.id.toString()
+            }
+            addAll(buildMemoryTools(
+                json = json,
+                onCreation = { content -> memoryRepo.addMemory(memoryAssistantId, content) },
+                onUpdate = { id, content -> memoryRepo.updateContent(id, content) },
+                onDelete = { id -> memoryRepo.deleteMemory(id) },
+            ))
+        }
+        addAll(tools)
+    }
+
     fun generateText(
         settings: Settings,
         model: Model,
@@ -101,29 +120,7 @@ class GenerationHandler(
         for (stepIndex in 0 until maxSteps) {
             Log.i(TAG, "streamText: start step #$stepIndex (${model.id})")
 
-            val toolsInternal = buildList {
-                Log.i(TAG, "generateInternal: build tools($assistant)")
-                if (assistant?.enableMemory == true) {
-                    val memoryAssistantId = if (assistant.useGlobalMemory) {
-                        MemoryRepository.GLOBAL_MEMORY_ID
-                    } else {
-                        assistant.id.toString()
-                    }
-                    buildMemoryTools(
-                        json = json,
-                        onCreation = { content ->
-                            memoryRepo.addMemory(memoryAssistantId, content)
-                        },
-                        onUpdate = { id, content ->
-                            memoryRepo.updateContent(id, content)
-                        },
-                        onDelete = { id ->
-                            memoryRepo.deleteMemory(id)
-                        }
-                    ).let(this::addAll)
-                }
-                addAll(tools)
-            }
+            val toolsInternal = completeTools(assistant, tools)
 
             // Check if we have tool calls ready to continue after user interaction.
             val pendingTools = messages.lastOrNull()?.getTools()?.filter {
@@ -356,6 +353,55 @@ class GenerationHandler(
 
     }.flowOn(Dispatchers.IO)
 
+    /** 普通压缩与聊天共用请求前缀；返回 null 只表示发送前预算不足，尚未发出请求。 */
+    internal suspend fun generateCompressionSummary(
+        settings: Settings,
+        assistant: Assistant,
+        model: Model,
+        messages: List<UIMessage>,
+        tools: List<Tool>,
+        memories: List<AssistantMemory>,
+        conversation: Conversation,
+        inputTransformers: List<InputMessageTransformer>,
+        additionalPrompt: String,
+        targetTokens: Int,
+    ): String? {
+        check(messages.contextMessages().none { message -> message.getTools().any { !it.isExecuted } }) {
+            "请先完成或取消待处理工具调用，再压缩这部分历史。"
+        }
+        val provider = model.resolveEndpoint(settings.providers) ?: error("聊天模型的提供商或协议未配置")
+        val actualTools = completeTools(assistant, tools)
+        val requestMessages = prepareChatMessages(
+            context, assistant, settings, model, messages, actualTools, memories, inputTransformers,
+            MutableStateFlow(null), conversation.customSystemPrompt, conversation.modeInjectionIds,
+            conversation.lorebookIds, conversation.workspaceCwd,
+        )
+        val instruction = buildCompressPrompt(
+            additionalPrompt = listOf(additionalPrompt, "Aim for approximately $targetTokens tokens.")
+                .filter { it.isNotBlank() }.joinToString("\n"),
+            locale = Locale.getDefault().displayName,
+        )
+        val toolTokens = actualTools.sumOf {
+            (it.name + it.description + it.parameters()).estimateTokens().toLong()
+        }
+        val reserved = if (provider is ProviderSetting.Claude) DEFAULT_CLAUDE_MAX_TOKENS else 16_384
+        if (!canUseSingleCompressionRequest(
+                requestMessages.estimateTokens(), toolTokens, instruction.estimateTokens(), reserved, model.contextWindow
+            )
+        ) return null
+
+        val result = providerManager.getProviderByType(provider).generateText(
+            providerSetting = provider,
+            messages = requestMessages + UIMessage.user(instruction),
+            // 工具定义和请求参数不变；总结不受聊天回复输出上限限制。
+            params = chatGenerationParams(assistant, model, provider, actualTools).copy(maxTokens = null),
+        )
+        val message = result.choices.firstOrNull()?.message ?: error("压缩模型没有返回消息，原记录已保留")
+        check(message.getTools().isEmpty()) { "压缩模型返回了工具调用而非摘要，原记录已保留" }
+        return message.toText().trim().takeIf { it.isNotBlank() }
+            ?: error("压缩模型返回了空摘要，原记录已保留")
+    }
+
     private suspend fun generateInternal(
         assistant: Assistant,
         settings: Settings,
@@ -376,41 +422,10 @@ class GenerationHandler(
         compressContext: suspend (List<UIMessage>) -> List<UIMessage> = { it },
     ) {
         var messages = messages
-        suspend fun prepareMessages(): List<UIMessage> = buildList {
-            val system = buildString {
-                val effectiveSystemPrompt =
-                    if (assistant.allowConversationSystemPrompt && !conversationSystemPrompt.isNullOrBlank()) {
-                        conversationSystemPrompt
-                    } else {
-                        assistant.systemPrompt
-                    }
-                if (effectiveSystemPrompt.isNotBlank()) {
-                    append(effectiveSystemPrompt)
-                }
-
-                // 记忆
-                if (assistant.enableMemory) {
-                    appendLine()
-                    append(buildMemoryPrompt(memories = memories))
-                }
-                // 工具prompt
-                tools.forEach { tool ->
-                    appendLine()
-                    append(tool.systemPrompt(model, messages))
-                }
-            }
-            if (system.isNotBlank()) add(UIMessage.system(prompt = system))
-            addAll(messages.contextMessages().limitContext(assistant.contextMessageLimit))
-        }.transforms(
-            transformers = transformers,
-            context = context,
-            model = model,
-            assistant = assistant,
-            settings = settings,
-            conversationModeInjectionIds = conversationModeInjectionIds,
-            conversationLorebookIds = conversationLorebookIds,
-            processingStatus = processingStatus,
-            workspaceCwd = workspaceCwd,
+        suspend fun prepareMessages(): List<UIMessage> = prepareChatMessages(
+            context, assistant, settings, model, messages, tools, memories, transformers,
+            processingStatus, conversationSystemPrompt, conversationModeInjectionIds,
+            conversationLorebookIds, workspaceCwd,
         )
 
         var internalMessages = prepareMessages()
@@ -448,25 +463,7 @@ class GenerationHandler(
             }
             onUpdateMessages(messages)
         }
-        val params = TextGenerationParams(
-            model = model,
-            temperature = assistant.temperature,
-            topP = assistant.topP,
-            maxTokens = assistant.maxTokens,
-            tools = tools,
-            reasoningLevel = assistant.reasoningLevel,
-            customHeaders = buildList {
-                addAll(assistant.customHeaders)
-                addAll(model.customHeaders)
-            },
-            customBody = buildList {
-                addAll(assistant.customBodies)
-                addAll(model.customBodies)
-            },
-            // 快速模式 / 优先级模式：只作用于聊天主请求，且仅当服务商为 OpenAI 系时才真正写入
-            // service_tier（其他服务商即使开关为开启也静默忽略）。后台调用不经过此处。
-            serviceTierPriority = assistant.enablePriorityTier && provider is ProviderSetting.OpenAI,
-        )
+        val params = chatGenerationParams(assistant, model, provider, tools)
         if (stream) {
             providerImpl.streamText(
                 providerSetting = provider,

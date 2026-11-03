@@ -56,7 +56,6 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -69,6 +68,9 @@ import me.rerere.ai.provider.ProviderSetting
 import me.rerere.rikkahub.R
 import me.rerere.rikkahub.Screen
 import me.rerere.rikkahub.data.datastore.DEFAULT_PROVIDERS
+import me.rerere.rikkahub.data.datastore.moveById
+import me.rerere.rikkahub.data.datastore.mergeUrlIdentity
+import me.rerere.rikkahub.data.datastore.applyProviderMerge
 import me.rerere.rikkahub.data.datastore.mergeBaseUrl
 import me.rerere.rikkahub.ui.components.nav.BackButton
 import me.rerere.rikkahub.ui.components.ui.AutoAIIcon
@@ -84,6 +86,8 @@ import me.rerere.rikkahub.ui.theme.CustomColors
 import me.rerere.rikkahub.utils.ImageUtils
 import me.rerere.rikkahub.utils.plus
 import org.koin.androidx.compose.koinViewModel
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 import kotlin.uuid.Uuid
@@ -92,6 +96,7 @@ import kotlin.uuid.Uuid
 fun SettingProviderPage(vm: SettingVM = koinViewModel()) {
     val settings by vm.settings.collectAsStateWithLifecycle()
     val navController = LocalNavController.current
+    val scope = rememberCoroutineScope()
     val toaster = LocalToaster.current
     val context = LocalContext.current
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
@@ -102,7 +107,7 @@ fun SettingProviderPage(vm: SettingVM = koinViewModel()) {
         settings.providers
             .filter { !it.builtIn }
             .filter { it.mergeBaseUrl().isNotBlank() }
-            .groupBy { it.mergeBaseUrl().trim().trimEnd('/').lowercase() }
+            .groupBy { it.mergeUrlIdentity() }
             .values
             .filter { it.size > 1 }
             .toList()
@@ -131,13 +136,8 @@ fun SettingProviderPage(vm: SettingVM = koinViewModel()) {
     val reorderableState = rememberReorderableLazyListState(lazyListState) { from, to ->
         val fromId = filteredProviders.getOrNull(from.index)?.id
         val toId = filteredProviders.getOrNull(to.index)?.id
-        val fromIndex = fromId?.let { id -> settings.providers.indexOfFirst { it.id == id } } ?: -1
-        val toIndex = toId?.let { id -> settings.providers.indexOfFirst { it.id == id } } ?: -1
-        if (fromIndex >= 0 && toIndex >= 0) {
-            val newProviders = settings.providers.toMutableList().apply {
-                add(toIndex, removeAt(fromIndex))
-            }
-            vm.updateSettings(settings.copy(providers = newProviders))
+        vm.updateSettings { latest ->
+            latest.copy(providers = latest.providers.moveById(fromId, toId) { it.id })
         }
     }
 
@@ -151,19 +151,12 @@ fun SettingProviderPage(vm: SettingVM = koinViewModel()) {
                     BackButton()
                 },
                 actions = {
-                    ImportProviderButton {
-                        vm.updateSettings(
-                            settings.copy(
-                                providers = listOf(it.copyProvider(Uuid.random())) + settings.providers
-                            )
-                        )
+                    ImportProviderButton { imported ->
+                        val added = imported.copyProvider(Uuid.random())
+                        vm.updateSettings { latest -> latest.copy(providers = listOf(added) + latest.providers) }
                     }
-                    AddButton {
-                        vm.updateSettings(
-                            settings.copy(
-                                providers = listOf(it) + settings.providers
-                            )
-                        )
+                    AddButton { added ->
+                        vm.updateSettings { latest -> latest.copy(providers = listOf(added) + latest.providers) }
                     }
                 },
                 scrollBehavior = scrollBehavior,
@@ -287,16 +280,17 @@ fun SettingProviderPage(vm: SettingVM = koinViewModel()) {
             groups = mergeGroups,
             onDismiss = { showMergeSheet = false },
             onMerge = { primary, others, merged ->
-                val otherIds = others.map { it.id }.toSet()
-                val newProviders = settings.providers
-                    .map { if (it.id == primary.id) merged else it }
-                    .filter { it.id !in otherIds }
-                vm.updateSettings(settings.copy(providers = newProviders))
-                showMergeSheet = false
-                toaster.show(
-                    context.getString(R.string.setting_provider_page_merge_success),
-                    type = ToastType.Success
-                )
+                scope.launch {
+                    try {
+                        vm.saveSettings { latest -> latest.applyProviderMerge(primary, others, merged) }
+                        showMergeSheet = false
+                        toaster.show(context.getString(R.string.setting_provider_page_merge_success), type = ToastType.Success)
+                    } catch (e: kotlinx.coroutines.CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        toaster.show(e.message ?: "合并失败", type = ToastType.Error)
+                    }
+                }
             }
         )
     }

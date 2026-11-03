@@ -48,6 +48,8 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import me.rerere.highlight.LocalHighlighter
 import me.rerere.rikkahub.R
+import me.rerere.rikkahub.data.datastore.removeSearchService
+import me.rerere.rikkahub.data.datastore.updateSearchServices
 import me.rerere.rikkahub.ui.components.nav.BackButton
 import me.rerere.rikkahub.ui.components.richtext.HighlightCodeVisualTransformation
 import me.rerere.rikkahub.ui.components.ui.FormItem
@@ -74,14 +76,13 @@ fun SettingSearchDetailPage(
     val nav = LocalNavController.current
 
     val service = settings.searchServices.find { it.id == serviceId } ?: return
-    val serviceIndex = settings.searchServices.indexOf(service)
     var options by remember(service) { mutableStateOf(service) }
 
     fun save(updated: SearchServiceOptions) {
         options = updated
-        val newServices = settings.searchServices.toMutableList()
-        newServices[serviceIndex] = updated
-        vm.updateSettings(settings.copy(searchServices = newServices))
+        vm.updateSettings { latest ->
+            latest.updateSearchServices { services -> services.map { if (it.id == serviceId) updated else it } }
+        }
     }
 
     Scaffold(
@@ -97,9 +98,7 @@ fun SettingSearchDetailPage(
                     if (settings.searchServices.size > 1) {
                         IconButton(
                             onClick = {
-                                val newServices = settings.searchServices.toMutableList()
-                                newServices.removeAt(serviceIndex)
-                                vm.updateSettings(settings.copy(searchServices = newServices))
+                                vm.updateSettings { it.removeSearchService(serviceId) }
                                 nav.popBackStack()
                             }
                         ) {

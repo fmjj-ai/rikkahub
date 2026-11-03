@@ -114,7 +114,7 @@ fun UIAvatar(
         }
     }
 
-    val (_, launchImageCrop) = useCropLauncher(
+    val launchImageCrop = useCropLauncher(
         onCroppedImageReady = { croppedUri ->
             saveAvatarImage(croppedUri)
         },

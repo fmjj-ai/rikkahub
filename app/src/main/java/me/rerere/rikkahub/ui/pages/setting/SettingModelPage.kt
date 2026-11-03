@@ -114,30 +114,32 @@ private fun ModelSettingsPage(settings: Settings, vm: SettingVM, contentPadding:
                 description = stringResource(R.string.setting_model_page_chat_model_desc),
                 modelId = settings.chatModelId,
                 providers = settings.providers,
-                onSelect = { vm.updateSettings(settings.copy(chatModelId = it.id)) },
+                onSelect = { vm.updateSettings { latest -> latest.copy(chatModelId = it.id) } },
             )
         }
         item {
             ModelSettingItem(
                 title = stringResource(R.string.setting_model_page_fast_model),
-                description = stringResource(R.string.setting_model_page_fast_model_desc),
+                description = "标题与聊天建议统一使用此模型，下面的思考等级同时生效。",
                 modelId = settings.fastModelId,
                 providers = settings.providers,
-                onSelect = { vm.updateSettings(settings.copy(fastModelId = it.id)) },
+                onSelect = { vm.updateSettings { latest -> latest.copy(fastModelId = it.id) } },
                 reasoningLevel = settings.fastModelReasoningLevel,
                 onUpdateReasoningLevel = {
-                    vm.updateSettings(settings.copy(fastModelReasoningLevel = it))
+                    vm.updateSettings { latest -> latest.copy(fastModelReasoningLevel = it) }
                 },
             )
         }
         item {
-            ModelSettingItem(
-                title = stringResource(R.string.setting_model_page_title_model),
-                description = stringResource(R.string.setting_model_page_title_model_desc),
-                modelId = settings.titleModelId,
-                providers = settings.providers,
-                onSelect = { vm.updateSettings(settings.copy(titleModelId = it.id)) },
-                onClear = { vm.updateSettings(settings.copy(titleModelId = null)) },
+            Text(
+                text = if (settings.titleModelId != null || settings.suggestionModelId != null) {
+                    "已采用官方快速模型方案：原独立标题/建议模型不再单独生效；旧选择仍保留在备份配置中。"
+                } else {
+                    "标题和聊天建议共用快速模型，不影响聊天主模型与生图模型。"
+                },
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = 4.dp),
             )
         }
         item {
@@ -152,7 +154,7 @@ private fun ModelSettingsPage(settings: Settings, vm: SettingVM, contentPadding:
                 description = stringResource(R.string.setting_model_page_translate_model_desc),
                 modelId = settings.translateModeId,
                 providers = settings.providers,
-                onSelect = { vm.updateSettings(settings.copy(translateModeId = it.id)) },
+                onSelect = { vm.updateSettings { latest -> latest.copy(translateModeId = it.id) } },
             )
         }
         item {
@@ -161,7 +163,7 @@ private fun ModelSettingsPage(settings: Settings, vm: SettingVM, contentPadding:
                 description = stringResource(R.string.setting_model_page_ocr_model_desc),
                 modelId = settings.ocrModelId,
                 providers = settings.providers,
-                onSelect = { vm.updateSettings(settings.copy(ocrModelId = it.id)) },
+                onSelect = { vm.updateSettings { latest -> latest.copy(ocrModelId = it.id) } },
             )
         }
         item {
@@ -170,7 +172,7 @@ private fun ModelSettingsPage(settings: Settings, vm: SettingVM, contentPadding:
                 description = stringResource(R.string.setting_model_page_compress_model_desc),
                 modelId = settings.compressModelId,
                 providers = settings.providers,
-                onSelect = { vm.updateSettings(settings.copy(compressModelId = it.id)) },
+                onSelect = { vm.updateSettings { latest -> latest.copy(compressModelId = it.id) } },
             )
         }
     }
@@ -182,11 +184,6 @@ private fun SuggestionModelSettingItem(
     vm: SettingVM,
 ) {
     val title = stringResource(R.string.setting_model_page_suggestion_model)
-    val state = rememberModelListState(
-        modelId = settings.suggestionModelId,
-        providers = settings.providers,
-        type = ModelType.CHAT,
-    )
 
     Column {
         CardGroup(title = { Text(title) }) {
@@ -196,56 +193,20 @@ private fun SuggestionModelSettingItem(
                     Switch(
                         checked = settings.enableSuggestion,
                         onCheckedChange = {
-                            vm.updateSettings(settings.copy(enableSuggestion = it))
+                            vm.updateSettings { latest -> latest.copy(enableSuggestion = it) }
                         }
                     )
                 },
             )
-            if (settings.enableSuggestion) {
-                item(
-                    onClick = { state.open() },
-                    headlineContent = { Text(title) },
-                    trailingContent = {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        ) {
-                            Text(
-                                text = state.currentModel?.displayName
-                                    ?: stringResource(R.string.model_list_select_model),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                            )
-                            if (state.currentModel != null) {
-                                IconButton(
-                                    onClick = { vm.updateSettings(settings.copy(suggestionModelId = null)) },
-                                    modifier = Modifier.size(20.dp),
-                                ) {
-                                    Icon(HugeIcons.Cancel01, contentDescription = null, modifier = Modifier.size(14.dp))
-                                }
-                            } else {
-                                Icon(
-                                    HugeIcons.ArrowRight01,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(16.dp),
-                                )
-                            }
-                        }
-                    },
-                )
-            }
         }
         Text(
-            text = stringResource(R.string.setting_model_page_suggestion_model_desc),
+            text = "开启后使用上方的快速模型生成建议。",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(horizontal = 4.dp, vertical = 4.dp),
         )
     }
 
-    ModelListSheet(state = state, onSelect = { vm.updateSettings(settings.copy(suggestionModelId = it.id)) })
 }
 
 @Composable

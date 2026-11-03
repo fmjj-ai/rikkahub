@@ -1,6 +1,8 @@
 package me.rerere.rikkahub.ui.components.ai
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -16,16 +18,20 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
@@ -33,6 +39,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
 import androidx.core.net.toUri
 import coil3.compose.AsyncImage
+import com.dokar.sonner.ToastType
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.withContext
 import me.rerere.ai.ui.UIMessagePart
 import me.rerere.hugeicons.HugeIcons
 import me.rerere.hugeicons.stroke.Cancel01
@@ -41,6 +54,7 @@ import me.rerere.hugeicons.stroke.MusicNote03
 import me.rerere.hugeicons.stroke.Video01
 import me.rerere.rikkahub.data.files.FilesManager
 import me.rerere.rikkahub.ui.hooks.ChatInputState
+import me.rerere.rikkahub.ui.context.LocalToaster
 import org.koin.compose.koinInject
 
 @Composable
@@ -57,45 +71,86 @@ internal fun MediaFileInputRow(
     }
 
     fun removePart(part: UIMessagePart, url: String) {
-        state.messageContent = state.messageContent.filterNot { it == part }
+        state.removeAttachment(part)
         if (state.shouldDeleteFileOnRemove(part)) {
             filesManager.deleteChatFiles(listOf(url.toUri()))
         }
     }
 
+    val toaster = LocalToaster.current
+    var editing by remember { mutableStateOf<UIMessagePart.Image?>(null) }
+    var editRevision by remember { mutableStateOf(0L) }
+    val launchCrop = useCropLauncher(
+        onCroppedImageReady = { cropped ->
+            val original = editing
+            if (original != null) {
+                val revision = editRevision
+                val deleteOriginal = state.shouldDeleteFileOnRemove(original)
+                var copied: android.net.Uri? = null
+                var accepted = false
+                try {
+                    // 临时文件在挂起回调完成后才释放；流式复制，不在主线程读取整张图片。
+                    withContext(NonCancellable) {
+                        val saved = filesManager.saveManagedFromUri(
+                            me.rerere.rikkahub.data.files.FileFolders.UPLOAD, cropped)
+                        copied = filesManager.getFile(saved).toUri()
+                    }
+                    currentCoroutineContext().ensureActive()
+                    val url = copied ?: error("裁剪图片保存失败")
+                    accepted = state.replaceImage(original, url.toString(), revision)
+                    if (accepted && deleteOriginal) {
+                        withContext(NonCancellable + Dispatchers.IO) {
+                            filesManager.deleteChatFiles(listOf(original.url.toUri()))
+                        }
+                    }
+                } catch (cancelled: CancellationException) {
+                    throw cancelled
+                } catch (error: Exception) {
+                    toaster.show(error.message ?: "裁剪图片保存失败", type = ToastType.Error)
+                } finally {
+                    if (!accepted) copied?.let { uri ->
+                        withContext(NonCancellable + Dispatchers.IO) { filesManager.deleteChatFiles(listOf(uri)) }
+                    }
+                }
+            }
+        },
+        onCleanup = { editing = null },
+    )
+
     Row(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier
             .fillMaxWidth()
+            .animateContentSize()
             .padding(horizontal = 6.dp, vertical = 6.dp)
             .horizontalScroll(rememberScrollState())
     ) {
         state.messageContent.fastForEach { part ->
             when (part) {
                 is UIMessagePart.Image -> {
-                    AttachmentChip(
-                        title = attachmentNameFromUrl(
-                            url = part.url,
-                            fallback = "image",
-                            displayNameByRelativePath = displayNameByRelativePath,
-                            displayNameByFileName = displayNameByFileName
-                        ),
-                        leading = {
-                            Surface(
-                                modifier = Modifier.size(34.dp),
-                                shape = RoundedCornerShape(10.dp),
-                                color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                            ) {
-                                AsyncImage(
-                                    model = part.url,
-                                    contentDescription = null,
-                                    contentScale = ContentScale.Crop,
-                                    modifier = Modifier.fillMaxSize()
-                                )
-                            }
-                        },
-                        onRemove = { removePart(part, part.url) }
-                    )
+                    Box(Modifier.size(88.dp)) {
+                        AsyncImage(
+                            model = part.url,
+                            contentDescription = "图片附件，点击裁剪",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(16.dp)).clickable {
+                                editing = part
+                                editRevision = state.attachmentRevision
+                                launchCrop(part.url.toUri())
+                            },
+                        )
+                        IconButton(
+                            onClick = { removePart(part, part.url) },
+                            modifier = Modifier.align(Alignment.TopEnd).size(40.dp),
+                        ) {
+                            Icon(
+                                HugeIcons.Cancel01, contentDescription = "删除图片附件",
+                                tint = Color.White,
+                                modifier = Modifier.size(26.dp).clip(CircleShape)
+                                    .background(Color.Black.copy(alpha = 0.5f)).padding(4.dp),
+                            )
+                        }
+                    }
                 }
 
                 is UIMessagePart.Video -> {

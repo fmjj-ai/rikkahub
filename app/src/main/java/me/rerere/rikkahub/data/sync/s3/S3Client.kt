@@ -299,6 +299,10 @@ class S3Client(
         }
     }
 
+    /** 桶保持私有，通过带时限的地址交给媒体服务端下载素材。 */
+    fun presignGetUrl(key: String, expires: kotlin.time.Duration): String =
+        AwsSignatureV4.presignGetUrl(config, "/${key.trimStart('/')}", expires)
+
     private fun File.sha256Hex(): String {
         val digest = MessageDigest.getInstance("SHA-256")
         inputStream().buffered().use { input ->
