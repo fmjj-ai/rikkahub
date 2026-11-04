@@ -65,6 +65,16 @@ class ContextCheckpointTest {
     }
 
     @Test
+    fun `quick compression does not compress only an old checkpoint again`() {
+        val messages = history + checkpoint(history) + UIMessage.user("新问题") + UIMessage.assistant("新回复")
+        assertNull(messages.compressionTarget(4))
+        assertNull(messages.compressionTarget(1))
+        assertEquals(messages.lastIndex, messages.compressionTarget(0))
+        val continued = messages + UIMessage.user("再来一轮")
+        assertEquals(messages.lastIndex, continued.compressionTarget(1))
+    }
+
+    @Test
     fun `checkpoint without a source fingerprint is not trusted`() {
         val point = UIMessage.user("无来源摘要").copy(isContextCheckpoint = true)
         assertEquals(history, (history + point).contextMessages())

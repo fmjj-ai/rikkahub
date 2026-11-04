@@ -211,8 +211,7 @@ dependencies {
     implementation(libs.ktor.client.content.negotiation)
     implementation(libs.ktor.serialization.kotlinx.json)
 
-    // ucrop
-    implementation(libs.ucrop)
+    implementation(libs.androidx.exifinterface)
 
     // pebble (template engine)
     implementation(libs.pebble)
@@ -237,6 +236,13 @@ dependencies {
     implementation(libs.quickie.bundled)
     implementation(libs.barcode.scanning)
     implementation(libs.androidx.camera.core)
+    implementation(libs.androidx.camera.camera2)
+    implementation(libs.androidx.camera.lifecycle)
+    implementation(libs.androidx.camera.view)
+    constraints {
+        implementation("com.google.guava:guava:33.3.1-android")
+        implementation("com.google.errorprone:error_prone_annotations:2.36.0")
+    }
 
     // Room
     implementation(libs.androidx.room.runtime)

@@ -7,7 +7,18 @@ package me.rerere.rikkahub.data.ai.prompts
 internal fun buildCompressPrompt(
     additionalPrompt: String,
     locale: String,
+    targetTokens: Int = 2_000,
 ): String = buildString {
+    appendLine("Write a concise summary of the preceding conversation, not a reply to its last request.")
+    appendLine("Use at most $targetTokens tokens, preferably fewer. This is a ceiling, not a length to fill.")
+    appendLine("The summary MUST be shorter than the history it replaces. Do not invent or repeat details.")
+    if (targetTokens < 512) {
+        appendLine("Use compact sentences or bullets, with no section headings or boilerplate.")
+        appendLine("Preserve only essential goals, constraints, decisions, exact values and unfinished work.")
+        appendLine("Do not call tools. Output only the summary in the conversation's language; if unclear, use $locale.")
+        if (additionalPrompt.isNotBlank()) appendLine("Additional instructions from user: $additionalPrompt")
+        return@buildString
+    }
     appendLine(
         """
         Stop the current task and write a structured summary of the conversation so far. The summary will replace the conversation history as the context for continuing it, so anything not in the summary will be lost.

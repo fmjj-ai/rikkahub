@@ -145,7 +145,7 @@ internal class ImageCropState(
     }
 
     fun rotate() {
-        quarterTurns = (quarterTurns + 1) % 4
+        quarterTurns = counterClockwiseQuarterTurns(quarterTurns)
         modified = true
         fit()
     }
@@ -335,6 +335,9 @@ internal class ImageCropState(
  * 把顺时针转过 [quarterTurns] 个 90° 的图片上的矩形，换回宽 [width]、高 [height] 的原图上的矩形。
  * 原图 (x, y) 顺时针转 90° 后落在 (height - y, x)。
  */
+/** 内部仍用顺时针象限编号，减一象限即为逆时针 90 度。 */
+internal fun counterClockwiseQuarterTurns(quarterTurns: Int): Int = (quarterTurns + 3) % 4
+
 internal fun rotatedRectToSource(rect: Rect, quarterTurns: Int, width: Float, height: Float): Rect =
     when (quarterTurns) {
         1 -> Rect(rect.top, height - rect.right, rect.bottom, height - rect.left)

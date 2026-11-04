@@ -71,6 +71,7 @@ fun List<UIMessage>.compressionTarget(keepRecentMessages: Int = 4): Int? {
     if (none { it.id == active[boundary].id }) {
         boundary = active.indexOfLast { it.role == MessageRole.USER } - 1
     }
+    if (active.take(boundary + 1).none { !it.isContextCheckpoint }) return null
     val id = active.getOrNull(boundary)?.id ?: return null
     return indexOfFirst { it.id == id }.takeIf { it >= 0 }
 }

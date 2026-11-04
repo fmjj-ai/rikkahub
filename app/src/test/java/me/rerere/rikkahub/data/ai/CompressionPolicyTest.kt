@@ -5,10 +5,42 @@ import me.rerere.ai.provider.CustomHeader
 import me.rerere.ai.provider.Model
 import me.rerere.ai.provider.ProviderSetting
 import me.rerere.rikkahub.data.model.Assistant
+import me.rerere.ai.core.MessageRole
+import me.rerere.ai.ui.UIMessage
+import me.rerere.ai.ui.UIMessagePart
+import me.rerere.ai.ui.estimateTokens
 import org.junit.Assert.*
 import org.junit.Test
 
 class CompressionPolicyTest {
+    @Test
+    fun `summary length uses expanded document input and includes the checkpoint message overhead`() {
+        val attachment = UIMessage(role = MessageRole.USER, parts = listOf(
+            UIMessagePart.Document("file:///document.txt", "document.txt"),
+        ))
+        val expanded = attachment.copy(parts = attachment.parts + UIMessagePart.Text("正文".repeat(1_000)))
+        validateCompressionSummary("正文摘要".repeat(30), listOf(expanded).estimateTokens())
+        assertThrows(IllegalStateException::class.java) {
+            validateCompressionSummary("正文摘要".repeat(30), listOf(attachment).estimateTokens())
+        }
+        assertThrows(IllegalStateException::class.java) { validateCompressionSummary("甲乙丙丁", 8) }
+        assertThrows(IllegalStateException::class.java) { validateCompressionSummary("", 100) }
+    }
+
+    @Test
+    fun `short history gets a smaller ceiling instead of a fixed 2000 token summary`() {
+        assertEquals(98, compressionSummaryTarget(2_000, 200))
+        assertEquals(2_000, compressionSummaryTarget(2_000, 20_000))
+        assertEquals(100, compressionSummaryTarget(100, 20_000))
+        assertEquals(1, compressionSummaryTarget(0, 200))
+        assertEquals(2_000, compressionSummaryTarget(2_000, Int.MAX_VALUE))
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun `trivial history is rejected before a paid request`() {
+        compressionSummaryTarget(2_000, 8)
+    }
+
     @Test
     fun `normal request fits exactly and excess uses the fallback before sending`() {
         assertTrue(canUseSingleCompressionRequest(1000, 100, 100, 1000, 2712))

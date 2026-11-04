@@ -25,9 +25,6 @@ import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 
 val viewModelModule = module {
-    viewModel<me.rerere.rikkahub.ui.pages.mediacreation.MediaCreationVM> {
-        me.rerere.rikkahub.ui.pages.mediacreation.MediaCreationVM(it.get(), get(), get(), get(), get(), get(), get())
-    }
     viewModel<ChatVM> { params ->
         ChatVM(
             id = params.get(),

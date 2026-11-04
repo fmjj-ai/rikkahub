@@ -16,6 +16,70 @@ class DraftImageImporterTest {
     @get:Rule val timeout: Timeout = Timeout.seconds(15)
 
     @Test
+    fun `arrival is reported after acceptance but before the source is released`() = runBlocking {
+        val state = ChatInputState()
+        val events = mutableListOf<String>()
+        val importer = DraftImageImporter(state, this, { "file:///saved.jpg" }, { fail(it) }, { fail(it) })
+        importer.add(listOf("camera.jpg"), onImported = { source, url ->
+            assertEquals("camera.jpg", source)
+            assertEquals("file:///saved.jpg", url)
+            assertTrue(state.messageContent.contains(UIMessagePart.Image(url!!)))
+            events += "accepted"
+        }) { events += "released" }
+        coroutineContext[Job]!!.children.toList().joinAll()
+        assertEquals(listOf("accepted", "released"), events)
+    }
+
+    @Test
+    fun `failed and invalidated arrivals report null exactly once and still release their sources`() = runBlocking {
+        for (invalidate in listOf(false, true)) {
+            val state = ChatInputState()
+            val reported = mutableListOf<String?>()
+            val released = mutableListOf<String>()
+            val importer = DraftImageImporter(state, this, {
+                if (invalidate) { state.clearInput(); "file:///late.jpg" } else null
+            }, {}, {})
+            importer.add(listOf("camera.jpg"), onImported = { _, url -> reported += url }) { released += it }
+            coroutineContext[Job]!!.children.toList().joinAll()
+            assertEquals(listOf<String?>(null), reported)
+            assertEquals(listOf("camera.jpg"), released)
+            assertTrue(state.messageContent.isEmpty())
+        }
+    }
+
+    @Test
+    fun `camera source is released only after copy and even when draft changes`() = runBlocking {
+        val state = ChatInputState()
+        val entered = CompletableDeferred<Unit>()
+        val finish = CompletableDeferred<Unit>()
+        val cleaned = mutableListOf<String>()
+        val importer = DraftImageImporter(state, this, {
+            entered.complete(Unit); finish.await(); "file:///copied.jpg"
+        }, { cleaned += it }, { fail(it) })
+        importer.add(listOf("camera.jpg")) { cleaned += it }
+        entered.await()
+        assertTrue(cleaned.isEmpty())
+        state.clearInput()
+        finish.complete(Unit)
+        coroutineContext[Job]!!.children.toList().joinAll()
+        assertTrue(state.messageContent.isEmpty())
+        assertEquals(listOf("file:///copied.jpg", "camera.jpg"), cleaned)
+    }
+
+    @Test
+    fun `camera source is also released on import failure`() = runBlocking {
+        val state = ChatInputState()
+        val cleaned = mutableListOf<String>()
+        val errors = mutableListOf<String>()
+        val importer = DraftImageImporter(state, this, { null }, { fail(it) }, { errors += it })
+        importer.add(listOf("camera.jpg")) { cleaned += it }
+        coroutineContext[Job]!!.children.toList().joinAll()
+        assertEquals(listOf("camera.jpg"), cleaned)
+        assertEquals(1, errors.size)
+        assertEquals(0, state.pendingGalleryImageCount)
+    }
+
+    @Test
     fun `multi selection copies once in order and never discards accepted files`() = runBlocking {
         val state = ChatInputState()
         val copies = mutableListOf<String>()

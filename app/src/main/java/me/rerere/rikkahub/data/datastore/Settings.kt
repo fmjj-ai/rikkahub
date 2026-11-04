@@ -71,7 +71,7 @@ data class Settings(
     val mcpServers: List<McpServerConfig> = emptyList(),
     val webDavConfig: WebDavConfig = WebDavConfig(),
     val s3Config: S3Config = S3Config(),
-    // 媒体提供商独立保存，不替换聊天提供商及旧生图配置。
+    // 仅保留上一版设置/备份的读写兼容；独立媒体创作已移除，不再调用这些配置。
     val mediaGenerationProviders: List<me.rerere.mediagen.provider.MediaGenerationProviderSetting> = emptyList(),
     val uploadS3Config: S3Config = S3Config(),
     val ttsProviders: List<TTSProviderSetting> = DEFAULT_TTS_PROVIDERS,

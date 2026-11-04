@@ -132,9 +132,6 @@
       android:exported="false"
       android:label="考研英语阅读"
       android:theme="@style/Theme.Rikkahub" />
-    <activity
-      android:name="com.yalantis.ucrop.UCropActivity"
-      android:theme="@style/Theme.AppCompat.DayNight.NoActionBar" />
 
     <service
       android:name=".service.WebServerService"

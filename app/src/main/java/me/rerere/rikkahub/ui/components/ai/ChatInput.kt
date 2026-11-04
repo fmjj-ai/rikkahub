@@ -61,6 +61,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalFocusManager
@@ -116,7 +118,7 @@ import org.koin.compose.koinInject
 import kotlin.time.Duration.Companion.seconds
 
 @Composable
-fun ChatInput(
+internal fun ChatInput(
     state: ChatInputState,
     loading: Boolean,
     settings: Settings,
@@ -126,6 +128,8 @@ fun ChatInput(
     onToggleSearch: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
     completionProviders: List<ChatCompletionProvider> = emptyList(),
+    inputFocusRequester: FocusRequester? = null,
+    cameraTransition: CameraAttachmentTransitionState? = null,
     onUpdateChatModel: (Model) -> Unit,
     onUpdateAssistant: (Assistant) -> Unit,
     onUpdateSearchService: (Int) -> Unit,
@@ -240,12 +244,13 @@ fun ChatInput(
                     verticalArrangement = Arrangement.spacedBy(2.dp)
                 ) {
                     if (state.messageContent.isNotEmpty()) {
-                        MediaFileInputRow(state = state)
+                        MediaFileInputRow(state = state, cameraTransition = cameraTransition)
                     }
 
                     TextInputRow(
                         state = state,
                         completionProviders = completionProviders,
+                        inputFocusRequester = inputFocusRequester,
                         onSendMessage = { sendMessage() }
                     )
 
@@ -448,6 +453,7 @@ private fun ActionIconButton(
 private fun TextInputRow(
     state: ChatInputState,
     completionProviders: List<ChatCompletionProvider>,
+    inputFocusRequester: FocusRequester?,
     onSendMessage: () -> Unit,
 ) {
     val settings = LocalSettings.current
@@ -577,6 +583,7 @@ private fun TextInputRow(
             modifier = Modifier
                 .fillMaxWidth()
                 .testTag("chat_input")
+                .then(if (inputFocusRequester != null) Modifier.focusRequester(inputFocusRequester) else Modifier)
                 .contentReceiver(receiveContentListener)
                 .onFocusChanged {
                     isFocused = it.isFocused

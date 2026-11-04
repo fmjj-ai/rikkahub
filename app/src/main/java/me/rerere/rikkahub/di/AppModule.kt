@@ -50,12 +50,6 @@ val appModule = module {
         AppScope()
     }
 
-    single {
-        me.rerere.rikkahub.service.MediaCreationService(
-            get(), get(), get(), get(), get(), get(), get(),
-        )
-    }
-
     single<EmojiData> {
         EmojiUtils.loadEmoji(get())
     }

@@ -20,12 +20,17 @@ internal class DraftImageImporter(
 ) {
     private val copyMutex = Mutex()
 
-    fun add(sources: List<String>) {
+    fun add(
+        sources: List<String>,
+        onImported: (String, String?) -> Unit = { _, _ -> },
+        onSourceConsumed: suspend (String) -> Unit = {},
+    ) {
         sources.distinct().forEach { source ->
             val token = state.beginGalleryImageImport(source) ?: return@forEach
-            scope.launch {
+            scope.launch(start = kotlinx.coroutines.CoroutineStart.UNDISPATCHED) {
                 var copied: String? = null
                 var accepted = false
+                var reported = false
                 try {
                     copyMutex.withLock {
                         if (!state.isGalleryImageImportPending(source, token)) return@launch
@@ -35,6 +40,8 @@ internal class DraftImageImporter(
                     currentCoroutineContext().ensureActive()
                     val url = copied ?: error("图片读取失败，请重新选择或检查相册访问权限")
                     accepted = state.finishGalleryImageImport(source, token, url)
+                    reported = true
+                    onImported(source, url.takeIf { accepted })
                 } catch (error: CancellationException) {
                     throw error
                 } catch (error: Exception) {
@@ -43,8 +50,16 @@ internal class DraftImageImporter(
                     }
                 } finally {
                     state.cancelGalleryImageImport(source, token)
-                    if (!accepted) copied?.let { url ->
-                        withContext(NonCancellable) { discardImage(url) }
+                    try {
+                        if (!accepted) copied?.let { url ->
+                            withContext(NonCancellable) { discardImage(url) }
+                        }
+                    } finally {
+                        try {
+                            if (!reported) onImported(source, null)
+                        } finally {
+                            withContext(NonCancellable) { onSourceConsumed(source) }
+                        }
                     }
                 }
             }

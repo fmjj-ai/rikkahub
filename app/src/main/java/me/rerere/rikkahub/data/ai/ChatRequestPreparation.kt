@@ -67,6 +67,10 @@ internal suspend fun prepareChatMessages(
     }
     if (system.isNotBlank()) add(UIMessage.system(system))
     addAll(messages.contextMessages().limitContext(assistant.contextMessageLimit))
+}.let { prepared ->
+    if (tools.any { it.name == me.rerere.rikkahub.data.ai.tools.local.IMAGE_GENERATION_TOOL_NAME }) {
+        me.rerere.rikkahub.data.ai.tools.local.labelImageReferences(prepared)
+    } else prepared
 }.transforms(
     transformers = transformers,
     context = context,

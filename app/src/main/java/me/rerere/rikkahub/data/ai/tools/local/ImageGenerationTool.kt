@@ -10,6 +10,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonArray
@@ -21,10 +23,13 @@ import kotlinx.serialization.json.put
 import me.rerere.ai.core.InputSchema
 import me.rerere.ai.core.Tool
 import me.rerere.ai.provider.ImageGenerationParams
+import me.rerere.ai.provider.ImageEditParams
+import me.rerere.ai.provider.ProviderSetting
 import me.rerere.ai.provider.ModelAbility
 import me.rerere.ai.provider.ProviderManager
 import me.rerere.ai.ui.ImageGenSize
 import me.rerere.ai.ui.UIMessagePart
+import me.rerere.ai.ui.estimateTokens
 import me.rerere.common.android.appTempFolder
 import me.rerere.rikkahub.data.ai.tools.ToolCallContext
 import me.rerere.rikkahub.data.datastore.SettingsStore
@@ -52,6 +57,8 @@ private val ALLOWED_SIZES: List<String> = ImageGenSize.entries.map { it.value }
 private val IMAGE_GENERATION_SYSTEM_PROMPT = """
     你有画图能力：当用户想要图片时，先回一句话说明你要画什么，然后调用 $IMAGE_GENERATION_TOOL_NAME 工具，用 prompt 描述画面。
     每次调用只生成 1 张图，需要多张时请连续多次调用；图片会直接显示在对话里，画好后你可以继续说明。
+    需要参考图时，从当前上下文图片旁的 Reference image ID 中选择，传入 reference_image_ids（最多 4 张）。
+    prompt 必须完整描述本次任务和需要保留或修改的特征；子模型不会收到其他聊天上下文。全新画图不传参考图，不要自动使用最近图片。
 """.trimIndent()
 
 /**
@@ -97,7 +104,9 @@ internal fun buildImageGenerationTool(
     description = """
         Draw one image with the image generation sub-agent.
         Use it when the user wants a picture. Tell the user in one short sentence what you are about to draw before calling it.
-        Pass the picture description in `prompt`; `size` is optional.
+        Pass a self-contained description in `prompt`; `size` is optional.
+        To edit or reference images, select up to 4 labeled Reference image IDs in `reference_image_ids`.
+        Omit reference_image_ids for text-to-image generation. Never invent an image ID or pass a file path/URL.
     """.trimIndent().replace("\n", " "),
     parameters = {
         InputSchema.Obj(
@@ -110,6 +119,12 @@ internal fun buildImageGenerationTool(
                     put("type", "string")
                     put("description", "可选，输出尺寸；不确定时不要传。")
                     put("enum", buildJsonArray { ALLOWED_SIZES.forEach { add(JsonPrimitive(it)) } })
+                })
+                put("reference_image_ids", buildJsonObject {
+                    put("type", "array")
+                    put("description", "可选，从上下文图片旁选择的 Reference image ID；按顺序对应 prompt 中的第一、第二张参考图。")
+                    put("maxItems", 4)
+                    put("items", buildJsonObject { put("type", "string") })
                 })
             },
             required = listOf("prompt"),
@@ -140,7 +155,8 @@ private suspend fun generateImage(
     filesManager: FilesManager,
     genMediaRepository: GenMediaRepository,
 ): List<UIMessagePart> {
-    val toolCallId = currentCoroutineContext()[ToolCallContext]?.toolCallId
+    val callContext = currentCoroutineContext()[ToolCallContext]
+    val toolCallId = callContext?.toolCallId
     val arguments = runCatching { args.jsonObject }.getOrNull()
     val prompt = arguments?.get("prompt")?.jsonPrimitive?.contentOrNull?.trim().orEmpty()
     val size = arguments?.get("size")?.jsonPrimitive?.contentOrNull
@@ -157,6 +173,14 @@ private suspend fun generateImage(
             ?: return errorOutput("尚未配置生图模型（设置 → 模型，把生图模型设为 IMAGE 类型），无法画图。请提示用户先去配置。")
         val provider = model.resolveEndpoint(settings.providers)
             ?: return errorOutput("找不到生图模型对应的服务商或协议未配置，请提示用户检查模型设置。")
+        val references = selectImageReferences(arguments?.get("reference_image_ids"), callContext?.messages.orEmpty())
+        check(prompt.estimateTokens() <= minOf(8_192, model.contextWindow / 4)) {
+            "生图描述过长，请提炼画面要求后重新调用；不会自动发送整段聊天历史"
+        }
+        if (references.isNotEmpty() && provider !is ProviderSetting.OpenAI) {
+            return errorOutput("当前参考图编辑需要支持 /images/edits 的 OpenAI 兼容生图服务，请检查生图模型协议；未自动改为纯文本生图。")
+        }
+        val sourceFiles = imageReferenceFiles(references, context.filesDir)
 
         val params = ImageGenerationParams(
             model = model,
@@ -170,27 +194,48 @@ private suspend fun generateImage(
 
         var finalData: String? = null
         var previewFile: File? = null
+        val referenceCopies = mutableListOf<File>()
         try {
-            providerManager.getProviderByType(provider)
-                .generateImage(provider, params)
-                .collect { item ->
-                    if (item.partial) {
-                        if (toolCallId == null) return@collect
-                        previewFile?.delete()
-                        val file = File(
-                            context.appTempFolder,
-                            "imggen_preview_${toolCallId}_${System.currentTimeMillis()}.png",
-                        )
-                        previewFile = filesManager.createImageFileFromBase64(item.data, file.absolutePath)
-                        ImageGenerationProgress.update(toolCallId, previewFile.toUri().toString())
-                    } else {
-                        finalData = item.data
+            val handler = providerManager.getProviderByType(provider)
+            val stream = if (references.isEmpty()) {
+                handler.generateImage(provider, params)
+            } else {
+                withContext(Dispatchers.IO) {
+                    sourceFiles.forEach { source ->
+                        val target = File(context.appTempFolder, "imggen_ref_${Uuid.random()}.png")
+                        referenceCopies += target
+                        prepareImageReference(source, target)
                     }
                 }
+                handler.editImage(provider, ImageEditParams(
+                    model = model,
+                    prompt = prompt,
+                    images = referenceCopies.map { it.absolutePath },
+                    numOfImages = 1,
+                    size = size,
+                    customHeaders = model.customHeaders,
+                    customBody = model.customBodies,
+                ))
+            }
+            stream.collect { item ->
+                if (item.partial) {
+                    if (toolCallId == null) return@collect
+                    previewFile?.delete()
+                    val file = File(
+                        context.appTempFolder,
+                        "imggen_preview_${toolCallId}_${System.currentTimeMillis()}.png",
+                    )
+                    previewFile = filesManager.createImageFileFromBase64(item.data, file.absolutePath)
+                    ImageGenerationProgress.update(toolCallId, previewFile.toUri().toString())
+                } else {
+                    finalData = item.data
+                }
+            }
         } finally {
             // 预览的清理时机：无论成功、失败还是被取消，都撤销这条工具调用的半成品
             if (toolCallId != null) ImageGenerationProgress.clear(toolCallId)
             previewFile?.delete()
+            referenceCopies.forEach { it.delete() }
         }
 
         val data = finalData
@@ -202,6 +247,7 @@ private suspend fun generateImage(
             base64Data = data,
             prompt = prompt,
             modelName = model.displayName,
+            sourcePaths = sourceFiles.takeIf { it.isNotEmpty() }?.joinToString("\n") { it.absolutePath },
         )
 
         listOf(
@@ -212,6 +258,8 @@ private suspend fun generateImage(
                     put("prompt", prompt)
                     put("size", size)
                     put("count", 1)
+                    put("reference_count", references.size)
+                    put("reference_image_ids", buildJsonArray { references.forEach { add(JsonPrimitive(it.id)) } })
                     put("note", "图片已显示在对话中，并归档到图库。需要更多张请再次调用本工具。")
                 }.toString()
             ),
@@ -243,6 +291,7 @@ private suspend fun saveGeneratedImage(
     base64Data: String,
     prompt: String,
     modelName: String,
+    sourcePaths: String? = null,
 ): File {
     val imagesDir = filesManager.getImagesDir()
     val timestamp = System.currentTimeMillis()
@@ -254,7 +303,8 @@ private suspend fun saveGeneratedImage(
             modelId = modelName,
             prompt = prompt,
             createAt = timestamp,
-            type = GenMediaEntity.TYPE_IMAGE_GENERATION,
+            type = if (sourcePaths == null) GenMediaEntity.TYPE_IMAGE_GENERATION else GenMediaEntity.TYPE_IMAGE_EDIT,
+            sourcePaths = sourcePaths,
         )
     )
     return createdFile

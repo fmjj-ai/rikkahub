@@ -1001,27 +1001,33 @@ class ChatService(
         keepRecentMessages: Int = 4,
         conversation: Conversation,
     ): List<UIMessage> = kotlinx.coroutines.withContext(Dispatchers.IO) {
-        val activeMessages = messages.contextMessages()
         val originalBoundary = messages.compressionTarget(keepRecentMessages)
             ?: error("暂无可压缩的早期历史；可调整保留条数，或选择全部活动上下文压缩")
-        val boundary = activeMessages.indexOfFirst { it.id == messages[originalBoundary].id }
         val settings = settingsStore.settingsFlow.first()
         val prefix = messages.take(originalBoundary + 1)
         check(prefix.contextMessages().none { message -> message.getTools().any { !it.isExecuted } }) {
             "请先完成或取消待处理工具调用，再压缩这部分历史。"
         }
+        // 文档在发送前会展开，必须按展开后的活动历史比较，不能拿零 token 的附件占位作基准。
+        val sourceMessages = prefix.contextMessages().transforms(
+            transformers = listOf(DocumentAsPromptTransformer, OcrTransformer),
+            context = context,
+            model = chatModel,
+            assistant = assistant,
+            settings = settings,
+        )
+        val sourceTokens = sourceMessages.estimateTokens()
+        val summaryTarget = me.rerere.rikkahub.data.ai.compressionSummaryTarget(targetTokens, sourceTokens)
         val memories = if (assistant.useGlobalMemory) memoryRepository.getGlobalMemories()
             else memoryRepository.getMemoriesOfAssistant(assistant.id.toString())
         val primarySummary = generationHandler.generateCompressionSummary(
             settings, assistant, chatModel, prefix,
             createChatTools(settings, assistant, conversation.workspaceCwd), memories, conversation,
             inputTransformers + templateTransformer + workspaceReminderTransformer,
-            additionalPrompt, targetTokens,
+            additionalPrompt, summaryTarget,
         )
         fun withCheckpoint(summary: String): List<UIMessage> {
-            check(summary.estimateTokens() < prefix.contextMessages().estimateTokens()) {
-                "摘要未缩短上下文，原记录已保留。请调整压缩要求。"
-            }
+            me.rerere.rikkahub.data.ai.validateCompressionSummary(summary, sourceTokens)
             val point = UIMessage.user(summary).copy(
                 isContextCheckpoint = true,
                 contextCheckpointHash = prefix.contextFingerprint(),
@@ -1032,13 +1038,14 @@ class ChatService(
         val model = settings.findModelById(settings.compressModelId) ?: chatModel
         val provider = model.resolveEndpoint(settings.providers) ?: error("找不到压缩模型的服务商或协议未配置")
         val providerHandler = providerManager.getProviderByType(provider)
-        val outputBudget = targetTokens.coerceIn(128, (model.contextWindow / 4).coerceAtLeast(128))
+        val outputBudget = summaryTarget.coerceIn(128, (model.contextWindow / 4).coerceAtLeast(128))
         fun prompt(content: String) = settings.compressPrompt.applyPlaceholders(
             "content" to content,
-            "target_tokens" to outputBudget.toString(),
+            "target_tokens" to summaryTarget.coerceAtMost(outputBudget).toString(),
             "additional_context" to additionalPrompt,
             "locale" to Locale.getDefault().displayName,
-        )
+        ) + "\nUse at most ${summaryTarget.coerceAtMost(outputBudget)} tokens, preferably fewer. " +
+            "The summary must be shorter than the source. Do not pad it with headings or commentary."
         // 单次压缩请求的输入上限动态跟随当前聊天模型的自动压缩阈值（模型设置里的“自动压缩上下文”），
         // 每次压缩都会重新读取，用户改完设置后下次压缩立即生效；触发自动压缩时待压缩历史不会超过该阈值，
         // 因此正常情况下第一次压缩只需要一个请求，不再按固定的 32k 切块。
@@ -1050,13 +1057,7 @@ class ChatService(
         )
         check(inputBudget >= 128) { "压缩模型的上下文容量不足，请调整模型设置" }
         // 展开完整附件和 OCR；不再把每条消息截成 2,000 字符。
-        val source = activeMessages.take(boundary + 1).transforms(
-            transformers = listOf(DocumentAsPromptTransformer, OcrTransformer),
-            context = context,
-            model = chatModel,
-            assistant = assistant,
-            settings = settings,
-        ).joinToString("\n\n") { it.compressionText() }
+        val source = sourceMessages.joinToString("\n\n") { it.compressionText() }
 
         suspend fun summarize(content: String): String {
             val result = providerHandler.generateText(

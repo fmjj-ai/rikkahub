@@ -91,6 +91,18 @@ class ChatVM(
 
     fun toggleGalleryImage(uri: android.net.Uri) = galleryImporter.toggle(uri.toString())
 
+    /** 拍照文件移交草稿导入器；切换草稿后拒收，复制完成或取消后删除本次临时原片。 */
+    fun addCameraImage(file: java.io.File, expectedRevision: Long, onImported: (String?) -> Unit = {}) {
+        if (inputState.attachmentRevision != expectedRevision) {
+            file.delete()
+            onImported(null)
+            return
+        }
+        galleryImporter.add(listOf(file.toUri().toString()), onImported = { _, url -> onImported(url) }) {
+            withContext(Dispatchers.IO) { file.delete() }
+        }
+    }
+
     // 异步任务 (从ChatService获取，响应式)
     val conversationJob: StateFlow<Job?> =
         chatService

@@ -230,11 +230,6 @@ class RouteActivity : ComponentActivity() {
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        intent.getStringExtra(me.rerere.rikkahub.service.MediaCreationForegroundService.EXTRA_MEDIA_SESSION_ID)
-            ?.takeIf { runCatching { Uuid.parse(it) }.isSuccess }?.let {
-                navStack?.add(Screen.MediaCreation(it))
-                return
-            }
         // 通知打开指定会话。
         intent.getStringExtra("conversationId")?.let { text ->
             navStack?.add(Screen.Chat(text))
@@ -273,11 +268,7 @@ class RouteActivity : ComponentActivity() {
             }
         )
 
-        val initialScreens = me.rerere.rikkahub.data.model.mediaCreationInitialScreens(
-            defaultChatScreen,
-            intent.getStringExtra(me.rerere.rikkahub.service.MediaCreationForegroundService.EXTRA_MEDIA_SESSION_ID),
-        )
-        val backStack = rememberNavBackStack(*initialScreens.toTypedArray())
+        val backStack = rememberNavBackStack(defaultChatScreen)
         SideEffect { this@RouteActivity.navStack = backStack }
 
         ShareHandler(backStack)
@@ -450,22 +441,11 @@ class RouteActivity : ComponentActivity() {
                                 SettingProviderDetailPage(id = id)
                             }
 
-                            entry<Screen.MediaCreationSessions> {
-                                me.rerere.rikkahub.ui.pages.mediacreation.MediaCreationSessionsPage()
-                            }
-                            entry<Screen.MediaCreation> { key ->
-                                me.rerere.rikkahub.ui.pages.mediacreation.MediaCreationPage(key.sessionId)
-                            }
-                            entry<Screen.SettingMediaUpload> {
-                                me.rerere.rikkahub.ui.pages.setting.SettingMediaUploadPage()
-                            }
-                            entry<Screen.SettingMedia> {
-                                me.rerere.rikkahub.ui.pages.setting.SettingMediaPage()
-                            }
-
-                            entry<Screen.SettingMediaProviderDetail> { key ->
-                                me.rerere.rikkahub.ui.pages.setting.SettingMediaProviderDetailPage(Uuid.parse(key.providerId))
-                            }
+                            entry<Screen.MediaCreationSessions> { SettingPage() }
+                            entry<Screen.MediaCreation> { SettingPage() }
+                            entry<Screen.SettingMediaUpload> { SettingPage() }
+                            entry<Screen.SettingMedia> { SettingPage() }
+                            entry<Screen.SettingMediaProviderDetail> { SettingPage() }
 
                             entry<Screen.SettingModels> {
                                 SettingModelPage()
@@ -692,6 +672,7 @@ sealed interface Screen : NavKey {
     @Serializable
     data class SettingProviderDetail(val providerId: String) : Screen
 
+    // 兼容旧版保存的导航栈，恢复时统一显示设置页，不再启动媒体功能。
     @Serializable
     data object MediaCreationSessions : Screen
 

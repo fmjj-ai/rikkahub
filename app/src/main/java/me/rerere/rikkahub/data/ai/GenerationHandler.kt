@@ -292,7 +292,9 @@ class GenerationHandler(
                             }
                             Log.i(TAG, "generateText: executing tool ${toolDef.name} with args: $args")
                             // 把 toolCallId 放进协程上下文，需要"按调用定位"的工具（如生图预览）才能拿到它
-                            val result = withContext(ToolCallContext(tool.toolCallId)) {
+                            val result = withContext(ToolCallContext(
+                                tool.toolCallId, messages.contextMessages().limitContext(assistant.contextMessageLimit),
+                            )) {
                                 toolDef.execute(args)
                             }
                             val hasShellAccess = toolsInternal.any { it.name == "workspace_shell" }
@@ -377,9 +379,9 @@ class GenerationHandler(
             conversation.lorebookIds, conversation.workspaceCwd,
         )
         val instruction = buildCompressPrompt(
-            additionalPrompt = listOf(additionalPrompt, "Aim for approximately $targetTokens tokens.")
-                .filter { it.isNotBlank() }.joinToString("\n"),
+            additionalPrompt = additionalPrompt,
             locale = Locale.getDefault().displayName,
+            targetTokens = targetTokens,
         )
         val toolTokens = actualTools.sumOf {
             (it.name + it.description + it.parameters()).estimateTokens().toLong()

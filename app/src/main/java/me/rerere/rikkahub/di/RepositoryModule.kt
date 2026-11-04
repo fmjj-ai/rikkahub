@@ -35,8 +35,6 @@ val repositoryModule = module {
         GenMediaRepository(get())
     }
 
-    single { me.rerere.rikkahub.data.repository.MediaCreationRepository(get(), get(), get(), get()) }
-
     single {
         FilesRepository(get())
     }

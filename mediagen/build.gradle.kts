@@ -5,7 +5,7 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 }
 
-// 沿用主项目锁定的 AGP、Kotlin 与 Gradle，不引入上游的新版构建插件。
+// 仅编译旧媒体配置的序列化兼容类型；不含生成、上传或视频请求实现。
 android {
     namespace = "me.rerere.mediagen"
     compileSdk = 37
@@ -22,14 +22,10 @@ android {
 
 dependencies {
     constraints {
-        implementation("androidx.collection:collection:1.6.0") {
-            because("与当前应用已有的 AndroidX Collection 缓存版本对齐，避免独立模块回退到未缓存的旧版本")
-        }
+        implementation("androidx.tracing:tracing:1.2.0")
+        implementation("androidx.collection:collection:1.6.0")
     }
-    implementation(project(":common"))
-    implementation(libs.androidx.core.ktx)
     implementation(libs.okhttp)
     implementation(libs.kotlinx.serialization.json)
-    implementation(libs.kotlinx.coroutines.core)
     testImplementation(libs.junit)
 }

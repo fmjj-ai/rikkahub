@@ -6,6 +6,16 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class ImageCropStateTest {
+    @Test
+    fun `rotate button turns counter clockwise and four clicks return to original`() {
+        var turns = 0
+        for (expected in listOf(3, 2, 1, 0)) {
+            turns = counterClockwiseQuarterTurns(turns)
+            assertEquals(expected, turns)
+        }
+        assertEquals(Offset(20f, 390f), rotate(Offset(10f, 20f), counterClockwiseQuarterTurns(0)))
+    }
+
     private val width = 400f
     private val height = 300f
 
