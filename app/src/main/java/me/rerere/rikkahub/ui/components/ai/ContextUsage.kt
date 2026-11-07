@@ -175,10 +175,10 @@ private fun formatTokens(tokens: Int): String =
 
 /**
  * 缓存命中率展示：百分比 + 括号内分数，例如 `85%（1,700 / 2,000）`。
- * 无真实缓存用量时显示 `—`，避免让用户误以为"缓存完全没命中"。
+ * 零命中也显示 0%；没有有效输入用量时不构造无意义的分母。
  */
-private fun formatCacheHitRate(usage: ContextUsage): String {
-    val rate = usage.cacheHitRate ?: return "—"
+internal fun formatCacheHitRate(usage: ContextUsage): String {
+    val rate = usage.cacheHitRate ?: return "0%"
     val cached = formatTokens(usage.cachedTokens)
     val total = formatTokens(usage.inputTokens.coerceAtLeast(usage.cachedTokens))
     return "${(rate * 100).roundToInt()}%（$cached / $total）"

@@ -24,6 +24,7 @@ import me.rerere.hugeicons.stroke.Sun01
 import me.rerere.rikkahub.R
 import me.rerere.rikkahub.Screen
 import me.rerere.rikkahub.ui.components.nav.BackButton
+import me.rerere.rikkahub.ui.components.nav.navigationSourceModifiers
 import me.rerere.rikkahub.ui.components.ui.CardGroup
 import me.rerere.rikkahub.ui.context.LocalNavController
 import me.rerere.rikkahub.ui.theme.CustomColors
@@ -33,6 +34,13 @@ import me.rerere.rikkahub.utils.plus
 fun SettingPreferencesPage() {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val navController = LocalNavController.current
+    val navigationSources = navigationSourceModifiers(
+        Screen.SettingPreferencesTheme,
+        Screen.SettingPreferencesNotification,
+        Screen.SettingPreferencesGeneral,
+        Screen.SettingPreferencesUI,
+        Screen.SettingPreferencesNetwork,
+    )
 
     Scaffold(
         topBar = {
@@ -60,30 +68,35 @@ fun SettingPreferencesPage() {
                     modifier = Modifier.padding(horizontal = 8.dp),
                 ) {
                     item(
+                        modifier = navigationSources.getValue(Screen.SettingPreferencesTheme),
                         onClick = { navController.navigate(Screen.SettingPreferencesTheme) },
                         leadingContent = { Icon(HugeIcons.Sun01, null) },
                         headlineContent = { Text(stringResource(R.string.setting_page_preferences_theme)) },
                         supportingContent = { Text(stringResource(R.string.setting_page_preferences_theme_desc)) },
                     )
                     item(
+                        modifier = navigationSources.getValue(Screen.SettingPreferencesNotification),
                         onClick = { navController.navigate(Screen.SettingPreferencesNotification) },
                         leadingContent = { Icon(HugeIcons.Notification01, null) },
                         headlineContent = { Text(stringResource(R.string.setting_page_preferences_notification)) },
                         supportingContent = { Text(stringResource(R.string.setting_page_preferences_notification_desc)) },
                     )
                     item(
+                        modifier = navigationSources.getValue(Screen.SettingPreferencesGeneral),
                         onClick = { navController.navigate(Screen.SettingPreferencesGeneral) },
                         leadingContent = { Icon(HugeIcons.Settings03, null) },
                         headlineContent = { Text(stringResource(R.string.setting_page_preferences_general)) },
                         supportingContent = { Text(stringResource(R.string.setting_page_preferences_general_desc)) },
                     )
                     item(
+                        modifier = navigationSources.getValue(Screen.SettingPreferencesUI),
                         onClick = { navController.navigate(Screen.SettingPreferencesUI) },
                         leadingContent = { Icon(HugeIcons.PaintBoard, null) },
                         headlineContent = { Text(stringResource(R.string.setting_page_preferences_ui)) },
                         supportingContent = { Text(stringResource(R.string.setting_page_preferences_ui_desc)) },
                     )
                     item(
+                        modifier = navigationSources.getValue(Screen.SettingPreferencesNetwork),
                         onClick = { navController.navigate(Screen.SettingPreferencesNetwork) },
                         leadingContent = { Icon(HugeIcons.Internet, null) },
                         headlineContent = { Text(stringResource(R.string.setting_page_preferences_network)) },

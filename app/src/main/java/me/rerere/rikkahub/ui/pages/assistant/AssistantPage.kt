@@ -69,10 +69,11 @@ import me.rerere.rikkahub.ui.components.ui.FormItem
 import me.rerere.rikkahub.ui.components.ui.Tag
 import me.rerere.rikkahub.ui.components.ui.TagType
 import me.rerere.rikkahub.ui.components.ui.UIAvatar
+import me.rerere.rikkahub.ui.components.nav.navigationSource
 import me.rerere.rikkahub.ui.context.LocalNavController
 import me.rerere.rikkahub.ui.hooks.EditState
 import me.rerere.rikkahub.ui.hooks.EditStateContent
-import me.rerere.rikkahub.ui.hooks.heroAnimation
+import me.rerere.rikkahub.ui.hooks.assistantAvatarNavigation
 import me.rerere.rikkahub.ui.hooks.useEditState
 import me.rerere.rikkahub.ui.modifier.onClick
 import me.rerere.rikkahub.ui.pages.assistant.detail.AssistantImporter
@@ -202,12 +203,13 @@ fun AssistantPage(vm: AssistantVM = koinViewModel()) {
                         val memories by vm.getMemories(assistant).collectAsStateWithLifecycle(
                             initialValue = emptyList(),
                         )
+                        val detail = Screen.AssistantDetail(assistant.id.toString())
                         AssistantItem(
                             assistant = assistant,
                             settings = settings,
                             memories = memories,
                             onEdit = {
-                                navController.navigate(Screen.AssistantDetail(id = assistant.id.toString()))
+                                navController.navigate(detail)
                             },
                             onShowActions = {
                                 actionSheetAssistant = assistant
@@ -216,6 +218,7 @@ fun AssistantPage(vm: AssistantVM = koinViewModel()) {
                                 .scale(if (isDragging) 0.95f else 1f)
                                 .fillMaxWidth()
                                 .animateItem()
+                                .navigationSource(detail)
                                 .then(
                                     if (!isFiltering) {
                                         Modifier.longPressDraggableHandle(
@@ -417,7 +420,7 @@ private fun AssistantItem(
                 value = assistant.avatar,
                 modifier = Modifier
                     .size(48.dp)
-                    .heroAnimation("assistant_${assistant.id}")
+                    .assistantAvatarNavigation("assistant_${assistant.id}")
             )
 
             Column(

@@ -3,7 +3,12 @@ package me.rerere.rikkahub.ui.hooks
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation3.ui.LocalNavAnimatedContentScope
+import me.rerere.rikkahub.ui.components.nav.LocalExpandedNavigation
 import me.rerere.rikkahub.ui.context.LocalSharedTransitionScope
+
+@Composable
+internal fun Modifier.assistantAvatarNavigation(key: String): Modifier =
+    if (LocalExpandedNavigation.current) this else heroAnimation(key)
 
 @Composable
 fun Modifier.heroAnimation(

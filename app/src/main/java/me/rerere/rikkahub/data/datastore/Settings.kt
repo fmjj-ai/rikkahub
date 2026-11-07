@@ -158,6 +158,7 @@ data class DisplaySetting(
     val enableVolumeKeyScroll: Boolean = false,
     val volumeKeyScrollRatio: Float = 1.0f,
     val enableBackgroundKeepAlive: Boolean = true,
+    val enableExpandedNavigation: Boolean = false,
 )
 
 @Serializable
@@ -303,7 +304,7 @@ internal val DEFAULT_ASSISTANTS = listOf(
             You are a helpful assistant, called {{char}}, based on model {{model_name}}.
 
             ## Info
-            - Time: {{cur_datetime}}
+            - Date: {{cur_date}}
             - Locale: {{locale}}
             - Timezone: {{timezone}}
             - Device Info: {{device_info}}

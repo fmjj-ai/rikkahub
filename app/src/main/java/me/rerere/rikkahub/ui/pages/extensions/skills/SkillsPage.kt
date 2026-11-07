@@ -63,6 +63,7 @@ import me.rerere.rikkahub.data.files.SkillMetadata
 import me.rerere.rikkahub.Screen
 import me.rerere.rikkahub.ui.components.nav.BackButton
 import me.rerere.rikkahub.ui.components.ui.RikkaConfirmDialog
+import me.rerere.rikkahub.ui.components.nav.navigationSource
 import me.rerere.rikkahub.ui.context.LocalNavController
 import me.rerere.rikkahub.ui.context.LocalToaster
 import me.rerere.rikkahub.ui.theme.CustomColors
@@ -151,9 +152,11 @@ fun SkillsPage() {
             }
 
             items(skills, key = { it.name }) { skill ->
+                val detail = Screen.SkillDetail(skill.name)
                 SkillCard(
                     skill = skill,
-                    onClick = { navController.navigate(Screen.SkillDetail(skill.name)) },
+                    modifier = Modifier.navigationSource(detail),
+                    onClick = { navController.navigate(detail) },
                     onDelete = { deleteTarget = skill },
                 )
             }
@@ -233,6 +236,7 @@ fun SkillsPage() {
 @Composable
 private fun SkillCard(
     skill: SkillMetadata,
+    modifier: Modifier,
     onClick: () -> Unit,
     onDelete: () -> Unit,
 ) {
@@ -240,7 +244,7 @@ private fun SkillCard(
 
     Card(
         onClick = onClick,
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         colors = CustomColors.cardColorsOnSurfaceContainer,
     ) {
         Row(

@@ -30,6 +30,7 @@ import me.rerere.hugeicons.stroke.ArrowRight01
 import me.rerere.rikkahub.R
 import me.rerere.rikkahub.Screen
 import me.rerere.rikkahub.ui.components.nav.BackButton
+import me.rerere.rikkahub.ui.components.nav.navigationSourceModifiers
 import me.rerere.rikkahub.ui.components.ui.CardGroup
 import me.rerere.rikkahub.ui.context.LocalNavController
 import me.rerere.rikkahub.ui.hooks.rememberAmoledDarkMode
@@ -43,6 +44,9 @@ fun SettingPreferencesThemePage(vm: SettingVM = koinViewModel()) {
     var amoledDarkMode by rememberAmoledDarkMode()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val navController = LocalNavController.current
+    val navigationSources = navigationSourceModifiers(
+        Screen.SettingTheme,
+    )
 
     Scaffold(
         topBar = {
@@ -80,6 +84,7 @@ fun SettingPreferencesThemePage(vm: SettingVM = koinViewModel()) {
                         },
                     )
                     item(
+                        modifier = navigationSources.getValue(Screen.SettingTheme),
                         onClick = { navController.navigate(Screen.SettingTheme) },
                         headlineContent = { Text(stringResource(R.string.setting_page_theme_setting)) },
                         supportingContent = { Text(stringResource(R.string.setting_page_theme_setting_desc)) },

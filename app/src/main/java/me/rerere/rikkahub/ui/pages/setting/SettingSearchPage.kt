@@ -59,6 +59,7 @@ import me.rerere.rikkahub.ui.components.ui.FormItem
 import me.rerere.rikkahub.ui.components.ui.OutlinedNumberInput
 import me.rerere.rikkahub.ui.components.ui.Tag
 import me.rerere.rikkahub.ui.components.ui.TagType
+import me.rerere.rikkahub.ui.components.nav.navigationSource
 import me.rerere.rikkahub.ui.context.LocalNavController
 import me.rerere.rikkahub.ui.theme.CustomColors
 import me.rerere.rikkahub.utils.plus
@@ -127,10 +128,11 @@ fun SettingSearchPage(vm: SettingVM = koinViewModel()) {
                     state = reorderableState,
                     key = service.id
                 ) { isDragging ->
+                    val detail = Screen.SettingSearchDetail(service.id.toString())
                     SearchProviderCard(
                         service = service,
                         onEdit = {
-                            nav.navigate(Screen.SettingSearchDetail(service.id.toString()))
+                            nav.navigate(detail)
                         },
                         onDelete = {
                             vm.updateSettings { it.removeSearchService(service.id) }
@@ -139,6 +141,7 @@ fun SettingSearchPage(vm: SettingVM = koinViewModel()) {
                         modifier = Modifier
                             .scale(if (isDragging) 0.95f else 1f)
                             .animateItem()
+                            .navigationSource(detail)
                             .longPressDraggableHandle(
                                 onDragStarted = {
                                     haptic.performHapticFeedback(HapticFeedbackType.GestureThresholdActivate)

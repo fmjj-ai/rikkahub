@@ -182,11 +182,12 @@ data class ContextUsage(
      * （OpenAI `prompt_tokens` / Responses `input_tokens`、Google `promptTokenCount`、
      * Claude `input + cache_read + cache_creation`），因此分母直接取 inputTokens。
      * 对异常数据做夹取，保证分母 ≥ 分子且结果落在 0..1；
-     * 无真实缓存数据（首轮请求 / 服务商不返回 / 模型不支持缓存）时返回 null，由 UI 显示占位符。
+     * 有输入但没有缓存命中时返回 0；缺少有效输入用量时返回 null。
      */
     val cacheHitRate: Float?
         get() {
-            if (cachedTokens <= 0 || inputTokens <= 0) return null
+            if (inputTokens <= 0) return null
+            if (cachedTokens <= 0) return 0f
             val denominator = inputTokens.coerceAtLeast(cachedTokens)
             return (cachedTokens.toFloat() / denominator).coerceIn(0f, 1f)
         }

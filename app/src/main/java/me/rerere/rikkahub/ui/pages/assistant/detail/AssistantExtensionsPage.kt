@@ -30,6 +30,7 @@ import me.rerere.rikkahub.ui.components.ai.ModeInjectionsContent
 import me.rerere.rikkahub.ui.components.ai.QuickMessagesContent
 import me.rerere.rikkahub.ui.components.ai.SkillsContent
 import me.rerere.rikkahub.ui.components.nav.BackButton
+import me.rerere.rikkahub.ui.components.nav.navigationSource
 import me.rerere.rikkahub.ui.context.LocalNavController
 import me.rerere.rikkahub.ui.theme.CustomColors
 import org.koin.androidx.compose.koinViewModel
@@ -95,6 +96,15 @@ fun AssistantExtensionsPage(id: String) {
                     .fillMaxWidth()
                     .weight(1f),
             ) { page ->
+                val destination = when (page) {
+                    0 -> Screen.QuickMessages
+                    1, 2 -> Screen.Prompts
+                    else -> Screen.Skills
+                }
+                // Pager 可能预组合相邻标签，只让当前标签提供共享边界。
+                val actionAnchor = if (page == pagerState.settledPage) {
+                    Modifier.navigationSource(destination)
+                } else Modifier
                 when (page) {
                     0 -> {
                         if (settings.quickMessages.isEmpty()) {
@@ -102,6 +112,7 @@ fun AssistantExtensionsPage(id: String) {
                                 message = stringResource(R.string.assistant_extensions_page_empty_quick_messages),
                                 buttonText = stringResource(R.string.assistant_extensions_page_goto_extensions),
                                 onAction = { navController.navigate(Screen.QuickMessages) },
+                                actionModifier = actionAnchor,
                             )
                         } else {
                             Column {
@@ -117,7 +128,7 @@ fun AssistantExtensionsPage(id: String) {
                                 )
                                 TextButton(
                                     onClick = { navController.navigate(Screen.QuickMessages) },
-                                    modifier = Modifier.fillMaxWidth(),
+                                    modifier = actionAnchor.fillMaxWidth(),
                                 ) {
                                     Text(stringResource(R.string.assistant_extensions_page_goto_extensions))
                                 }
@@ -131,6 +142,7 @@ fun AssistantExtensionsPage(id: String) {
                                 message = stringResource(R.string.assistant_extensions_page_empty_mode_injections),
                                 buttonText = stringResource(R.string.assistant_extensions_page_goto_prompts),
                                 onAction = { navController.navigate(Screen.Prompts) },
+                                actionModifier = actionAnchor,
                             )
                         } else {
                             Column {
@@ -146,7 +158,7 @@ fun AssistantExtensionsPage(id: String) {
                                 )
                                 TextButton(
                                     onClick = { navController.navigate(Screen.Prompts) },
-                                    modifier = Modifier.fillMaxWidth(),
+                                    modifier = actionAnchor.fillMaxWidth(),
                                 ) {
                                     Text(stringResource(R.string.assistant_extensions_page_goto_prompts))
                                 }
@@ -160,6 +172,7 @@ fun AssistantExtensionsPage(id: String) {
                                 message = stringResource(R.string.assistant_extensions_page_empty_lorebooks),
                                 buttonText = stringResource(R.string.assistant_extensions_page_goto_prompts),
                                 onAction = { navController.navigate(Screen.Prompts) },
+                                actionModifier = actionAnchor,
                             )
                         } else {
                             Column {
@@ -175,7 +188,7 @@ fun AssistantExtensionsPage(id: String) {
                                 )
                                 TextButton(
                                     onClick = { navController.navigate(Screen.Prompts) },
-                                    modifier = Modifier.fillMaxWidth(),
+                                    modifier = actionAnchor.fillMaxWidth(),
                                 ) {
                                     Text(stringResource(R.string.assistant_extensions_page_goto_prompts))
                                 }
@@ -189,6 +202,7 @@ fun AssistantExtensionsPage(id: String) {
                                 message = stringResource(R.string.assistant_extensions_page_empty_skills),
                                 buttonText = stringResource(R.string.assistant_extensions_page_goto_extensions),
                                 onAction = { navController.navigate(Screen.Skills) },
+                                actionModifier = actionAnchor,
                             )
                         } else {
                             Column {
@@ -204,7 +218,7 @@ fun AssistantExtensionsPage(id: String) {
                                 )
                                 TextButton(
                                     onClick = { navController.navigate(Screen.Skills) },
-                                    modifier = Modifier.fillMaxWidth(),
+                                    modifier = actionAnchor.fillMaxWidth(),
                                 ) {
                                     Text(stringResource(R.string.assistant_extensions_page_goto_extensions))
                                 }

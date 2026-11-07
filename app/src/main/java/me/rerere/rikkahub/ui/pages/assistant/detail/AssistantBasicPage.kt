@@ -46,7 +46,7 @@ import me.rerere.rikkahub.ui.components.ui.FormItem
 import me.rerere.rikkahub.ui.components.ui.Select
 import me.rerere.rikkahub.ui.components.ui.TagsInput
 import me.rerere.rikkahub.ui.components.ui.UIAvatar
-import me.rerere.rikkahub.ui.hooks.heroAnimation
+import me.rerere.rikkahub.ui.hooks.assistantAvatarNavigation
 import me.rerere.rikkahub.ui.theme.CustomColors
 import me.rerere.rikkahub.utils.toFixed
 import org.koin.androidx.compose.koinViewModel
@@ -134,7 +134,7 @@ internal fun AssistantBasicContent(
                 },
                 modifier = Modifier
                     .size(80.dp)
-                    .heroAnimation("assistant_${assistant.id}")
+                    .assistantAvatarNavigation("assistant_${assistant.id}")
             )
         }
 

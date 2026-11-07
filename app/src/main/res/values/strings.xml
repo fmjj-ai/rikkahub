@@ -683,6 +683,8 @@
   <string name="setting_display_page_enable_auto_scroll_desc">Automatically scroll to the bottom when AI is generating content</string>
   <string name="setting_display_page_enable_auto_scroll_title">Auto Scroll</string>
   <string name="setting_display_page_enable_blur_effect_desc">Enable blur effect on chat input bar</string>
+  <string name="setting_display_page_enable_expanded_navigation_title">Enable Expanding Navigation</string>
+  <string name="setting_display_page_enable_expanded_navigation_desc">Open settings pages by expanding from the selected item, and collapse back into it when returning. Turn off to keep the original transitions.</string>
   <string name="setting_display_page_enable_blur_effect_title">Enable Blur Effect</string>
   <string name="setting_display_page_enable_latex_rendering_desc">Render mathematical expressions and formulas using LaTeX syntax</string>
   <string name="setting_display_page_enable_latex_rendering_title">Enable LaTeX Rendering</string>

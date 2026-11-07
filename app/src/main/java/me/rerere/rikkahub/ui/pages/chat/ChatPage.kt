@@ -5,39 +5,31 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.isImeVisible
-import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.safeDrawingPadding
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.PermanentNavigationDrawer
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.adaptive.currentWindowDpSize
-import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -93,8 +85,11 @@ import me.rerere.rikkahub.service.ChatError
 import me.rerere.rikkahub.ui.components.ai.ChatInput
 import me.rerere.rikkahub.ui.components.ai.CameraAttachmentTransition
 import me.rerere.rikkahub.ui.components.ai.CameraAttachmentTransitionState
+import me.rerere.rikkahub.ui.components.ai.CameraCloseAction
+import me.rerere.rikkahub.ui.components.ai.CameraPanelState
 import me.rerere.rikkahub.ui.components.ai.ContextUsageDialog
 import me.rerere.rikkahub.ui.components.ai.FilesPicker
+import me.rerere.rikkahub.ui.components.ai.FilesPickerOverlay
 import me.rerere.rikkahub.ui.components.ai.HalfScreenCamera
 import me.rerere.rikkahub.ui.components.ai.completion.WorkspaceCompletionProvider
 import me.rerere.rikkahub.ui.components.ui.permission.PermissionCamera
@@ -235,6 +230,7 @@ fun ChatPage(id: Uuid, text: String?, files: List<Uri>, nodeId: Uuid? = null) {
     }
 
     ChatPageOverlayHost(
+        modalOverlayVisible = showFilesSheet,
         content = {
             when {
                 isBigScreen -> {
@@ -326,7 +322,7 @@ fun ChatPage(id: Uuid, text: String?, files: List<Uri>, nodeId: Uuid? = null) {
                     conversation = conversation,
                     assistant = setting.getCurrentAssistant(),
                     vm = vm,
-                    onCameraStarted = { cameraActive = true; keyboardRestoreRequest++ },
+                    onCameraStarted = { cameraActive = true },
                     onRestoreKeyboard = { keyboardRestoreRequest++ },
                     onCameraCancelled = {
                         cameraActive = false
@@ -618,20 +614,34 @@ private fun ChatFilesPickerSheet(
     val filesManager: FilesManager = koinInject()
     var showInjectionSheet by remember { mutableStateOf(false) }
     var showCompressDialog by remember { mutableStateOf(false) }
-    var showCamera by remember { mutableStateOf(false) }
+    val cameraPanel = remember { CameraPanelState() }
+    val filesPickerScrollState = rememberScrollState()
+    val keyboardController = LocalSoftwareKeyboardController.current
     var cameraRequested by remember { mutableStateOf(false) }
     var cameraDraftRevision by remember { mutableStateOf(0L) }
-    var cameraOpened by remember { mutableStateOf(false) }
+    var cameraLaunchBounds by remember { mutableStateOf(Rect.Zero) }
+    var latestCameraButtonBounds by remember { mutableStateOf(Rect.Zero) }
     var active by remember { mutableStateOf(true) }
     DisposableEffect(Unit) { onDispose { active = false } }
 
     fun dismissAll() {
+        if (!active) return
+        active = false
         showInjectionSheet = false
         showCompressDialog = false
-        showCamera = false
+        cameraPanel.dismiss()
         cameraRequested = false
         onDismiss()
-        if (cameraOpened) onRestoreKeyboard()
+        onRestoreKeyboard()
+    }
+
+    fun closeCamera(dismissPicker: Boolean = false) {
+        if (cameraPanel.requestClose(dismissPicker)) {
+            if (!latestCameraButtonBounds.isEmpty) cameraLaunchBounds = latestCameraButtonBounds
+            onCameraCancelled()
+            // 附件与相机全程保持输入法收起，避免落点被输入法遮住。
+            keyboardController?.hide()
+        }
     }
 
     val cameraPermission = rememberPermissionState(PermissionCamera)
@@ -640,12 +650,12 @@ private fun ChatFilesPickerSheet(
     LaunchedEffect(cameraRequested, cameraPermission.allRequiredPermissionsGranted) {
         if (cameraRequested && cameraPermission.allRequiredPermissionsGranted) {
             cameraRequested = false
-            showCamera = true
-            cameraOpened = true
+            cameraPanel.open()
             onCameraStarted()
         }
     }
-    val onLaunchCamera: () -> Unit = {
+    val onLaunchCamera: (Rect) -> Unit = { bounds ->
+        cameraLaunchBounds = bounds
         cameraDraftRevision = inputState.attachmentRevision
         cameraRequested = true
         if (!cameraPermission.allRequiredPermissionsGranted) {
@@ -708,43 +718,40 @@ private fun ChatFilesPickerSheet(
             }
         }
 
-    val filesSheetState = rememberBottomSheetState(
-        initialValue = SheetValue.Hidden,
-        enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)
-    )
-    if (showCamera) {
-        BackHandler {
-            showCamera = false
-            onCameraCancelled()
-        }
-        Box(Modifier.fillMaxSize().safeDrawingPadding().imePadding()) {
-            Box(Modifier.fillMaxSize().clickable(
-                interactionSource = remember { MutableInteractionSource() }, indication = null,
-            ) {
-                dismissAll()
-            })
-            Box(Modifier.align(Alignment.BottomCenter).widthIn(max = BottomSheetDefaults.SheetMaxWidth).fillMaxWidth()) {
-                HalfScreenCamera(
-                    onCancel = { showCamera = false; onCameraCancelled() },
-                    onCaptured = { file, bounds ->
-                        val revision = cameraDraftRevision
-                        vm.addCameraImage(file, revision) { url ->
-                            if (active && showCamera) {
-                                if (url != null) onCameraImageReady(url, bounds, revision)
-                                else {
-                                    dismissAll()
-                                }
+    FilesPickerOverlay(
+        cameraPanel = cameraPanel,
+        onDismissRequest = { dismissAll() },
+        onCloseCamera = { closeCamera(it) },
+        camera = {
+            HalfScreenCamera(
+                onCancel = { closeCamera() },
+                launchBounds = cameraLaunchBounds,
+                visible = cameraPanel.expanded,
+                onClosed = {
+                    when (cameraPanel.finishClose()) {
+                        CameraCloseAction.RETURN_TO_ATTACHMENTS -> Unit
+                        CameraCloseAction.DISMISS_PICKER -> dismissAll()
+                        null -> Unit
+                    }
+                },
+                onTransitionProgress = cameraPanel::updateProgress,
+                onCaptured = captured@{ file, bounds ->
+                    if (!cameraPanel.acceptsCapture) {
+                        file.delete()
+                        return@captured
+                    }
+                    val revision = cameraDraftRevision
+                    vm.addCameraImage(file, revision) { url ->
+                        if (active && cameraPanel.acceptsCapture) {
+                            if (url != null) onCameraImageReady(url, bounds, revision)
+                            else {
+                                dismissAll()
                             }
                         }
-                    },
-                )
-            }
-        }
-        return
-    }
-    ModalBottomSheet(
-        sheetState = filesSheetState,
-        onDismissRequest = { dismissAll() },
+                    }
+                },
+            )
+        },
     ) {
         FilesPicker(
             conversation = conversation,
@@ -781,6 +788,11 @@ private fun ChatFilesPickerSheet(
             onToggleGalleryImage = vm::toggleGalleryImage,
             onPickVideo = { videoPickerLauncher.launch("video/*") },
             onPickAudio = { audioPickerLauncher.launch("audio/*") },
+            scrollState = filesPickerScrollState,
+            onCameraButtonBoundsChange = { bounds ->
+                latestCameraButtonBounds = bounds
+                if (cameraPanel.returningToAttachments) cameraLaunchBounds = bounds
+            },
             onPickFile = { filePickerLauncher.launch(arrayOf("*/*")) },
         )
     }

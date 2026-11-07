@@ -77,6 +77,7 @@ import me.rerere.rikkahub.ui.components.ui.AutoAIIcon
 import me.rerere.rikkahub.ui.components.ui.Tag
 import me.rerere.rikkahub.ui.components.ui.TagType
 import me.rerere.rikkahub.ui.components.ui.decodeProviderSetting
+import me.rerere.rikkahub.ui.components.nav.navigationSource
 import me.rerere.rikkahub.ui.context.LocalNavController
 import me.rerere.rikkahub.ui.context.LocalToaster
 import me.rerere.rikkahub.ui.hooks.useEditState
@@ -240,9 +241,11 @@ fun SettingProviderPage(vm: SettingVM = koinViewModel()) {
                         state = reorderableState,
                         key = provider.id
                     ) { isDragging ->
+                        val detail = Screen.SettingProviderDetail(provider.id.toString())
                         ProviderItem(
                             modifier = Modifier
                                 .scale(if (isDragging) 0.95f else 1f)
+                                .navigationSource(detail)
                                 .fillMaxWidth(),
                             provider = provider,
                             dragHandle = {
@@ -266,7 +269,7 @@ fun SettingProviderPage(vm: SettingVM = koinViewModel()) {
                                 }
                             },
                             onClick = {
-                                navController.navigate(Screen.SettingProviderDetail(providerId = provider.id.toString()))
+                                navController.navigate(detail)
                             }
                         )
                     }

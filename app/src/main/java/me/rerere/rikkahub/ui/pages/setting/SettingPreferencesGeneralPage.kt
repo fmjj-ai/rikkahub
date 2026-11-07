@@ -34,6 +34,7 @@ import me.rerere.rikkahub.R
 import me.rerere.rikkahub.data.datastore.DisplaySetting
 import me.rerere.rikkahub.ui.components.nav.BackButton
 import me.rerere.rikkahub.ui.components.ui.CardGroup
+import me.rerere.rikkahub.ui.hooks.isPhoneLayout
 import me.rerere.rikkahub.ui.hooks.rememberSharedPreferenceBoolean
 import me.rerere.rikkahub.ui.theme.CustomColors
 import me.rerere.rikkahub.utils.plus
@@ -43,6 +44,7 @@ import org.koin.androidx.compose.koinViewModel
 fun SettingPreferencesGeneralPage(vm: SettingVM = koinViewModel()) {
     val settings by vm.settings.collectAsStateWithLifecycle()
     var displaySetting by remember(settings) { mutableStateOf(settings.displaySetting) }
+    val phoneLayout = isPhoneLayout()
 
     fun updateDisplaySetting(setting: DisplaySetting) {
         displaySetting = setting
@@ -161,6 +163,22 @@ fun SettingPreferencesGeneralPage(vm: SettingVM = koinViewModel()) {
                                 checked = displaySetting.useAppIconStyleLoadingIndicator,
                                 onCheckedChange = {
                                     updateDisplaySetting(displaySetting.copy(useAppIconStyleLoadingIndicator = it))
+                                }
+                            )
+                        },
+                    )
+                    if (phoneLayout) item(
+                        headlineContent = {
+                            Text(stringResource(R.string.setting_display_page_enable_expanded_navigation_title))
+                        },
+                        supportingContent = {
+                            Text(stringResource(R.string.setting_display_page_enable_expanded_navigation_desc))
+                        },
+                        trailingContent = {
+                            Switch(
+                                checked = displaySetting.enableExpandedNavigation,
+                                onCheckedChange = {
+                                    updateDisplaySetting(displaySetting.copy(enableExpandedNavigation = it))
                                 }
                             )
                         },

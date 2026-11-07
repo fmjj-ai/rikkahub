@@ -31,7 +31,9 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.semantics
@@ -66,6 +68,13 @@ import me.rerere.rikkahub.data.db.MigrationState
 import me.rerere.rikkahub.data.event.AppEvent
 import me.rerere.rikkahub.data.event.AppEventBus
 import me.rerere.rikkahub.ui.activity.SafeModeActivity
+import me.rerere.rikkahub.ui.components.nav.LocalExpandedNavigation
+import me.rerere.rikkahub.ui.components.nav.LocalUnanchoredNavigation
+import me.rerere.rikkahub.ui.components.nav.canExpandNavigation
+import me.rerere.rikkahub.ui.components.nav.expandableNavigationEntry
+import me.rerere.rikkahub.ui.components.nav.expandedNavigationTransition
+import me.rerere.rikkahub.ui.components.nav.navigationScreenMetadata
+import me.rerere.rikkahub.ui.components.nav.unanchoredNavigationTransition
 import me.rerere.rikkahub.ui.components.ui.TTSController
 import me.rerere.rikkahub.ui.context.LocalASRState
 import me.rerere.rikkahub.ui.context.LocalNavController
@@ -74,6 +83,7 @@ import me.rerere.rikkahub.ui.context.LocalSharedTransitionScope
 import me.rerere.rikkahub.ui.context.LocalTTSState
 import me.rerere.rikkahub.ui.context.LocalToaster
 import me.rerere.rikkahub.ui.context.Navigator
+import me.rerere.rikkahub.ui.hooks.isPhoneLayout
 import me.rerere.rikkahub.ui.hooks.readBooleanPreference
 import me.rerere.rikkahub.ui.hooks.readStringPreference
 import me.rerere.rikkahub.ui.hooks.rememberCustomAsrState
@@ -273,9 +283,15 @@ class RouteActivity : ComponentActivity() {
 
         ShareHandler(backStack)
 
+        val expandedNavigationEnabled = settings.displaySetting.enableExpandedNavigation && isPhoneLayout()
+        val expandedNavigation by rememberUpdatedState(expandedNavigationEnabled)
+        val unanchoredOrigins = remember { mutableStateMapOf<String, String>() }
+
         SharedTransitionLayout {
             CompositionLocalProvider(
-                LocalNavController provides Navigator(backStack),
+                LocalNavController provides Navigator(backStack, unanchoredOrigins),
+                LocalExpandedNavigation provides expandedNavigationEnabled,
+                LocalUnanchoredNavigation provides unanchoredOrigins,
                 LocalSharedTransitionScope provides this,
                 LocalSettings provides settings,
                 LocalHighlighter provides highlighter,
@@ -304,21 +320,63 @@ class RouteActivity : ComponentActivity() {
                             rememberViewModelStoreNavEntryDecorator(),
                         ),
                         modifier = Modifier.fillMaxSize(),
+                        sharedTransitionScope = if (expandedNavigationEnabled) this@SharedTransitionLayout else null,
                         onBack = { backStack.removeLastOrNull() },
                         transitionSpec = {
-                            if (backStack.size == 1) fadeIn() togetherWith fadeOut()
-                            else {
+                            val sourceKey = initialState.entries.lastOrNull()?.contentKey
+                            val destinationKey = targetState.entries.lastOrNull()?.contentKey
+                            if (expandedNavigation && destinationKey != null && sourceKey != null &&
+                                unanchoredOrigins[destinationKey.toString()] == sourceKey.toString()
+                            ) {
+                                unanchoredNavigationTransition()
+                            } else if (expandedNavigation && canExpandNavigation(
+                                    source = initialState.entries.lastOrNull()?.metadata,
+                                    destination = targetState.entries.lastOrNull()?.metadata,
+                                )
+                            ) {
+                                expandedNavigationTransition()
+                            } else if (backStack.size == 1) {
+                                fadeIn() togetherWith fadeOut()
+                            } else {
                                 slideInHorizontally { it } togetherWith
                                     slideOutHorizontally { -it / 2 } + scaleOut(targetScale = 0.7f) + fadeOut()
                             }
                         },
                         popTransitionSpec = {
-                            slideInHorizontally { -it / 2 } + scaleIn(initialScale = 0.7f) + fadeIn() togetherWith
-                                slideOutHorizontally { it }
+                            val sourceKey = targetState.entries.lastOrNull()?.contentKey
+                            val destinationKey = initialState.entries.lastOrNull()?.contentKey
+                            if (expandedNavigation && destinationKey != null && sourceKey != null &&
+                                unanchoredOrigins[destinationKey.toString()] == sourceKey.toString()
+                            ) {
+                                unanchoredNavigationTransition()
+                            } else if (expandedNavigation && canExpandNavigation(
+                                    source = targetState.entries.lastOrNull()?.metadata,
+                                    destination = initialState.entries.lastOrNull()?.metadata,
+                                )
+                            ) {
+                                expandedNavigationTransition()
+                            } else {
+                                slideInHorizontally { -it / 2 } + scaleIn(initialScale = 0.7f) + fadeIn() togetherWith
+                                    slideOutHorizontally { it }
+                            }
                         },
                         predictivePopTransitionSpec = {
-                            slideInHorizontally { -it / 2 } + scaleIn(initialScale = 0.7f) + fadeIn() togetherWith
-                                slideOutHorizontally { it }
+                            val sourceKey = targetState.entries.lastOrNull()?.contentKey
+                            val destinationKey = initialState.entries.lastOrNull()?.contentKey
+                            if (expandedNavigation && destinationKey != null && sourceKey != null &&
+                                unanchoredOrigins[destinationKey.toString()] == sourceKey.toString()
+                            ) {
+                                unanchoredNavigationTransition()
+                            } else if (expandedNavigation && canExpandNavigation(
+                                    source = targetState.entries.lastOrNull()?.metadata,
+                                    destination = initialState.entries.lastOrNull()?.metadata,
+                                )
+                            ) {
+                                expandedNavigationTransition()
+                            } else {
+                                slideInHorizontally { -it / 2 } + scaleIn(initialScale = 0.7f) + fadeIn() togetherWith
+                                    slideOutHorizontally { it }
+                            }
                         },
                         entryProvider = entryProvider {
                             entry<Screen.Chat>(
@@ -348,39 +406,53 @@ class RouteActivity : ComponentActivity() {
                                 FavoritePage()
                             }
 
-                            entry<Screen.Assistant> {
+                            expandableNavigationEntry<Screen.Assistant>(Screen.Setting) {
                                 AssistantPage()
                             }
 
-                            entry<Screen.AssistantDetail> { key ->
+                            expandableNavigationEntry<Screen.AssistantDetail>(Screen.Assistant) { key ->
                                 AssistantDetailPage(key.id)
                             }
 
-                            entry<Screen.AssistantBasic> { key ->
+                            expandableNavigationEntry<Screen.AssistantBasic>(
+                                sourceFor = { Screen.AssistantDetail(it.id) },
+                            ) { key ->
                                 AssistantBasicPage(key.id)
                             }
 
-                            entry<Screen.AssistantPrompt> { key ->
+                            expandableNavigationEntry<Screen.AssistantPrompt>(
+                                sourceFor = { Screen.AssistantDetail(it.id) },
+                            ) { key ->
                                 AssistantPromptPage(key.id)
                             }
 
-                            entry<Screen.AssistantMemory> { key ->
+                            expandableNavigationEntry<Screen.AssistantMemory>(
+                                sourceFor = { Screen.AssistantDetail(it.id) },
+                            ) { key ->
                                 AssistantMemoryPage(key.id)
                             }
 
-                            entry<Screen.AssistantRequest> { key ->
+                            expandableNavigationEntry<Screen.AssistantRequest>(
+                                sourceFor = { Screen.AssistantDetail(it.id) },
+                            ) { key ->
                                 AssistantRequestPage(key.id)
                             }
 
-                            entry<Screen.AssistantMcp> { key ->
+                            expandableNavigationEntry<Screen.AssistantMcp>(
+                                sourceFor = { Screen.AssistantDetail(it.id) },
+                            ) { key ->
                                 AssistantMcpPage(key.id)
                             }
 
-                            entry<Screen.AssistantLocalTool> { key ->
+                            expandableNavigationEntry<Screen.AssistantLocalTool>(
+                                sourceFor = { Screen.AssistantDetail(it.id) },
+                            ) { key ->
                                 AssistantLocalToolPage(key.id)
                             }
 
-                            entry<Screen.AssistantInjections> { key ->
+                            expandableNavigationEntry<Screen.AssistantInjections>(
+                                sourceFor = { Screen.AssistantDetail(it.id) },
+                            ) { key ->
                                 AssistantExtensionsPage(key.id)
                             }
 
@@ -388,11 +460,11 @@ class RouteActivity : ComponentActivity() {
                                 TranslatorPage()
                             }
 
-                            entry<Screen.Setting> {
+                            entry<Screen.Setting>(metadata = navigationScreenMetadata(Screen.Setting)) {
                                 SettingPage()
                             }
 
-                            entry<Screen.Backup> {
+                            expandableNavigationEntry<Screen.Backup>(Screen.Setting) {
                                 BackupPage()
                             }
 
@@ -404,39 +476,39 @@ class RouteActivity : ComponentActivity() {
                                 WebViewPage(key.url, key.contentId)
                             }
 
-                            entry<Screen.SettingTheme> {
+                            expandableNavigationEntry<Screen.SettingTheme>(Screen.SettingPreferencesTheme) {
                                 SettingThemePage()
                             }
 
-                            entry<Screen.SettingPreferences> {
+                            expandableNavigationEntry<Screen.SettingPreferences>(Screen.Setting) {
                                 SettingPreferencesPage()
                             }
 
-                            entry<Screen.SettingPreferencesTheme> {
+                            expandableNavigationEntry<Screen.SettingPreferencesTheme>(Screen.SettingPreferences) {
                                 SettingPreferencesThemePage()
                             }
 
-                            entry<Screen.SettingPreferencesNotification> {
+                            expandableNavigationEntry<Screen.SettingPreferencesNotification>(Screen.SettingPreferences) {
                                 SettingPreferencesNotificationPage()
                             }
 
-                            entry<Screen.SettingPreferencesGeneral> {
+                            expandableNavigationEntry<Screen.SettingPreferencesGeneral>(Screen.SettingPreferences) {
                                 SettingPreferencesGeneralPage()
                             }
 
-                            entry<Screen.SettingPreferencesUI> {
+                            expandableNavigationEntry<Screen.SettingPreferencesUI>(Screen.SettingPreferences) {
                                 SettingPreferencesUIPage()
                             }
 
-                            entry<Screen.SettingPreferencesNetwork> {
+                            expandableNavigationEntry<Screen.SettingPreferencesNetwork>(Screen.SettingPreferences) {
                                 SettingPreferencesNetworkPage()
                             }
 
-                            entry<Screen.SettingProvider> {
+                            expandableNavigationEntry<Screen.SettingProvider>(Screen.Setting) {
                                 SettingProviderPage()
                             }
 
-                            entry<Screen.SettingProviderDetail> { key ->
+                            expandableNavigationEntry<Screen.SettingProviderDetail>(Screen.SettingProvider) { key ->
                                 val id = Uuid.parse(key.providerId)
                                 SettingProviderDetailPage(id = id)
                             }
@@ -447,36 +519,36 @@ class RouteActivity : ComponentActivity() {
                             entry<Screen.SettingMedia> { SettingPage() }
                             entry<Screen.SettingMediaProviderDetail> { SettingPage() }
 
-                            entry<Screen.SettingModels> {
+                            expandableNavigationEntry<Screen.SettingModels>(Screen.Setting) {
                                 SettingModelPage()
                             }
 
-                            entry<Screen.SettingAbout> {
+                            expandableNavigationEntry<Screen.SettingAbout>(Screen.Setting) {
                                 SettingAboutPage()
                             }
 
-                            entry<Screen.SettingSearch> {
+                            expandableNavigationEntry<Screen.SettingSearch>(Screen.Setting) {
                                 SettingSearchPage()
                             }
 
-                            entry<Screen.SettingSearchDetail> { key ->
+                            expandableNavigationEntry<Screen.SettingSearchDetail>(Screen.SettingSearch) { key ->
                                 val id = Uuid.parse(key.serviceId)
                                 SettingSearchDetailPage(id)
                             }
 
-                            entry<Screen.SettingSpeech> {
+                            expandableNavigationEntry<Screen.SettingSpeech>(Screen.Setting) {
                                 SettingSpeechPage()
                             }
 
-                            entry<Screen.SettingMcp> {
+                            expandableNavigationEntry<Screen.SettingMcp>(Screen.Setting) {
                                 SettingMcpPage()
                             }
 
-                            entry<Screen.SettingFiles> {
+                            expandableNavigationEntry<Screen.SettingFiles>(Screen.Setting) {
                                 SettingFilesPage()
                             }
 
-                            entry<Screen.SettingWeb> {
+                            expandableNavigationEntry<Screen.SettingWeb>(Screen.Setting) {
                                 SettingWebPage()
                             }
 
@@ -484,39 +556,52 @@ class RouteActivity : ComponentActivity() {
                                 DebugPage()
                             }
 
-                            entry<Screen.Log> {
+                            expandableNavigationEntry<Screen.Log>(Screen.Setting) {
                                 LogPage()
                             }
 
-                            entry<Screen.Extensions> {
+                            expandableNavigationEntry<Screen.Extensions>(Screen.Setting) {
                                 ExtensionsPage()
                             }
 
-                            entry<Screen.QuickMessages> {
+                            expandableNavigationEntry<Screen.QuickMessages>(
+                                source = Screen.Extensions,
+                                additionalSource = { it is Screen.AssistantInjections },
+                            ) {
                                 QuickMessagesPage()
                             }
 
-                            entry<Screen.Prompts> {
+                            expandableNavigationEntry<Screen.Prompts>(
+                                source = Screen.Extensions,
+                                additionalSource = { it is Screen.AssistantInjections },
+                            ) {
                                 PromptPage()
                             }
 
-                            entry<Screen.Skills> {
+                            expandableNavigationEntry<Screen.Skills>(
+                                source = Screen.Extensions,
+                                additionalSource = { it is Screen.AssistantInjections },
+                            ) {
                                 SkillsPage()
                             }
 
-                            entry<Screen.Workspaces> {
+                            expandableNavigationEntry<Screen.Workspaces>(Screen.Extensions) {
                                 WorkspacePage()
                             }
 
-                            entry<Screen.WorkspaceDetail> { key ->
+                            expandableNavigationEntry<Screen.WorkspaceDetail>(Screen.Workspaces) { key ->
                                 WorkspaceDetailPage(key.id)
                             }
 
-                            entry<Screen.WorkspaceTerminal> { key ->
+                            expandableNavigationEntry<Screen.WorkspaceTerminal>(
+                                sourceFor = { Screen.WorkspaceDetail(it.id) },
+                            ) { key ->
                                 WorkspaceTerminalPage(key.id)
                             }
 
-                            entry<Screen.WorkspaceFileEditor> { key ->
+                            expandableNavigationEntry<Screen.WorkspaceFileEditor>(
+                                sourceFor = { Screen.WorkspaceDetail(it.id) },
+                            ) { key ->
                                 WorkspaceFileEditorPage(
                                     id = key.id,
                                     area = WorkspaceStorageArea.valueOf(key.area),
@@ -524,7 +609,7 @@ class RouteActivity : ComponentActivity() {
                                 )
                             }
 
-                            entry<Screen.SkillDetail> { key ->
+                            expandableNavigationEntry<Screen.SkillDetail>(Screen.Skills) { key ->
                                 SkillDetailPage(skillName = key.skillName)
                             }
 

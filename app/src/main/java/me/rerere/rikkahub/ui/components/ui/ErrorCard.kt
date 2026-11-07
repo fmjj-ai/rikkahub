@@ -164,7 +164,7 @@ fun ErrorCard(
                                         )
                                     ),
                                     linkInteractionListener = {
-                                        navController.navigate(Screen.SettingModels)
+                                        navController.navigateWithoutAnchor(Screen.SettingModels)
                                     },
                                 )
                             ) {

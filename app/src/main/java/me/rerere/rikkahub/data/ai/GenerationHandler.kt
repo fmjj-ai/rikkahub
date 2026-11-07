@@ -366,7 +366,6 @@ class GenerationHandler(
         conversation: Conversation,
         inputTransformers: List<InputMessageTransformer>,
         additionalPrompt: String,
-        targetTokens: Int,
     ): String? {
         check(messages.contextMessages().none { message -> message.getTools().any { !it.isExecuted } }) {
             "请先完成或取消待处理工具调用，再压缩这部分历史。"
@@ -381,7 +380,6 @@ class GenerationHandler(
         val instruction = buildCompressPrompt(
             additionalPrompt = additionalPrompt,
             locale = Locale.getDefault().displayName,
-            targetTokens = targetTokens,
         )
         val toolTokens = actualTools.sumOf {
             (it.name + it.description + it.parameters()).estimateTokens().toLong()

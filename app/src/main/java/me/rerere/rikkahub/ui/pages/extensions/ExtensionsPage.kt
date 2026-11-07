@@ -24,6 +24,7 @@ import me.rerere.hugeicons.stroke.Puzzle
 import me.rerere.hugeicons.stroke.Zap
 import me.rerere.rikkahub.Screen
 import me.rerere.rikkahub.ui.components.nav.BackButton
+import me.rerere.rikkahub.ui.components.nav.navigationSourceModifiers
 import me.rerere.rikkahub.ui.components.ui.CardGroup
 import me.rerere.rikkahub.ui.context.LocalNavController
 import me.rerere.rikkahub.ui.theme.CustomColors
@@ -33,6 +34,12 @@ import me.rerere.rikkahub.utils.plus
 fun ExtensionsPage() {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val navController = LocalNavController.current
+    val navigationSources = navigationSourceModifiers(
+        Screen.QuickMessages,
+        Screen.Prompts,
+        Screen.Skills,
+        Screen.Workspaces,
+    )
 
     Scaffold(
         topBar = {
@@ -57,24 +64,28 @@ fun ExtensionsPage() {
                     title = { Text(stringResource(R.string.extensions_page_section_extensions)) },
                 ) {
                     item(
+                        modifier = navigationSources.getValue(Screen.QuickMessages),
                         onClick = { navController.navigate(Screen.QuickMessages) },
                         leadingContent = { Icon(HugeIcons.Zap, null) },
                         headlineContent = { Text(stringResource(R.string.assistant_page_quick_messages)) },
                         supportingContent = { Text(stringResource(R.string.extensions_page_quick_messages_desc)) },
                     )
                     item(
+                        modifier = navigationSources.getValue(Screen.Prompts),
                         onClick = { navController.navigate(Screen.Prompts) },
                         leadingContent = { Icon(HugeIcons.Book03, null) },
                         headlineContent = { Text(stringResource(R.string.extensions_page_prompts)) },
                         supportingContent = { Text(stringResource(R.string.extensions_page_prompts_desc)) },
                     )
                     item(
+                        modifier = navigationSources.getValue(Screen.Skills),
                         onClick = { navController.navigate(Screen.Skills) },
                         leadingContent = { Icon(HugeIcons.Puzzle, null) },
                         headlineContent = { Text(stringResource(R.string.extensions_page_agent_skills)) },
                         supportingContent = { Text(stringResource(R.string.extensions_page_agent_skills_desc)) },
                     )
                     item(
+                        modifier = navigationSources.getValue(Screen.Workspaces),
                         onClick = { navController.navigate(Screen.Workspaces) },
                         leadingContent = { Icon(HugeIcons.Folder01, null) },
                         headlineContent = { Text(stringResource(R.string.extensions_page_workspace)) },

@@ -34,7 +34,8 @@ internal fun Settings.normalized(): Settings = this
         }
         it.copy(
             providers = providers,
-            assistants = assistants,
+            assistants = assistants.map { assistant -> assistant.withOfficialDefaultPrompt() },
+            compressPrompt = officialDefaultCompressPrompt(it.compressPrompt),
             ttsProviders = ttsProviders,
         )
     }

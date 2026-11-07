@@ -212,6 +212,7 @@ private fun ManageButton(onClick: () -> Unit) {
 fun ExtensionEmptyState(
     message: String,
     buttonText: String? = null,
+    actionModifier: Modifier = Modifier,
     onAction: (() -> Unit)? = null,
 ) {
     Column(
@@ -227,7 +228,7 @@ fun ExtensionEmptyState(
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
         )
         if (buttonText != null && onAction != null) {
-            TextButton(onClick = onAction) {
+            TextButton(onClick = onAction, modifier = actionModifier) {
                 Icon(HugeIcons.Link01, contentDescription = null)
                 Text(buttonText)
             }

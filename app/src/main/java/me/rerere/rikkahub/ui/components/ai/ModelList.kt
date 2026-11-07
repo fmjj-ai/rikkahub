@@ -697,7 +697,7 @@ private fun ModelItem(
                         enabled = true,
                         onLongClick = {
                             onDismiss()
-                            navController.navigate(
+                            navController.navigateWithoutAnchor(
                                 Screen.SettingProviderDetail(
                                     providerSetting.id.toString()
                                 )

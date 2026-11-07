@@ -223,7 +223,7 @@ private fun AppSearchSettings(
             IconButton(
                 onClick = {
                     onDismiss()
-                    navBackStack.navigate(Screen.SettingSearch)
+                    navBackStack.navigateWithoutAnchor(Screen.SettingSearch)
                 }
             ) {
                 Icon(HugeIcons.Settings03, null)

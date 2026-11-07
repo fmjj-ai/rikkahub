@@ -59,6 +59,31 @@ class SettingsFieldsTest {
     }
 
     @Test
+    fun `expanding navigation stays off for existing settings and backups`() {
+        assertFalse(emptyPreferences().toSettings().displaySetting.enableExpandedNavigation)
+        val legacyPreferences = mutablePreferencesOf(SettingsStore.DISPLAY_SETTING to """{"sendOnEnter":true}""")
+        val legacyDisplay = legacyPreferences.toSettings().displaySetting
+        assertTrue(legacyDisplay.sendOnEnter)
+        assertFalse(legacyDisplay.enableExpandedNavigation)
+
+        val legacyBackup = JsonInstant.decodeFromString<Settings>("""{"displaySetting":{"sendOnEnter":true}}""")
+        assertTrue(legacyBackup.displaySetting.sendOnEnter)
+        assertFalse(legacyBackup.displaySetting.enableExpandedNavigation)
+    }
+
+    @Test
+    fun `expanding navigation can be enabled and switched back`() {
+        val enabled = Settings(displaySetting = DisplaySetting(enableExpandedNavigation = true))
+        val preferences = mutablePreferencesOf().apply { putSettings(enabled) }
+        assertPersistedEquals(enabled, preferences.toSettings())
+        assertPersistedEquals(enabled, JsonInstant.decodeFromString<Settings>(JsonInstant.encodeToString(enabled)))
+
+        val disabled = enabled.copy(displaySetting = enabled.displaySetting.copy(enableExpandedNavigation = false))
+        preferences.putSettings(disabled, enabled)
+        assertPersistedEquals(disabled, preferences.toSettings())
+    }
+
+    @Test
     fun `clearing nullable fields removes old keys`() {
         val settings = Settings(titleModelId = Uuid.random(), suggestionModelId = Uuid.random())
         val preferences = mutablePreferencesOf().apply { putSettings(settings) }

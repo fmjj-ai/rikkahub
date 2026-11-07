@@ -1024,7 +1024,7 @@ class ChatService(
             settings, assistant, chatModel, prefix,
             createChatTools(settings, assistant, conversation.workspaceCwd), memories, conversation,
             inputTransformers + templateTransformer + workspaceReminderTransformer,
-            additionalPrompt, summaryTarget,
+            additionalPrompt,
         )
         fun withCheckpoint(summary: String): List<UIMessage> {
             me.rerere.rikkahub.data.ai.validateCompressionSummary(summary, sourceTokens)
@@ -1044,8 +1044,7 @@ class ChatService(
             "target_tokens" to summaryTarget.coerceAtMost(outputBudget).toString(),
             "additional_context" to additionalPrompt,
             "locale" to Locale.getDefault().displayName,
-        ) + "\nUse at most ${summaryTarget.coerceAtMost(outputBudget)} tokens, preferably fewer. " +
-            "The summary must be shorter than the source. Do not pad it with headings or commentary."
+        )
         // 单次压缩请求的输入上限动态跟随当前聊天模型的自动压缩阈值（模型设置里的“自动压缩上下文”），
         // 每次压缩都会重新读取，用户改完设置后下次压缩立即生效；触发自动压缩时待压缩历史不会超过该阈值，
         // 因此正常情况下第一次压缩只需要一个请求，不再按固定的 32k 切块。
