@@ -103,6 +103,12 @@ android {
     sourceSets {
         getByName("androidTest").assets.srcDirs("$projectDir/schemas")
     }
+    testOptions {
+        unitTests.all {
+            // JVM 回归中的本机 Ktor 服务不应加载需要 Android Log 的运行时日志绑定。
+            it.systemProperty("slf4j.provider", "org.slf4j.helpers.NOP_FallbackServiceProvider")
+        }
+    }
     androidResources {
         generateLocaleConfig = true
     }
@@ -301,6 +307,7 @@ dependencies {
     implementation(project(":common"))
     implementation(project(":material3"))
     implementation(project(":workspace"))
+    implementation(project(":oauth"))
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar", "*.aar"))))
     implementation(kotlin("reflect"))
 

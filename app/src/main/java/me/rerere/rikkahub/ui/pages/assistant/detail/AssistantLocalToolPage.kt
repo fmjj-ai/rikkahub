@@ -82,7 +82,7 @@ fun AssistantLocalToolPage(id: String) {
 private fun AssistantLocalToolContent(
     innerPadding: PaddingValues,
     assistant: Assistant,
-    onUpdate: (Assistant) -> Unit
+    onUpdate: ((Assistant) -> Assistant) -> Unit
 ) {
     val context = LocalContext.current
     val toaster = LocalToaster.current
@@ -127,7 +127,7 @@ private fun AssistantLocalToolContent(
         } else {
             assistant.localTools - option
         }
-        onUpdate(assistant.copy(localTools = newLocalTools))
+        onUpdate { currentAssistant -> currentAssistant.copy(localTools = newLocalTools) }
     }
 
     Column(

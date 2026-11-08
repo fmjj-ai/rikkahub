@@ -211,6 +211,7 @@ private fun ProviderMergeConfirm(
 }
 
 private fun ProviderSetting.mergeProtocols(): List<ProviderProtocol> = when (this) {
+    is ProviderSetting.Account -> emptyList()
     is ProviderSetting.MultiProtocol -> configuredProtocols()
     is ProviderSetting.OpenAI -> listOf(ProviderProtocol.OPENAI)
     is ProviderSetting.Google -> listOf(ProviderProtocol.GOOGLE)

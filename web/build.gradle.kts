@@ -14,10 +14,14 @@ val buildWebUi = tasks.register<Exec>("buildWebUi") {
     workingDir = webUiDir.asFile
     when {
         Os.isFamily(Os.FAMILY_MAC) -> commandLine("zsh", "-ic", "pnpm run build")
-        Os.isFamily(Os.FAMILY_WINDOWS) -> commandLine("cmd", "/c", "pnpm run build")
+        Os.isFamily(Os.FAMILY_WINDOWS) -> commandLine(
+            "pwsh", "-NoProfile", "-File",
+            rootProject.file("scripts/Invoke-WebUiBuild.ps1").absolutePath
+        )
         else -> commandLine("pnpm", "run", "build")
     }
 
+    inputs.file(rootProject.file("scripts/Invoke-WebUiBuild.ps1"))
     inputs.files(
         webUiDir.file("package.json"),
         webUiDir.file("pnpm-lock.yaml"),

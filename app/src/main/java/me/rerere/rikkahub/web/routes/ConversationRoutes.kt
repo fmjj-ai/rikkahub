@@ -1,5 +1,8 @@
 package me.rerere.rikkahub.web.routes
 
+import me.rerere.rikkahub.utils.ReferenceProjectionCache
+import me.rerere.rikkahub.web.dto.MessageNodeDto
+import me.rerere.rikkahub.data.model.MessageNode
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
@@ -143,9 +146,10 @@ fun Route.conversationRoutes(
         // GET /api/conversations/{id} - Get single conversation
         get("/{id}") {
             val uuid = call.parameters["id"].toUuid("conversation id")
-            val conversation = conversationRepo.getConversationById(uuid)
-                ?: throw NotFoundException("Conversation not found")
-
+            if (!conversationRepo.existsConversationById(uuid)) {
+                throw NotFoundException("Conversation not found")
+            }
+            val conversation = chatService.getInitializedConversation(uuid)
             val isGenerating = chatService.getGenerationJobStateFlow(uuid).first() != null
             call.respond(conversation.toDto(isGenerating))
         }
@@ -163,10 +167,10 @@ fun Route.conversationRoutes(
         // POST /api/conversations/{id}/pin - Toggle pinned status
         post("/{id}/pin") {
             val uuid = call.parameters["id"].toUuid("conversation id")
-            val conversation = conversationRepo.getConversationById(uuid)
-                ?: throw NotFoundException("Conversation not found")
-
-            chatService.saveConversation(uuid, conversation.copy(isPinned = !conversation.isPinned))
+            if (!conversationRepo.existsConversationById(uuid)) {
+                throw NotFoundException("Conversation not found")
+            }
+            chatService.updateConversationMetadataAndSave(uuid) { it.copy(isPinned = !it.isPinned) }
             call.respond(HttpStatusCode.OK, mapOf("status" to "updated"))
         }
 
@@ -190,10 +194,10 @@ fun Route.conversationRoutes(
                 throw BadRequestException("Title must not be blank")
             }
 
-            val conversation = conversationRepo.getConversationById(uuid)
-                ?: throw NotFoundException("Conversation not found")
-
-            chatService.saveConversation(uuid, conversation.copy(title = title))
+            if (!conversationRepo.existsConversationById(uuid)) {
+                throw NotFoundException("Conversation not found")
+            }
+            chatService.updateConversationMetadataAndSave(uuid) { it.copy(title = title) }
             call.respond(HttpStatusCode.OK, mapOf("status" to "updated"))
         }
 
@@ -201,8 +205,9 @@ fun Route.conversationRoutes(
         post("/{id}/injections") {
             val uuid = call.parameters["id"].toUuid("conversation id")
             val request = call.receive<UpdateConversationInjectionsRequest>()
-            conversationRepo.getConversationById(uuid)
-                ?: throw NotFoundException("Conversation not found")
+            if (!conversationRepo.existsConversationById(uuid)) {
+                throw NotFoundException("Conversation not found")
+            }
 
             chatService.initializeConversation(uuid)
             val conversation = chatService.getConversationFlow(uuid).first()
@@ -218,11 +223,10 @@ fun Route.conversationRoutes(
                 modeInjectionIds = request.modeInjectionIds,
                 lorebookIds = request.lorebookIds,
             )
-            val updatedConversation = conversation.copy(
-                modeInjectionIds = modeInjectionIds,
-                lorebookIds = lorebookIds,
-            )
-            chatService.saveConversation(uuid, updatedConversation)
+            chatService.updateConversationMetadataAndSave(uuid) {
+                it.copy(modeInjectionIds = modeInjectionIds, lorebookIds = lorebookIds)
+            }
+            val updatedConversation = chatService.getConversationFlow(uuid).value
 
             val isGenerating = chatService.getGenerationJobStateFlow(uuid).first() != null
             call.respond(HttpStatusCode.OK, updatedConversation.toDto(isGenerating))
@@ -239,10 +243,10 @@ fun Route.conversationRoutes(
                 throw BadRequestException("Assistant not found")
             }
 
-            val conversation = conversationRepo.getConversationById(uuid)
-                ?: throw NotFoundException("Conversation not found")
-
-            chatService.saveConversation(uuid, conversation.copy(assistantId = targetAssistantId))
+            if (!conversationRepo.existsConversationById(uuid)) {
+                throw NotFoundException("Conversation not found")
+            }
+            chatService.updateConversationMetadataAndSave(uuid) { it.copy(assistantId = targetAssistantId, folderId = null) }
             call.respond(HttpStatusCode.OK, mapOf("status" to "updated"))
         }
 
@@ -251,7 +255,7 @@ fun Route.conversationRoutes(
             val uuid = call.parameters["id"].toUuid("conversation id")
             val request = call.receive<MoveConversationToFolderRequest>()
 
-            val conversation = conversationRepo.getConversationById(uuid)
+            val conversation = conversationRepo.getConversationMetadata(uuid)
                 ?: throw NotFoundException("Conversation not found")
 
             val targetFolderId = request.folderId?.takeIf { it.isNotBlank() }?.toUuid("folder id")
@@ -367,16 +371,16 @@ fun Route.conversationRoutes(
             val id = call.parameters["id"] ?: return@sse
             val uuid = runCatching { Uuid.parse(id) }.getOrNull() ?: return@sse
 
-            chatService.initializeConversation(uuid)
             chatService.addConversationReference(uuid)
-
-            heartbeat {
-                period = 1.seconds
-            }
-
             try {
+                chatService.initializeConversation(uuid)
+                heartbeat {
+                    period = 1.seconds
+                }
+
                 var sequence = 0L
                 var previousDto: ConversationDto? = null
+                val nodeProjection = ReferenceProjectionCache<MessageNode, MessageNodeDto> { it.toDto() }
 
                 val knownErrorIds = chatService.errors.value.map { it.id }.toMutableSet()
 
@@ -387,7 +391,8 @@ fun Route.conversationRoutes(
                         .map { it != null }
                         .distinctUntilChanged()
                 ) { conversation, isGenerating ->
-                    ConversationStreamPayload.Conversation(conversation.toDto(isGenerating))
+                    val nodes = nodeProjection.project(conversation.messageNodes)
+                    ConversationStreamPayload.Conversation(conversation.toDto(isGenerating, nodes))
                 }
 
                 val errorEvents = chatService.errors.map { errors ->

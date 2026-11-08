@@ -57,37 +57,31 @@ data class Conversation(
     }
 
     fun updateCurrentMessages(messages: List<UIMessage>): Conversation {
-        val newNodes = this.messageNodes.toMutableList()
-
+        var updatedNodes: MutableList<MessageNode>? = null
         messages.forEachIndexed { index, message ->
-            val node = newNodes
-                .getOrElse(index) { message.toMessageNode() }
-
-            val newMessages = node.messages.toMutableList()
-            var newMessageIndex = node.selectIndex
-            if (newMessages.any { it.id == message.id }) {
-                newMessages[newMessages.indexOfFirst { it.id == message.id }] = message
-            } else {
-                newMessages.add(message)
-                newMessageIndex = newMessages.lastIndex
+            val node = messageNodes.getOrNull(index)
+            if (node == null) {
+                if (updatedNodes == null) updatedNodes = messageNodes.toMutableList()
+                updatedNodes!!.add(message.toMessageNode())
+                return@forEachIndexed
             }
+            if (node.messages.getOrNull(node.selectIndex) === message) return@forEachIndexed
+            val branchIndex = node.messages.indexOfFirst { it.id == message.id }
+            if (branchIndex >= 0 && node.messages[branchIndex] == message) return@forEachIndexed
 
-            val newNode = node.copy(
-                messages = newMessages,
-                selectIndex = newMessageIndex
-            )
-
-            // 更新newNodes
-            if (index > newNodes.lastIndex) {
-                newNodes.add(newNode)
+            val updatedMessages = node.messages.toMutableList()
+            val selectedIndex = if (branchIndex >= 0) {
+                updatedMessages[branchIndex] = message
+                node.selectIndex
             } else {
-                newNodes[index] = newNode
+                updatedMessages.add(message)
+                updatedMessages.lastIndex
             }
+            if (updatedNodes == null) updatedNodes = messageNodes.toMutableList()
+            updatedNodes!![index] = node.copy(messages = updatedMessages, selectIndex = selectedIndex)
         }
-
-        return this.copy(
-            messageNodes = newNodes
-        )
+        // 输入可以只覆盖前缀；保留其余节点和未变化分支的原始引用。
+        return updatedNodes?.let { copy(messageNodes = it) } ?: this
     }
 
     companion object {

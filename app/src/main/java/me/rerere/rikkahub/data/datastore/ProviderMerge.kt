@@ -90,6 +90,7 @@ fun buildProviderMergePlan(
     others: List<ProviderSetting>,
 ): ProviderMergePlan {
     val participants = listOf(primary) + others
+    require(participants.none { it is ProviderSetting.Account }) { "账号提供商不参与协议合并" }
     val conflicts = ProviderProtocol.entries.mapNotNull { protocol ->
         val options = participants.mapNotNull { provider ->
             provider.mergeEndpoint(protocol)?.let { ProviderMergeOption(provider, it) }
@@ -144,6 +145,7 @@ fun Settings.applyProviderMerge(
 }
 
 fun ProviderSetting.mergeBaseUrl(): String = when (this) {
+    is ProviderSetting.Account -> ""
     is ProviderSetting.MultiProtocol -> baseUrl.ifBlank {
         openai?.baseUrl ?: google?.baseUrl ?: claude?.baseUrl ?: ""
     }
@@ -154,6 +156,7 @@ fun ProviderSetting.mergeBaseUrl(): String = when (this) {
 }
 
 private fun ProviderSetting.mergeEndpoint(protocol: ProviderProtocol): ProviderSetting? = when (this) {
+    is ProviderSetting.Account -> null
     is ProviderSetting.MultiProtocol -> endpointConfig(protocol)
     is ProviderSetting.OpenAI -> takeIf { protocol == ProviderProtocol.OPENAI }
     is ProviderSetting.Google -> takeIf { protocol == ProviderProtocol.GOOGLE }
@@ -161,6 +164,7 @@ private fun ProviderSetting.mergeEndpoint(protocol: ProviderProtocol): ProviderS
 }
 
 private fun ProviderSetting.mergeProtocol(): ProviderProtocol? = when (this) {
+    is ProviderSetting.Account -> null
     is ProviderSetting.MultiProtocol -> defaultProtocol
     is ProviderSetting.OpenAI -> ProviderProtocol.OPENAI
     is ProviderSetting.Google -> ProviderProtocol.GOOGLE
@@ -168,6 +172,7 @@ private fun ProviderSetting.mergeProtocol(): ProviderProtocol? = when (this) {
 }
 
 private fun ProviderSetting.mergeApiKey(): String = when (this) {
+    is ProviderSetting.Account -> ""
     is ProviderSetting.OpenAI -> apiKey
     is ProviderSetting.Google -> apiKey
     is ProviderSetting.Claude -> apiKey
@@ -175,6 +180,7 @@ private fun ProviderSetting.mergeApiKey(): String = when (this) {
 }
 
 private fun ProviderSetting.normalizedFor(parent: ProviderSetting.MultiProtocol): ProviderSetting = when (this) {
+    is ProviderSetting.Account -> error("账号提供商不参与协议合并")
     is ProviderSetting.OpenAI -> copy(
         id = parent.id,
         name = parent.name,

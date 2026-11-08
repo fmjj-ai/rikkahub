@@ -1,5 +1,8 @@
 package me.rerere.rikkahub.ui.pages.assistant.detail
 
+import kotlinx.coroutines.flow.drop
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.key
 import me.rerere.hugeicons.HugeIcons
 import me.rerere.hugeicons.stroke.ArrowDown01
 import me.rerere.hugeicons.stroke.ArrowUp01
@@ -103,8 +106,9 @@ fun AssistantPromptPage(id: String) {
             parametersOf(id)
         }
     )
-    val assistant by vm.assistant.collectAsStateWithLifecycle()
     val settings by vm.settings.collectAsStateWithLifecycle()
+    val assistantId = remember(id) { Uuid.parse(id) }
+    val assistant = settings.assistants.firstOrNull { it.id == assistantId }
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
     Scaffold(
@@ -123,12 +127,16 @@ fun AssistantPromptPage(id: String) {
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         containerColor = CustomColors.topBarColors.containerColor,
     ) { innerPadding ->
-        AssistantPromptContent(
-            innerPadding = innerPadding,
-            assistant = assistant,
-            settings = settings,
-            onUpdate = { vm.update(it) }
-        )
+        if (!settings.init && assistant != null) {
+            key(assistant.id) {
+                AssistantPromptContent(
+                    innerPadding = innerPadding,
+                    assistant = assistant,
+                    settings = settings,
+                    onUpdate = { vm.update(it) },
+                )
+            }
+        }
     }
 }
 
@@ -137,7 +145,7 @@ private fun AssistantPromptContent(
     innerPadding: PaddingValues,
     assistant: Assistant,
     settings: Settings,
-    onUpdate: (Assistant) -> Unit
+    onUpdate: ((Assistant) -> Assistant) -> Unit
 ) {
     val context = LocalContext.current
     val templateTransformer = koinInject<TemplateTransformer>()
@@ -161,15 +169,12 @@ private fun AssistantPromptContent(
                 val systemPromptValue = rememberTextFieldState(
                     initialText = assistant.systemPrompt,
                 )
-                LaunchedEffect(Unit) {
-                    snapshotFlow { systemPromptValue.text }.collect {
-                        onUpdate(
-                            assistant.copy(
-                                systemPrompt = it.toString()
-                            )
-                        )
-                    }
-                }
+                val latestOnUpdate by rememberUpdatedState(onUpdate)
+    LaunchedEffect(systemPromptValue) {
+        snapshotFlow { systemPromptValue.text.toString() }.drop(1).collect { text ->
+            latestOnUpdate { current -> current.copy(systemPrompt = text) }
+        }
+    }
 
                 TextArea(
                     state = systemPromptValue,
@@ -217,11 +222,9 @@ private fun AssistantPromptContent(
                     Switch(
                         checked = assistant.allowConversationSystemPrompt,
                         onCheckedChange = {
-                            onUpdate(
-                                assistant.copy(
+                            onUpdate { currentAssistant -> currentAssistant.copy(
                                     allowConversationSystemPrompt = it
-                                )
-                            )
+                                ) }
                         }
                     )
                 }
@@ -243,11 +246,9 @@ private fun AssistantPromptContent(
                     Switch(
                         checked = assistant.allowConversationPromptInjection,
                         onCheckedChange = {
-                            onUpdate(
-                                assistant.copy(
+                            onUpdate { currentAssistant -> currentAssistant.copy(
                                     allowConversationPromptInjection = it
-                                )
-                            )
+                                ) }
                         }
                     )
                 }
@@ -267,7 +268,7 @@ private fun AssistantPromptContent(
                         Spacer(Modifier.weight(1f))
                         IconButton(
                             onClick = {
-                                onUpdate(assistant.copy(messageTemplate = "{{ message }}"))
+                                onUpdate { currentAssistant -> currentAssistant.copy(messageTemplate = "{{ message }}") }
                             },
                             enabled = assistant.messageTemplate != "{{ message }}",
                         ) {
@@ -283,11 +284,9 @@ private fun AssistantPromptContent(
                     OutlinedTextField(
                         value = assistant.messageTemplate,
                         onValueChange = {
-                            onUpdate(
-                                assistant.copy(
+                            onUpdate { currentAssistant -> currentAssistant.copy(
                                     messageTemplate = it
-                                )
-                            )
+                                ) }
                         },
                         modifier = Modifier.fillMaxWidth(),
                         minLines = 5,
@@ -424,30 +423,24 @@ private fun AssistantPromptContent(
                                 options = listOf(MessageRole.USER, MessageRole.ASSISTANT),
                                 selectedOption = presetMessage.role,
                                 onOptionSelected = { role ->
-                                    onUpdate(
-                                        assistant.copy(
-                                            presetMessages = assistant.presetMessages.mapIndexed { i, msg ->
-                                                if (i == index) {
+                                    onUpdate { currentAssistant -> currentAssistant.copy(
+                                            presetMessages = currentAssistant.presetMessages.map { msg ->
+                                if (msg.id == presetMessage.id) {
                                                     msg.copy(role = role)
                                                 } else {
                                                     msg
                                                 }
                                             }
-                                        )
-                                    )
+                                        ) }
                                 },
                                 modifier = Modifier.width(160.dp)
                             )
                             Spacer(modifier = Modifier.weight(1f))
                             IconButton(
                                 onClick = {
-                                    onUpdate(
-                                        assistant.copy(
-                                            presetMessages = assistant.presetMessages.filterIndexed { i, _ ->
-                                                i != index
-                                            }
-                                        )
-                                    )
+                                    onUpdate { currentAssistant -> currentAssistant.copy(
+                                            presetMessages = currentAssistant.presetMessages.filterNot { it.id == presetMessage.id }
+                                        ) }
                                 }
                             ) {
                                 Icon(HugeIcons.Cancel01, null)
@@ -456,17 +449,15 @@ private fun AssistantPromptContent(
                         OutlinedTextField(
                             value = presetMessage.toText(),
                             onValueChange = { text ->
-                                onUpdate(
-                                    assistant.copy(
-                                        presetMessages = assistant.presetMessages.mapIndexed { i, msg ->
-                                            if (i == index) {
+                                onUpdate { currentAssistant -> currentAssistant.copy(
+                                        presetMessages = currentAssistant.presetMessages.map { msg ->
+                                if (msg.id == presetMessage.id) {
                                                 msg.copy(parts = listOf(UIMessagePart.Text(text)))
                                             } else {
                                                 msg
                                             }
                                         }
-                                    )
-                                )
+                                    ) }
                             },
                             modifier = Modifier.fillMaxWidth(),
                             maxLines = 6
@@ -475,21 +466,13 @@ private fun AssistantPromptContent(
                 }
                 Button(
                     onClick = {
-                        val lastRole = assistant.presetMessages.lastOrNull()?.role ?: MessageRole.ASSISTANT
-                        val nextRole = when (lastRole) {
-                            MessageRole.USER -> MessageRole.ASSISTANT
-                            MessageRole.ASSISTANT -> MessageRole.USER
-                            else -> MessageRole.USER
-                        }
-                        onUpdate(
-                            assistant.copy(
-                                presetMessages = assistant.presetMessages + UIMessage(
-                                    role = nextRole,
-                                    parts = listOf(UIMessagePart.Text(""))
-                                )
-                            )
-                        )
-                    },
+                    val added = UIMessage(role = MessageRole.USER, parts = listOf(UIMessagePart.Text("")))
+                    onUpdate { current ->
+                        val lastRole = current.presetMessages.lastOrNull()?.role ?: MessageRole.ASSISTANT
+                        val nextRole = if (lastRole == MessageRole.USER) MessageRole.ASSISTANT else MessageRole.USER
+                        current.copy(presetMessages = current.presetMessages + added.copy(role = nextRole))
+                    }
+                },
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Icon(HugeIcons.Add01, null)
@@ -523,13 +506,8 @@ private fun AssistantPromptContent(
                 }
                 Button(
                     onClick = {
-                        onUpdate(
-                            assistant.copy(
-                                regexes = assistant.regexes + AssistantRegex(
-                                    id = Uuid.random()
-                                )
-                            )
-                        )
+                        val added = AssistantRegex(id = Uuid.random())
+                        onUpdate { current -> current.copy(regexes = current.regexes + added) }
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -543,7 +521,7 @@ private fun AssistantPromptContent(
 @Composable
 private fun AssistantRegexCard(
     regex: AssistantRegex,
-    onUpdate: (Assistant) -> Unit,
+    onUpdate: ((Assistant) -> Assistant) -> Unit,
     assistant: Assistant,
     index: Int
 ) {
@@ -573,17 +551,15 @@ private fun AssistantRegexCard(
                 Switch(
                     checked = regex.enabled,
                     onCheckedChange = { enabled ->
-                        onUpdate(
-                            assistant.copy(
-                                regexes = assistant.regexes.mapIndexed { i, reg ->
-                                    if (i == index) {
+                        onUpdate { currentAssistant -> currentAssistant.copy(
+                                regexes = currentAssistant.regexes.map { reg ->
+                                if (reg.id == regex.id) {
                                         reg.copy(enabled = enabled)
                                     } else {
                                         reg
                                     }
                                 }
-                            )
-                        )
+                            ) }
                     },
                     modifier = Modifier.padding(start = 8.dp)
                 )
@@ -604,17 +580,15 @@ private fun AssistantRegexCard(
                 OutlinedTextField(
                     value = regex.name,
                     onValueChange = { name ->
-                        onUpdate(
-                            assistant.copy(
-                                regexes = assistant.regexes.mapIndexed { i, reg ->
-                                    if (i == index) {
+                        onUpdate { currentAssistant -> currentAssistant.copy(
+                                regexes = currentAssistant.regexes.map { reg ->
+                                if (reg.id == regex.id) {
                                         reg.copy(name = name)
                                     } else {
                                         reg
                                     }
                                 }
-                            )
-                        )
+                            ) }
                     },
                     modifier = Modifier.fillMaxWidth(),
                     label = { Text(stringResource(R.string.assistant_page_regex_name)) }
@@ -623,17 +597,15 @@ private fun AssistantRegexCard(
                 OutlinedTextField(
                     value = regex.findRegex,
                     onValueChange = { findRegex ->
-                        onUpdate(
-                            assistant.copy(
-                                regexes = assistant.regexes.mapIndexed { i, reg ->
-                                    if (i == index) {
+                        onUpdate { currentAssistant -> currentAssistant.copy(
+                                regexes = currentAssistant.regexes.map { reg ->
+                                if (reg.id == regex.id) {
                                         reg.copy(findRegex = findRegex.trim())
                                     } else {
                                         reg
                                     }
                                 }
-                            )
-                        )
+                            ) }
                     },
                     modifier = Modifier.fillMaxWidth(),
                     label = { Text(stringResource(R.string.assistant_page_regex_find_regex)) },
@@ -643,17 +615,15 @@ private fun AssistantRegexCard(
                 OutlinedTextField(
                     value = regex.replaceString,
                     onValueChange = { replaceString ->
-                        onUpdate(
-                            assistant.copy(
-                                regexes = assistant.regexes.mapIndexed { i, reg ->
-                                    if (i == index) {
+                        onUpdate { currentAssistant -> currentAssistant.copy(
+                                regexes = currentAssistant.regexes.map { reg ->
+                                if (reg.id == regex.id) {
                                         reg.copy(replaceString = replaceString)
                                     } else {
                                         reg
                                     }
                                 }
-                            )
-                        )
+                            ) }
                     },
                     modifier = Modifier.fillMaxWidth(),
                     label = { Text(stringResource(R.string.assistant_page_regex_replace_string)) },
@@ -676,22 +646,16 @@ private fun AssistantRegexCard(
                                 Checkbox(
                                     checked = scope in regex.affectingScope,
                                     onCheckedChange = { checked ->
-                                        val newScopes = if (checked) {
-                                            regex.affectingScope + scope
-                                        } else {
-                                            regex.affectingScope - scope
+                                        onUpdate { current ->
+                                            current.copy(regexes = current.regexes.map { reg ->
+                                                if (reg.id == regex.id) {
+                                                    reg.copy(
+                                                        affectingScope = if (checked) reg.affectingScope + scope
+                                                        else reg.affectingScope - scope,
+                                                    )
+                                                } else reg
+                                            })
                                         }
-                                        onUpdate(
-                                            assistant.copy(
-                                                regexes = assistant.regexes.mapIndexed { i, reg ->
-                                                    if (i == index) {
-                                                        reg.copy(affectingScope = newScopes)
-                                                    } else {
-                                                        reg
-                                                    }
-                                                }
-                                            )
-                                        )
                                     }
                                 )
                                 Text(
@@ -710,17 +674,15 @@ private fun AssistantRegexCard(
                     Checkbox(
                         checked = regex.visualOnly,
                         onCheckedChange = { visualOnly ->
-                            onUpdate(
-                                assistant.copy(
-                                    regexes = assistant.regexes.mapIndexed { i, reg ->
-                                        if (i == index) {
+                            onUpdate { currentAssistant -> currentAssistant.copy(
+                                    regexes = currentAssistant.regexes.map { reg ->
+                                if (reg.id == regex.id) {
                                             reg.copy(visualOnly = visualOnly)
                                         } else {
                                             reg
                                         }
                                     }
-                                )
-                            )
+                                ) }
                         }
                     )
                     Text(
@@ -731,13 +693,9 @@ private fun AssistantRegexCard(
 
                 TextButton(
                     onClick = {
-                        onUpdate(
-                            assistant.copy(
-                                regexes = assistant.regexes.filterIndexed { i, _ ->
-                                    i != index
-                                }
-                            )
-                        )
+                        onUpdate { currentAssistant -> currentAssistant.copy(
+                                regexes = currentAssistant.regexes.filterNot { it.id == regex.id }
+                            ) }
                     }
                 ) {
                     Row(

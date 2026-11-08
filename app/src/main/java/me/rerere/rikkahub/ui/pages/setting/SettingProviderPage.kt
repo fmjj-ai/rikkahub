@@ -508,22 +508,38 @@ private fun handleImageQRCode(
 
 @Composable
 private fun AddButton(onAdd: (ProviderSetting) -> Unit) {
+    var chooseType by remember { mutableStateOf(false) }
     val dialogState = useEditState<ProviderSetting> {
         onAdd(it)
     }
 
     IconButton(
         onClick = {
-            dialogState.open(
-                ProviderSetting.MultiProtocol(
-                    name = "",
-                    baseUrl = "",
-                    openai = ProviderSetting.OpenAI(apiKey = "", baseUrl = ""),
-                )
-            )
+            chooseType = true
         }
     ) {
         Icon(HugeIcons.Add01, "Add")
+    }
+
+    if (chooseType) {
+        AlertDialog(
+            onDismissRequest = { chooseType = false },
+            title = { Text("添加提供商") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    TextButton(onClick = {
+                        chooseType = false
+                        dialogState.open(ProviderSetting.MultiProtocol(name = "", baseUrl = "",
+                            openai = ProviderSetting.OpenAI(apiKey = "", baseUrl = "")))
+                    }) { Text("API Key / 多协议提供商") }
+                    TextButton(onClick = {
+                        chooseType = false
+                        dialogState.open(ProviderSetting.ChatGPT())
+                    }) { Text("ChatGPT · 账号登录") }
+                }
+            },
+            confirmButton = { TextButton(onClick = { chooseType = false }) { Text("取消") } },
+        )
     }
 
     if (dialogState.isEditing) {

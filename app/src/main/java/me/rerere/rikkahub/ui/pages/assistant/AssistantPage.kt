@@ -1,5 +1,6 @@
 package me.rerere.rikkahub.ui.pages.assistant
 
+import me.rerere.rikkahub.data.datastore.moveById
 import me.rerere.hugeicons.HugeIcons
 import me.rerere.hugeicons.stroke.Copy01
 import me.rerere.hugeicons.stroke.Add01
@@ -146,13 +147,14 @@ fun AssistantPage(vm: AssistantVM = koinViewModel()) {
             val lazyListState = rememberLazyListState()
             val isFiltering = selectedTagIds.isNotEmpty() || searchQuery.isNotBlank()
             val reorderableState = rememberReorderableLazyListState(lazyListState) { from, to ->
-                if (!isFiltering) {
-                    val newAssistants = settings.assistants.toMutableList().apply {
-                        add(to.index, removeAt(from.index))
-                    }
-                    vm.updateSettings(settings.copy(assistants = newAssistants))
-                }
+        if (!isFiltering) {
+            val fromId = settings.assistants.getOrNull(from.index)?.id
+            val toId = settings.assistants.getOrNull(to.index)?.id
+            vm.updateSettings { latest ->
+                latest.copy(assistants = latest.assistants.moveById(fromId, toId) { it.id })
             }
+        }
+    }
             val haptic = LocalHapticFeedback.current
 
             // 搜索框
@@ -270,11 +272,12 @@ private fun AssistantTagsFilterRow(
     if (settings.assistantTags.isNotEmpty()) {
         val tagsListState = rememberLazyListState()
         val tagsReorderableState = rememberReorderableLazyListState(tagsListState) { from, to ->
-            val newTags = settings.assistantTags.toMutableList().apply {
-                add(to.index, removeAt(from.index))
-            }
-            vm.updateSettings(settings.copy(assistantTags = newTags))
+        val fromId = settings.assistantTags.getOrNull(from.index)?.id
+        val toId = settings.assistantTags.getOrNull(to.index)?.id
+        vm.updateSettings { latest ->
+            latest.copy(assistantTags = latest.assistantTags.moveById(fromId, toId) { it.id })
         }
+    }
 
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(8.dp),

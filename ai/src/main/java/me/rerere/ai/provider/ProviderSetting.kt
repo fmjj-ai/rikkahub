@@ -357,6 +357,49 @@ sealed class ProviderSetting {
         }
     }
 
+    /** 账号类地址由实现固定，不能转成可填写第三方地址的 API Key 配置。 */
+    @Serializable
+    sealed class Account : ProviderSetting() {
+        abstract val credential: OAuthCredential?
+        abstract fun withCredential(credential: OAuthCredential?): Account
+    }
+
+    @Serializable
+    @SerialName("chatgpt")
+    data class ChatGPT(
+        override val id: Uuid = Uuid.random(),
+        override val enabled: Boolean = true,
+        override val name: String = "ChatGPT",
+        override val models: List<Model> = emptyList(),
+        override val balanceOption: BalanceOption = BalanceOption(),
+        @Transient override val builtIn: Boolean = false,
+        @Transient override val description: @Composable (() -> Unit) = {},
+        @Transient override val shortDescription: @Composable (() -> Unit) = {},
+        override val credential: OAuthCredential? = null,
+    ) : Account() {
+        override fun withCredential(credential: OAuthCredential?): Account = copy(credential = credential)
+        override fun addModel(model: Model): ProviderSetting = copy(models = models + model)
+        override fun editModel(model: Model): ProviderSetting =
+            copy(models = models.map { if (it.id == model.id) model else it })
+        override fun delModel(model: Model): ProviderSetting = copy(models = models.filterNot { it.id == model.id })
+        override fun moveMove(from: Int, to: Int): ProviderSetting =
+            copy(models = models.toMutableList().apply { add(to, removeAt(from)) })
+
+        override fun copyProvider(
+            id: Uuid,
+            enabled: Boolean,
+            name: String,
+            models: List<Model>,
+            balanceOption: BalanceOption,
+            builtIn: Boolean,
+            description: @Composable (() -> Unit),
+            shortDescription: @Composable (() -> Unit),
+        ): ProviderSetting = copy(
+            id = id, enabled = enabled, name = name, models = models, balanceOption = balanceOption,
+            builtIn = builtIn, description = description, shortDescription = shortDescription,
+        )
+    }
+
     companion object {
         val Types by lazy {
             listOf(
@@ -407,11 +450,13 @@ private fun ProviderSetting.asEndpointOf(parent: ProviderSetting.MultiProtocol):
         )
 
         is ProviderSetting.MultiProtocol -> this
+        is ProviderSetting.Account -> error("账号提供商不支持多协议端点")
     }
 }
 
 /** 协议配置是否已经可以发请求：Key 已填（Google 也接受 Vertex Service Account）。 */
 fun ProviderSetting.isConfigured(): Boolean = when (this) {
+    is ProviderSetting.Account -> !credential?.accessToken.isNullOrBlank()
     is ProviderSetting.OpenAI -> apiKey.isNotBlank() && baseUrl.isNotBlank()
     is ProviderSetting.Claude -> apiKey.isNotBlank() && baseUrl.isNotBlank()
     is ProviderSetting.Google -> (apiKey.isNotBlank() && baseUrl.isNotBlank()) ||
@@ -423,6 +468,7 @@ fun ProviderSetting.isConfigured(): Boolean = when (this) {
 
 /** 模型实际使用的协议；旧 typed 服务商直接由其类型决定。 */
 fun ProviderSetting.protocolOf(model: Model): ProviderProtocol? = when (this) {
+    is ProviderSetting.Account -> null
     is ProviderSetting.MultiProtocol -> model.protocol ?: defaultProtocol
     is ProviderSetting.OpenAI -> ProviderProtocol.OPENAI
     is ProviderSetting.Google -> ProviderProtocol.GOOGLE
@@ -433,6 +479,7 @@ fun ProviderSetting.protocolOf(model: Model): ProviderProtocol? = when (this) {
  * 把旧的单协议服务商升级为多协议服务商，已有模型显式写入原协议，保证升级后行为不变。
  */
 fun ProviderSetting.toMultiProtocol(): ProviderSetting.MultiProtocol = when (this) {
+    is ProviderSetting.Account -> error("账号提供商不能转换为多协议提供商")
     is ProviderSetting.MultiProtocol -> this
 
     is ProviderSetting.OpenAI -> ProviderSetting.MultiProtocol(

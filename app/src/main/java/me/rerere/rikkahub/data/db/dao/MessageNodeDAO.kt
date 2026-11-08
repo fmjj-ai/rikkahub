@@ -37,6 +37,10 @@ interface MessageNodeDAO {
     @Query("DELETE FROM message_node WHERE conversation_id = :conversationId")
     suspend fun deleteByConversation(conversationId: String)
 
+    @Query("UPDATE message_node SET node_index = :nodeIndex, select_index = :selectIndex " +
+        "WHERE conversation_id = :conversationId AND id = :nodeId")
+    suspend fun updatePosition(conversationId: String, nodeId: String, nodeIndex: Int, selectIndex: Int)
+
     @Query("DELETE FROM message_node WHERE id = :nodeId")
     suspend fun deleteById(nodeId: String)
 

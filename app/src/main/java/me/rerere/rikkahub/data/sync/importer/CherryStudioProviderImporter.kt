@@ -124,6 +124,7 @@ object CherryStudioProviderImporter {
 
     private fun importedProviderKey(provider: ProviderSetting): String {
         return when (provider) {
+            is ProviderSetting.Account -> "account|${provider.id}"
             is ProviderSetting.OpenAI -> "openai|${provider.baseUrl}|${provider.apiKey}"
             is ProviderSetting.Google -> "google|${provider.baseUrl}|${provider.apiKey}"
             is ProviderSetting.Claude -> "claude|${provider.baseUrl}|${provider.apiKey}"
@@ -133,6 +134,7 @@ object CherryStudioProviderImporter {
                 ProviderProtocol.entries.forEach { protocol ->
                     val endpoint = provider.endpointConfig(protocol) ?: return@forEach
                     val apiKey = when (endpoint) {
+                        is ProviderSetting.Account -> ""
                         is ProviderSetting.OpenAI -> endpoint.apiKey
                         is ProviderSetting.Google -> endpoint.apiKey
                         is ProviderSetting.Claude -> endpoint.apiKey

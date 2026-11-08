@@ -49,6 +49,9 @@ internal fun Settings.normalized(): Settings = this
         settings.copy(
             providers = settings.providers.distinctBy { it.id }.map { provider ->
                 when (provider) {
+                    is ProviderSetting.Account -> provider.copyProvider(
+                        models = provider.models.distinctBy { model -> model.id }
+                    )
                     is ProviderSetting.OpenAI -> provider.copy(
                         models = provider.models.distinctBy { model -> model.id }
                     )

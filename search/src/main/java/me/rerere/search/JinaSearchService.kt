@@ -13,6 +13,7 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
 import me.rerere.ai.core.InputSchema
+import me.rerere.common.http.awaitText
 import me.rerere.search.SearchResult.SearchResultItem
 import me.rerere.search.SearchService.Companion.httpClient
 import me.rerere.search.SearchService.Companion.json
@@ -64,7 +65,7 @@ object JinaSearchService : SearchService<SearchServiceOptions.JinaOptions> {
         commonOptions: SearchCommonOptions,
         serviceOptions: SearchServiceOptions.JinaOptions
     ): Result<SearchResult> = withContext(Dispatchers.IO) {
-        runCatching {
+        runSearchCatching {
             val query = params["query"]?.jsonPrimitive?.content ?: error("query is required")
 
             val body = buildJsonObject {
@@ -81,9 +82,9 @@ object JinaSearchService : SearchService<SearchServiceOptions.JinaOptions> {
                 .addHeader("Content-Type", "application/json")
                 .build()
 
-            val response = httpClient.newCall(request).await()
+            val response = httpClient.newCall(request).awaitText()
             if (response.isSuccessful) {
-                val responseData = response.body.string().let {
+                val responseData = response.body.let {
                     json.decodeFromString<JinaSearchResponse>(it)
                 }
 
@@ -109,7 +110,7 @@ object JinaSearchService : SearchService<SearchServiceOptions.JinaOptions> {
         commonOptions: SearchCommonOptions,
         serviceOptions: SearchServiceOptions.JinaOptions
     ): Result<ScrapedResult> = withContext(Dispatchers.IO) {
-        runCatching {
+        runSearchCatching {
             val url = params["url"]?.jsonPrimitive?.content ?: error("urls is required")
 
             val body = buildJsonObject {
@@ -127,11 +128,11 @@ object JinaSearchService : SearchService<SearchServiceOptions.JinaOptions> {
                 .addHeader("X-Return-Format", "markdown")
                 .build()
 
-            val response = httpClient.newCall(request).await()
+            val response = httpClient.newCall(request).awaitText()
             if (!response.isSuccessful) {
                 error("response failed for url $url #${response.code}")
             }
-            val responseData = response.body.string().let {
+            val responseData = response.body.let {
                 json.decodeFromString<JinaScrapeResponse>(it)
             }
 

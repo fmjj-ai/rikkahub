@@ -25,6 +25,7 @@ enum class ProviderProtocol(val displayName: String) {
             is ProviderSetting.Google -> GOOGLE
             is ProviderSetting.Claude -> CLAUDE
             is ProviderSetting.MultiProtocol -> null
+            is ProviderSetting.Account -> null
         }
     }
 }

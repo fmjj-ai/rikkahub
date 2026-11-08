@@ -29,6 +29,7 @@ import { getAssistantDisplayName, getModelDisplayName } from "~/lib/display";
 import { convertConversationToMarkdown, downloadMarkdown } from "~/lib/export-markdown";
 import { cn } from "~/lib/utils";
 import api, { sse } from "~/services/api";
+import { subscribeToConversationDetail } from "~/services/conversation-detail-stream";
 import { useChatInputStore, useAppStore } from "~/stores";
 import { WorkbenchHost } from "~/components/workbench/workbench-host";
 import {
@@ -41,8 +42,6 @@ import {
   type MessageNodeDto,
   type MessageDto,
   type ConversationNodeUpdateEventDto,
-  type ConversationErrorEventDto,
-  type ConversationSnapshotEventDto,
   type ProviderModel,
   type Settings,
   type UIMessagePart,
@@ -54,11 +53,6 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { v4 as uuidv4 } from "uuid";
 import i18n from "~/i18n";
-
-type ConversationStreamEvent =
-  | ConversationSnapshotEventDto
-  | ConversationNodeUpdateEventDto
-  | ConversationErrorEventDto;
 
 interface SelectedNodeMessage {
   node: MessageNodeDto;
@@ -327,51 +321,21 @@ function useConversationDetail(activeId: string | null, updateSummary: Conversat
       return;
     }
 
-    let mounted = true;
+    setDetail(null);
     setDetailLoading(true);
     setDetailError(null);
 
-    const abortController = new AbortController();
-
-    api
-      .get<ConversationDto>(`conversations/${activeId}`)
-      .then((data) => {
-        if (!mounted) return;
-        setDetail(data);
-        updateSummary(toConversationSummaryUpdate(data));
-      })
-      .catch((err: Error) => {
-        if (!mounted) return;
-        setDetailError(err.message || t("conversations.errors.load_detail_failed"));
-        setDetail(null);
-      })
-      .finally(() => {
-        if (!mounted) return;
-        setDetailLoading(false);
-      });
-
-    void sse<ConversationStreamEvent>(
-      `conversations/${activeId}/stream`,
+    return subscribeToConversationDetail(
+      activeId,
       {
-        onMessage: ({ event, data }) => {
-          if (!mounted) return;
-
-          if (event === "error" && data.type === "error") {
-            toast.error(data.message);
-            return;
-          }
-
-          if (event === "snapshot" && data.type === "snapshot") {
-            useAppStore.getState().setClockOffset(data.serverTime);
-            setDetail(data.conversation);
-            updateSummary(toConversationSummaryUpdate(data.conversation));
-            setDetailError(null);
-            setDetailLoading(false);
-            return;
-          }
-
-          if (event !== "node_update" || data.type !== "node_update") return;
-
+        onSnapshot: (data) => {
+          useAppStore.getState().setClockOffset(data.serverTime);
+          setDetail(data.conversation);
+          updateSummary(toConversationSummaryUpdate(data.conversation));
+          setDetailError(null);
+          setDetailLoading(false);
+        },
+        onNodeUpdate: (data) => {
           useAppStore.getState().setClockOffset(data.serverTime);
           setDetail((prev) => {
             if (!prev) return prev;
@@ -383,20 +347,16 @@ function useConversationDetail(activeId: string | null, updateSummary: Conversat
             return next;
           });
           setDetailError(null);
+        },
+        onBusinessError: (message) => toast.error(message),
+        onInitialError: (error) => {
+          setDetailError(error?.message || t("conversations.errors.load_detail_failed"));
           setDetailLoading(false);
         },
-        onError: (streamError) => {
-          if (!mounted) return;
-          console.error("Conversation detail SSE error:", streamError);
-        },
+        onStreamError: (error) => console.error("Conversation detail SSE error:", error),
       },
-      { signal: abortController.signal },
+      sse,
     );
-
-    return () => {
-      mounted = false;
-      abortController.abort();
-    };
   }, [activeId, resetDetail, t, updateSummary]);
 
   const selectedNodeMessages = React.useMemo<SelectedNodeMessage[]>(() => {

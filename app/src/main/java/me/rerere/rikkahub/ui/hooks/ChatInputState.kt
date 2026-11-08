@@ -16,6 +16,7 @@ class ChatInputState {
     private var editingParts: List<UIMessagePart>? = null
     private var editingAttachmentUrls: Set<String> = emptySet()
     private var galleryImages by mutableStateOf<Map<String, GalleryImageSelection>>(emptyMap())
+    private var pendingAttachmentImports by mutableStateOf<Set<Uuid>>(emptySet())
     internal var attachmentRevision: Long = 0
         private set
 
@@ -25,6 +26,7 @@ class ChatInputState {
         }.keys
 
     internal val pendingGalleryImageCount: Int get() = galleryImages.values.count { it.localUrl == null }
+    internal val pendingAttachmentCount: Int get() = pendingAttachmentImports.size
 
     fun clearInput() {
         attachmentRevision++
@@ -34,6 +36,7 @@ class ChatInputState {
         editingParts = null
         editingAttachmentUrls = emptySet()
         galleryImages = emptyMap()
+        pendingAttachmentImports = emptySet()
     }
 
     fun isEditing() = editingMessage != null
@@ -49,6 +52,7 @@ class ChatInputState {
     fun setContents(contents: List<UIMessagePart>) {
         attachmentRevision++
         galleryImages = emptyMap()
+        pendingAttachmentImports = emptySet()
         val lastTextIndex = contents.indexOfLast { it is UIMessagePart.Text }
         val text = if (lastTextIndex >= 0) {
             (contents[lastTextIndex] as UIMessagePart.Text).text
@@ -109,9 +113,35 @@ class ChatInputState {
         messageContent = newMessage
     }
 
+    /** 分享附件替换当前附件集合，保留文字和编辑消息的原附件所有权信息。 */
+    fun clearAttachments() {
+        attachmentRevision++
+        messageContent = emptyList()
+        galleryImages = emptyMap()
+        pendingAttachmentImports = emptySet()
+    }
+
+    internal fun beginAttachmentImport(): Uuid = Uuid.random().also {
+        pendingAttachmentImports = pendingAttachmentImports + it
+    }
+
+    internal fun isAttachmentImportPending(token: Uuid): Boolean = token in pendingAttachmentImports
+
+    internal fun finishAttachmentImport(token: Uuid, part: UIMessagePart): Boolean {
+        if (!isAttachmentImportPending(token)) return false
+        require(part.attachmentUrlOrNull() != null) { "导入结果必须是附件" }
+        messageContent = messageContent + part
+        pendingAttachmentImports = pendingAttachmentImports - token
+        return true
+    }
+
+    internal fun cancelAttachmentImport(token: Uuid) {
+        pendingAttachmentImports = pendingAttachmentImports - token
+    }
+
     internal fun beginGalleryImageImport(source: String): Uuid? {
         if (source in selectedGallerySources) return null
-        val token = Uuid.random()
+        val token = beginAttachmentImport()
         galleryImages = galleryImages + (source to GalleryImageSelection(token))
         return token
     }
@@ -121,17 +151,20 @@ class ChatInputState {
 
     internal fun finishGalleryImageImport(source: String, token: Uuid, localUrl: String): Boolean {
         if (!isGalleryImageImportPending(source, token)) return false
-        messageContent = messageContent + UIMessagePart.Image(localUrl)
+        if (!finishAttachmentImport(token, UIMessagePart.Image(localUrl))) return false
         galleryImages = galleryImages + (source to GalleryImageSelection(token, localUrl))
         return true
     }
 
     internal fun cancelGalleryImageImport(source: String, token: Uuid) {
         if (isGalleryImageImportPending(source, token)) galleryImages = galleryImages - source
+        cancelAttachmentImport(token)
     }
 
     internal fun deselectGalleryImage(source: String): UIMessagePart.Image? {
-        val localUrl = galleryImages[source]?.localUrl
+        val selection = galleryImages[source]
+        val localUrl = selection?.localUrl
+        selection?.let { cancelAttachmentImport(it.token) }
         galleryImages = galleryImages - source
         val part = messageContent.filterIsInstance<UIMessagePart.Image>().firstOrNull { it.url == localUrl }
         if (part != null) removeAttachment(part)
@@ -194,15 +227,14 @@ class ChatInputState {
         return !isEditing() || url !in editingAttachmentUrls
     }
 
-    private fun UIMessagePart.attachmentUrlOrNull(): String? {
-        return when (this) {
-            is UIMessagePart.Image -> this.url
-            is UIMessagePart.Video -> this.url
-            is UIMessagePart.Audio -> this.url
-            is UIMessagePart.Document -> this.url
-            else -> null
-        }
-    }
+}
+
+internal fun UIMessagePart.attachmentUrlOrNull(): String? = when (this) {
+    is UIMessagePart.Image -> url
+    is UIMessagePart.Video -> url
+    is UIMessagePart.Audio -> url
+    is UIMessagePart.Document -> url
+    else -> null
 }
 
 private data class GalleryImageSelection(val token: Uuid, val localUrl: String? = null)

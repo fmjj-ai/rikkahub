@@ -14,8 +14,10 @@ import kotlinx.serialization.json.Json
 import me.rerere.ai.provider.ProviderManager
 import me.rerere.common.http.AcceptLanguageBuilder
 import me.rerere.rikkahub.BuildConfig
+import me.rerere.rikkahub.AppScope
 import me.rerere.rikkahub.data.ai.AIRequestInterceptor
 import me.rerere.rikkahub.data.ai.RequestLoggingInterceptor
+import me.rerere.rikkahub.data.ai.account.ProviderAccountManager
 import me.rerere.rikkahub.data.ai.transformers.AssistantTemplateLoader
 import me.rerere.rikkahub.data.ai.GenerationHandler
 import me.rerere.rikkahub.data.ai.transformers.TemplateTransformer
@@ -37,6 +39,7 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.dsl.module
+import org.koin.core.qualifier.named
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import java.util.Locale
@@ -206,8 +209,24 @@ val dataSourceModule = module {
             .build().also { SearchService.init(it, get()) }
     }
 
+    // 继承应用网络配置，但账号令牌和授权码不得进入请求日志；授权请求不自动重试。
+    single<OkHttpClient>(named("accountHttp")) {
+        get<OkHttpClient>().newBuilder().apply {
+            interceptors().removeAll { it is HttpLoggingInterceptor || it is RequestLoggingInterceptor }
+            networkInterceptors().removeAll { it is HttpLoggingInterceptor || it is RequestLoggingInterceptor }
+            followRedirects(false)
+            followSslRedirects(false)
+            retryOnConnectionFailure(false)
+        }.build()
+    }
+
     single {
-        ProviderManager(client = get(), context = get())
+        ProviderAccountManager(settingsStore = get(), appScope = get<AppScope>(), client = get(named("accountHttp")))
+    }
+
+    single {
+        ProviderManager(client = get(), context = get(), credentials = get<ProviderAccountManager>(),
+            accountClient = get(named("accountHttp")))
     }
 
     single {

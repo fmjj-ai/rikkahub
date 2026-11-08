@@ -40,11 +40,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -81,10 +81,7 @@ import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastForEach
 import androidx.core.net.toUri
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
@@ -105,64 +102,10 @@ import org.intellij.markdown.MarkdownTokenTypes
 import org.intellij.markdown.ast.ASTNode
 import org.intellij.markdown.ast.LeafASTNode
 import org.intellij.markdown.flavours.gfm.GFMElementTypes
-import org.intellij.markdown.flavours.gfm.GFMFlavourDescriptor
 import org.intellij.markdown.flavours.gfm.GFMTokenTypes
-import org.intellij.markdown.parser.MarkdownParser
 import kotlin.time.Clock
 
-private val flavour by lazy {
-    GFMFlavourDescriptor(
-        makeHttpsAutoLinks = true, useSafeLinks = true
-    )
-}
-
-private val parser by lazy {
-    MarkdownParser(flavour)
-}
-
-private val INLINE_LATEX_REGEX = Regex("\\\\\\((.+?)\\\\\\)")
-private val BLOCK_LATEX_REGEX = Regex("\\\\\\[(.+?)\\\\\\]", RegexOption.DOT_MATCHES_ALL)
-val THINKING_REGEX = Regex("<think>([\\s\\S]*?)(?:</think>|$)", RegexOption.DOT_MATCHES_ALL)
-private val CODE_BLOCK_REGEX = Regex("```[\\s\\S]*?```|`[^`\n]*`", RegexOption.DOT_MATCHES_ALL)
 private val BREAK_LINE_REGEX = Regex("(?i)<br\\s*/?>")
-private val LATEX_BLOCK_LINE_BREAK_REGEX = Regex("""[ \t]*\r?\n[ \t]*""")
-
-// 预处理markdown内容
-private fun preProcess(content: String): String {
-    // 先找出所有代码块的位置
-    val codeBlocks = mutableListOf<IntRange>()
-    CODE_BLOCK_REGEX.findAll(content).forEach { match ->
-        codeBlocks.add(match.range)
-    }
-
-    // 检查位置是否在代码块内
-    fun isInCodeBlock(position: Int): Boolean {
-        return codeBlocks.any { range -> position in range }
-    }
-
-    // 替换行内公式 \( ... \) 到 $ ... $，但跳过代码块内的内容
-    var result = INLINE_LATEX_REGEX.replace(content) { matchResult ->
-        if (isInCodeBlock(matchResult.range.first)) {
-            matchResult.value // 保持原样
-        } else {
-            "$" + matchResult.groupValues[1] + "$"
-        }
-    }
-
-    // 替换块级公式 \[ ... \] 到 $$ ... $$，但跳过代码块内的内容
-    result = BLOCK_LATEX_REGEX.replace(result) { matchResult ->
-        if (isInCodeBlock(matchResult.range.first)) {
-            matchResult.value // 保持原样
-        } else {
-            val formula = matchResult.groupValues[1]
-                .trim()
-                .replace(LATEX_BLOCK_LINE_BREAK_REGEX, " ")
-            "$$" + formula + "$$"
-        }
-    }
-
-    return result
-}
 
 @Preview(showBackground = true)
 @Composable
@@ -213,22 +156,6 @@ private fun MarkdownPreview() {
     }
 }
 
-private data class MarkdownParseResult(
-    val preprocessed: String,
-    val astTree: ASTNode,
-    val hasHtml: Boolean,
-)
-
-private fun ASTNode.containsHtml(): Boolean {
-    if (type == MarkdownElementTypes.HTML_BLOCK || type == MarkdownTokenTypes.HTML_TAG) return true
-    return children.any { it.containsHtml() }
-}
-
-private fun parseMarkdown(content: String): MarkdownParseResult {
-    val preprocessed = preProcess(content)
-    val astTree = parser.buildMarkdownTreeFromString(preprocessed)
-    return MarkdownParseResult(preprocessed, astTree, astTree.containsHtml())
-}
 
 @Composable
 fun MarkdownBlock(
@@ -237,23 +164,29 @@ fun MarkdownBlock(
     style: TextStyle = LocalTextStyle.current,
     onClickCitation: (String) -> Unit = {}
 ) {
-    var (data, setData) = remember { mutableStateOf(parseMarkdown(content)) }
-
-    // 监听内容变化，重新解析AST树
-    // 这里在后台线程解析AST树, 防止频繁更新的时候掉帧
+    val exportPrepared = LocalPreparedMarkdown.current
+    var state by remember {
+        mutableStateOf(exportPrepared[content]?.let { MarkdownPreparationState(content, it) })
+    }
     val updatedContent by rememberUpdatedState(content)
-    LaunchedEffect(Unit) {
+    LaunchedEffect(exportPrepared) {
         snapshotFlow { updatedContent }
             .distinctUntilChanged()
-            .mapLatest { parseMarkdown(it) }
-            .catch { exception -> exception.printStackTrace() }
-            .flowOn(Dispatchers.Default)
-            .collect { setData(it) }
+            .mapLatest { source ->
+                exportPrepared[source]?.let { MarkdownPreparationState(source, it) }
+                    ?: prepareMarkdownState(source)
+            }
+            .collect { state = it }
     }
 
-    if (data.hasHtml) {
+    // 准备过程中保留上一份完整快照，AST、DOM 和偏移始终使用同一版本的文本。
+    val current = state ?: MarkdownPreparationState(content, null)
+    val prepared = current.prepared
+    if (prepared == null) {
+        Text(text = current.source, modifier = modifier.padding(horizontal = 4.dp), style = style)
+    } else if (prepared.document != null) {
         MarkdownNew(
-            content = content,
+            document = prepared.document,
             modifier = modifier,
             style = style,
             onClickCitation = onClickCitation,
@@ -263,9 +196,9 @@ fun MarkdownBlock(
             Column(
                 modifier = modifier.padding(horizontal = 4.dp)
             ) {
-                data.astTree.children.fastForEach { child ->
+                prepared.astTree.children.fastForEach { child ->
                     MarkdownNode(
-                        node = child, content = data.preprocessed, onClickCitation = onClickCitation
+                        node = child, content = prepared.preprocessed, onClickCitation = onClickCitation
                     )
                 }
             }
@@ -504,7 +437,7 @@ private fun MarkdownNode(
         }
 
         GFMElementTypes.TABLE -> {
-            TableNode(node = node, content = content, modifier = modifier)
+            TableNode(node = node, content = content, modifier = modifier, onClickCitation = onClickCitation)
         }
 
         MarkdownTokenTypes.HORIZONTAL_RULE -> {
@@ -780,9 +713,6 @@ private fun Paragraph(
     }
 
     val colorScheme = MaterialTheme.colorScheme
-    val inlineContents = remember {
-        mutableStateMapOf<String, InlineTextContent>()
-    }
     val hasInlineMath = remember(node) {
         node.findChildOfTypeRecursive(GFMElementTypes.INLINE_MATH) != null
     }
@@ -791,30 +721,42 @@ private fun Paragraph(
     val textStyle = LocalTextStyle.current
     val density = LocalDensity.current
     val latexColorArgb = LocalContentColor.current.toArgb()
-    FlowRow(
-        modifier = modifier.then(
-            if (node.nextSibling() != null) Modifier.padding(bottom = LocalTextStyle.current.fontSize.toDp())
-            else Modifier
-        )
+    val (annotatedString, inlineContents) = remember(
+        node, content, trim, textStyle, density, colorScheme,
+        latexColorArgb, enableLatexRendering, onClickCitation,
     ) {
-        val annotatedString = remember(content, enableLatexRendering, latexColorArgb) {
-            buildAnnotatedString {
-                node.children.fastForEach { child ->
-                    appendMarkdownNodeContent(
-                        node = child,
-                        content = content,
-                        inlineContents = inlineContents,
-                        colorScheme = colorScheme,
-                        onClickCitation = onClickCitation,
-                        style = textStyle,
-                        density = density,
-                        trim = trim,
-                        enableLatexRendering = enableLatexRendering,
-                        latexColorArgb = latexColorArgb,
-                    )
-                }
+        val contents = mutableMapOf<String, InlineTextContent>()
+        val text = buildAnnotatedString {
+            node.children.fastForEach { child ->
+                appendMarkdownNodeContent(
+                    node = child,
+                    content = content,
+                    inlineContents = contents,
+                    colorScheme = colorScheme,
+                    onClickCitation = onClickCitation,
+                    style = textStyle,
+                    density = density,
+                    trim = trim,
+                    enableLatexRendering = enableLatexRendering,
+                    latexColorArgb = latexColorArgb,
+                )
             }
         }
+        // 只裁掉整个单元格的边缘空白，保留不同 inline 节点之间的空格及样式。
+        val renderedText = if (node.type == GFMTokenTypes.CELL) {
+            val start = text.indexOfFirst { !it.isWhitespace() }
+            if (start < 0) AnnotatedString("")
+            else text.subSequence(start, text.indexOfLast { !it.isWhitespace() } + 1)
+        } else text
+        renderedText to contents
+    }
+    FlowRow(
+        modifier = modifier.then(
+            if (node.type != GFMTokenTypes.CELL && node.nextSibling() != null) {
+                Modifier.padding(bottom = textStyle.fontSize.toDp())
+            } else Modifier
+        )
+    ) {
         Text(
             text = annotatedString,
             modifier = Modifier,
@@ -829,7 +771,12 @@ private fun Paragraph(
 }
 
 @Composable
-private fun TableNode(node: ASTNode, content: String, modifier: Modifier = Modifier) {
+private fun TableNode(
+    node: ASTNode,
+    content: String,
+    modifier: Modifier = Modifier,
+    onClickCitation: (String) -> Unit = {},
+) {
     // 提取表格的标题行和数据行
     val headerNode = node.children.find { it.type == GFMElementTypes.HEADER }
     val rowNodes = node.children.filter { it.type == GFMElementTypes.ROW }
@@ -840,32 +787,34 @@ private fun TableNode(node: ASTNode, content: String, modifier: Modifier = Modif
     // 检查是否有足够的列来显示表格
     if (columnCount == 0) return
 
-    // 提取表头单元格文本
-    val headerCells =
-        headerNode?.children?.filter { it.type == GFMTokenTypes.CELL }?.map { it.getTextInNode(content).trim() }
-            ?: emptyList()
+    val headerCellNodes = headerNode?.children?.filter { it.type == GFMTokenTypes.CELL }.orEmpty()
+    val rowCellNodes = rowNodes.map { row -> row.children.filter { it.type == GFMTokenTypes.CELL } }
+    // 字符串仅供复制和 CSV 导出；屏幕渲染复用整份文档中的 inline AST。
+    val headerCells = headerCellNodes.map { it.getTextInNode(content).trim() }
+    val rows = rowCellNodes.map { cells -> cells.map { it.getTextInNode(content).trim() } }
 
-    // 提取所有行的数据
-    val rows = rowNodes.map { rowNode ->
-        rowNode.children.filter { it.type == GFMTokenTypes.CELL }.map { it.getTextInNode(content).trim() }
-    }
-
-    // 创建表头composable列表
     val headers = List(columnCount) { columnIndex ->
         @Composable {
-            MarkdownBlock(
-                content = if (columnIndex < headerCells.size) headerCells[columnIndex] else "",
+            Paragraph(
+                node = headerCellNodes[columnIndex],
+                content = content,
+                modifier = Modifier.padding(horizontal = 4.dp),
+                onClickCitation = onClickCitation,
             )
         }
     }
 
-    // 创建行数据composable列表
-    val rowComposables = rows.map { rowData ->
+    val rowComposables: List<List<@Composable () -> Unit>> = rowCellNodes.map { cells ->
         List(columnCount) { columnIndex ->
             @Composable {
-                MarkdownBlock(
-                    content = if (columnIndex < rowData.size) rowData[columnIndex] else "",
-                )
+                cells.getOrNull(columnIndex)?.let { cell ->
+                    Paragraph(
+                        node = cell,
+                        content = content,
+                        modifier = Modifier.padding(horizontal = 4.dp),
+                        onClickCitation = onClickCitation,
+                    )
+                }
             }
         }
     }

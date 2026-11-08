@@ -562,6 +562,7 @@ fun List<UIMessagePart>.toSortedMessageParts(): List<UIMessagePart> {
 }
 
 fun UIMessage.finishReasoning(): UIMessage {
+    if (parts.none { it is UIMessagePart.Reasoning && it.finishedAt == null }) return this
     return copy(
         parts = parts.map { part ->
             when (part) {

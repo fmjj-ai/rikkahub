@@ -57,6 +57,7 @@ fun ProviderConfigure(
     onEdit: (provider: ProviderSetting) -> Unit
 ) {
     when (provider) {
+        is ProviderSetting.ChatGPT -> ProviderConfigureChatGPT(provider, modifier, onEdit)
         is ProviderSetting.MultiProtocol -> ProviderConfigureMulti(provider, modifier, onEdit)
         else -> ProviderConfigureSingle(provider, modifier, onEdit)
     }
@@ -93,6 +94,7 @@ private fun ProviderConfigureSingle(
             is ProviderSetting.Google -> ProviderConfigureGoogle(provider, onEdit = { onEdit(it) })
             is ProviderSetting.Claude -> ProviderConfigureClaude(provider, onEdit = { onEdit(it) })
             is ProviderSetting.MultiProtocol -> Unit
+            is ProviderSetting.Account -> Unit
         }
     }
 }
@@ -260,12 +262,14 @@ private fun ProviderSetting.MultiProtocol.storeEndpoint(
         )
 
         is ProviderSetting.MultiProtocol -> endpoint
+        is ProviderSetting.Account -> error("账号提供商不支持多协议端点")
     }
     return withEndpoint(protocol, synced)
 }
 
 fun ProviderSetting.convertTo(type: KClass<out ProviderSetting>): ProviderSetting {
     if (this::class == type) return this
+    if (this is ProviderSetting.Account) return this
     if (this is ProviderSetting.MultiProtocol) return this
 
     val apiKey = when (this) {
@@ -273,12 +277,14 @@ fun ProviderSetting.convertTo(type: KClass<out ProviderSetting>): ProviderSettin
         is ProviderSetting.Google -> this.apiKey
         is ProviderSetting.Claude -> this.apiKey
         is ProviderSetting.MultiProtocol -> ""
+        is ProviderSetting.Account -> ""
     }
     val sourceBaseUrl = when (this) {
         is ProviderSetting.OpenAI -> this.baseUrl
         is ProviderSetting.Google -> this.baseUrl
         is ProviderSetting.Claude -> this.baseUrl
         is ProviderSetting.MultiProtocol -> this.baseUrl
+        is ProviderSetting.Account -> ""
     }
     val targetDefaultBaseUrl = when (type) {
         ProviderSetting.OpenAI::class -> ProviderSetting.OpenAI().baseUrl
@@ -320,6 +326,7 @@ internal fun ProviderSetting.defaultBaseUrlForReset(): String {
             is ProviderSetting.Google -> if (defaultProvider is ProviderSetting.Google) return defaultProvider.baseUrl
             is ProviderSetting.Claude -> if (defaultProvider is ProviderSetting.Claude) return defaultProvider.baseUrl
             is ProviderSetting.MultiProtocol -> Unit
+            is ProviderSetting.Account -> Unit
         }
     }
     return when (this) {
@@ -327,6 +334,7 @@ internal fun ProviderSetting.defaultBaseUrlForReset(): String {
         is ProviderSetting.Google -> ProviderSetting.Google().baseUrl
         is ProviderSetting.Claude -> ProviderSetting.Claude().baseUrl
         is ProviderSetting.MultiProtocol -> baseUrl
+        is ProviderSetting.Account -> ""
     }
 }
 
@@ -338,6 +346,7 @@ internal fun ProviderSetting.resetBaseUrlToDefault(): ProviderSetting {
         is ProviderSetting.Google -> this.copy(baseUrl = defaultBaseUrl)
         is ProviderSetting.Claude -> this.copy(baseUrl = defaultBaseUrl)
         is ProviderSetting.MultiProtocol -> this
+        is ProviderSetting.Account -> this
     }
 }
 
@@ -348,6 +357,7 @@ internal fun ProviderSetting.isUsingDefaultBaseUrl(): Boolean {
         is ProviderSetting.Google -> this.baseUrl
         is ProviderSetting.Claude -> this.baseUrl
         is ProviderSetting.MultiProtocol -> this.baseUrl
+        is ProviderSetting.Account -> ""
     }
     return baseUrl == defaultBaseUrlForReset()
 }

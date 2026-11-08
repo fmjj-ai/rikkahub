@@ -42,10 +42,8 @@ class BackupVM(
         loadS3BackupFileItems()
     }
 
-    fun updateSettings(settings: Settings) {
-        viewModelScope.launch {
-            settingsStore.update(settings)
-        }
+    fun updateSettings(transform: (Settings) -> Settings) {
+        viewModelScope.launch { settingsStore.update(transform) }
     }
 
     fun loadBackupFileItems() {
@@ -98,12 +96,14 @@ class BackupVM(
     }
 
     suspend fun restoreFromChatBox(file: File): ChatboxRestoreResult {
+        val importSettings = settingsStore.awaitLoaded()
+        val targetAssistantId = importSettings.assistantId
         var importedConversations = 0
         var skippedExistingConversations = 0
         val result = ChatboxImporter.importStreaming(
             file = file,
-            assistantId = settings.value.assistantId,
-            providers = settings.value.providers,
+            assistantId = targetAssistantId,
+            providers = importSettings.providers,
             onConversation = { conversation ->
                 if (conversationRepository.existsConversationById(conversation.id)) {
                     skippedExistingConversations++
@@ -114,19 +114,16 @@ class BackupVM(
             }
         )
 
-        val targetAssistantId = settings.value.assistantId
-        settingsStore.update(
-            settings.value.copy(
-                providers = result.providers + settings.value.providers,
-                assistants = settings.value.assistants.map { assistant ->
+        settingsStore.update { latest ->
+            latest.copy(
+                providers = result.providers + latest.providers,
+                assistants = latest.assistants.map { assistant ->
                     if (result.hasConversationSystemPrompt && assistant.id == targetAssistantId) {
                         assistant.copy(allowConversationSystemPrompt = true)
-                    } else {
-                        assistant
-                    }
-                }
+                    } else assistant
+                },
             )
-        )
+        }
 
         Log.i(
             TAG,
@@ -152,11 +149,7 @@ class BackupVM(
 
         Log.i(TAG, "restoreFromCherryStudio: import ${importProviders.size} providers: $importProviders")
 
-        updateSettings(
-            settings.value.copy(
-                providers = importProviders + settings.value.providers,
-            )
-        )
+        updateSettings { latest -> latest.copy(providers = importProviders + latest.providers) }
     }
 
     // S3 Backup methods

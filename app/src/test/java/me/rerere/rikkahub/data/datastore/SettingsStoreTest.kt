@@ -1,5 +1,8 @@
 package me.rerere.rikkahub.data.datastore
 
+import org.junit.Assert.assertTrue
+import me.rerere.rikkahub.data.model.Assistant
+import me.rerere.rikkahub.data.model.Avatar
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
@@ -211,6 +214,188 @@ class SettingsStoreTest {
 
         assertEquals("kept", reopened().titlePrompt)
     }
+    @Test
+    fun assistantFieldTransformsMergeWhileTheFirstWriteIsBlocked() = runBlocking {
+        val opened = open()
+        val store = opened.store
+        val subject = Assistant(name = "before")
+        store.update { it.copy(assistants = listOf(subject), assistantId = subject.id) }
+        val previousWrites = opened.disk.writes.get()
+        val gate = CompletableDeferred<Unit>()
+        opened.disk.writeGate = gate
+        val first = launch(start = CoroutineStart.UNDISPATCHED) {
+            store.update { it.updateAssistant(subject.id) { assistant -> assistant.copy(name = "renamed") } }
+        }
+        while (opened.disk.writes.get() == previousWrites) delay(1)
+        val second = launch(start = CoroutineStart.UNDISPATCHED) {
+            store.update { it.updateAssistant(subject.id) { assistant -> assistant.copy(systemPrompt = "new prompt") } }
+        }
+        gate.complete(Unit)
+        listOf(first, second).joinAll()
+        val result = reopened().assistants.single { it.id == subject.id }
+        assertEquals("renamed", result.name)
+        assertEquals("new prompt", result.systemPrompt)
+    }
+
+    @Test
+    fun staleAssistantEditDoesNotRecreateADeletedAssistant() = runBlocking {
+        val store = open().store
+        val removed = Assistant(name = "removed")
+        val retained = Assistant(name = "retained")
+        store.update { it.copy(assistants = listOf(removed, retained), assistantId = retained.id) }
+        store.update { it.copy(assistants = it.assistants.filterNot { assistant -> assistant.id == removed.id }) }
+        store.update { it.updateAssistant(removed.id) { assistant -> assistant.copy(name = "late edit") } }
+        assertFalse(reopened().assistants.any { it.id == removed.id })
+    }
+
+    @Test
+    fun nestedUpdatesKeepOtherDisplayNetworkAndBackupFields() = runBlocking {
+        val store = open().store
+        store.update { latest -> latest.copy(
+            displaySetting = latest.displaySetting.copy(showUserAvatar = false),
+            networkSetting = latest.networkSetting.copy(userAgent = "custom-agent"),
+            webDavConfig = latest.webDavConfig.copy(username = "user"),
+            s3Config = latest.s3Config.copy(region = "region"),
+        ) }
+        store.update { latest -> latest.copy(
+            displaySetting = latest.displaySetting.copy(showDateTimeInMessage = true),
+            networkSetting = latest.networkSetting.copy(enableAutoRetry = true),
+            webDavConfig = latest.webDavConfig.copy(path = "backup-path"),
+            s3Config = latest.s3Config.copy(bucket = "bucket"),
+        ) }
+        val result = reopened()
+        assertFalse(result.displaySetting.showUserAvatar)
+        assertTrue(result.displaySetting.showDateTimeInMessage)
+        assertEquals("custom-agent", result.networkSetting.userAgent)
+        assertTrue(result.networkSetting.enableAutoRetry)
+        assertEquals("user", result.webDavConfig.username)
+        assertEquals("backup-path", result.webDavConfig.path)
+        assertEquals("region", result.s3Config.region)
+        assertEquals("bucket", result.s3Config.bucket)
+    }
+
+    @Test
+    fun appearanceCleanupKeepsSharedBackgroundAndUserAvatarReferences() = runBlocking {
+        val store = open().store
+        val url = "file:///shared-background.png"
+        val first = Assistant(name = "first", background = url)
+        val second = Assistant(name = "second", background = url)
+        store.update { latest -> latest.copy(
+            assistants = listOf(first, second),
+            assistantId = first.id,
+            displaySetting = latest.displaySetting.copy(userAvatar = Avatar.Image(url)),
+        ) }
+        val deleted = mutableListOf<String>()
+        val cleanup: (List<String>) -> Unit = { deleted.addAll(it) }
+        store.updateWithAppearanceCleanup(fileIdentity = { it }, deleteFiles = cleanup) {
+            it.updateAssistant(first.id) { assistant -> assistant.copy(background = null) }
+        }
+        store.updateWithAppearanceCleanup(fileIdentity = { it }, deleteFiles = cleanup) {
+            it.updateAssistant(second.id) { assistant -> assistant.copy(background = null) }
+        }
+        assertTrue(deleted.isEmpty())
+        store.updateWithAppearanceCleanup(fileIdentity = { it }, deleteFiles = cleanup) {
+            it.copy(displaySetting = it.displaySetting.copy(userAvatar = Avatar.Dummy))
+        }
+        assertEquals(listOf(url), deleted)
+    }
+
+    @Test
+    fun appearanceFilesAreNotDeletedBeforeTheWriteSucceeds() = runBlocking {
+        val opened = open()
+        val store = opened.store
+        val url = "file:///old-avatar.png"
+        val subject = Assistant(avatar = Avatar.Image(url))
+        store.update { it.copy(assistants = listOf(subject), assistantId = subject.id) }
+        val previousWrites = opened.disk.writes.get()
+        val gate = CompletableDeferred<Unit>()
+        opened.disk.writeGate = gate
+        val deleted = mutableListOf<String>()
+        val change = launch(start = CoroutineStart.UNDISPATCHED) {
+            store.updateWithAppearanceCleanup(fileIdentity = { it }, deleteFiles = { deleted.addAll(it) }) {
+                it.updateAssistant(subject.id) { assistant -> assistant.copy(avatar = Avatar.Dummy) }
+            }
+        }
+        try {
+            while (opened.disk.writes.get() == previousWrites) delay(1)
+            assertTrue(deleted.isEmpty())
+        } finally {
+            gate.complete(Unit)
+        }
+        change.join()
+        assertEquals(listOf(url), deleted)
+        assertEquals(Avatar.Dummy, reopened().assistants.single { it.id == subject.id }.avatar)
+    }
+
+    @Test
+    fun failedAppearanceWriteKeepsBothOldFilesAndAcceptedInMemoryState() = runBlocking {
+        val opened = open()
+        val store = opened.store
+        val subject = Assistant(background = "file:///old.png")
+        store.update { it.copy(assistants = listOf(subject), assistantId = subject.id) }
+        val failed = CompletableDeferred<Unit>()
+        failed.completeExceptionally(java.io.IOException("write failed"))
+        opened.disk.writeGate = failed
+        val deleted = mutableListOf<String>()
+        val result = runCatching {
+            store.updateWithAppearanceCleanup(fileIdentity = { it }, deleteFiles = { deleted.addAll(it) }) {
+                it.updateAssistant(subject.id) { assistant -> assistant.copy(background = "file:///new.png") }
+            }
+        }
+        assertTrue(result.isFailure)
+        assertTrue(deleted.isEmpty())
+        assertEquals("file:///new.png", store.settingsFlow.value.assistants.single { it.id == subject.id }.background)
+        opened.disk.writeGate = null
+        store.update { it.copy(titlePrompt = "retry pending settings") }
+        assertEquals("file:///new.png", reopened().assistants.single { it.id == subject.id }.background)
+    }
+
+    @Test
+    fun acceptedAppearanceUpdateAndCleanupFinishAfterCallerCancellation() = runBlocking {
+        val opened = open()
+        val store = opened.store
+        val url = "file:///old-background.png"
+        val subject = Assistant(background = url)
+        store.update { it.copy(assistants = listOf(subject), assistantId = subject.id) }
+        val gate = CompletableDeferred<Unit>()
+        opened.disk.writeGate = gate
+        val deleted = mutableListOf<String>()
+        val change = launch(start = CoroutineStart.UNDISPATCHED) {
+            store.updateWithAppearanceCleanup(fileIdentity = { it }, deleteFiles = { deleted.addAll(it) }) {
+                it.updateAssistant(subject.id) { assistant -> assistant.copy(background = null) }
+            }
+        }
+        change.cancel()
+        gate.complete(Unit)
+        change.join()
+        assertEquals(listOf(url), deleted)
+        assertEquals(null, reopened().assistants.single { it.id == subject.id }.background)
+    }
+
+    @Test
+    fun equivalentFileUrisKeepTheirSharedPhysicalFile() = runBlocking {
+        val store = open().store
+        val physicalFile = temp.newFile("shared image.png").canonicalFile
+        val firstUrl = physicalFile.toURI().toString()
+        val secondUrl = firstUrl.replaceFirst("file:/", "file:///")
+        val first = Assistant(background = firstUrl)
+        val second = Assistant(background = secondUrl)
+        store.update { it.copy(assistants = listOf(first, second), assistantId = first.id) }
+        val identity: (String) -> String? = { url ->
+            runCatching { File(java.net.URI(url)).canonicalFile.toURI().toString() }.getOrNull()
+        }
+        assertEquals(identity(firstUrl), identity(secondUrl))
+        val deleted = mutableListOf<String>()
+        store.updateWithAppearanceCleanup(identity, { deleted.addAll(it) }) {
+            it.updateAssistant(first.id) { assistant -> assistant.copy(background = null) }
+        }
+        assertTrue(deleted.isEmpty())
+        store.updateWithAppearanceCleanup(identity, { deleted.addAll(it) }) {
+            it.updateAssistant(second.id) { assistant -> assistant.copy(background = null) }
+        }
+        assertEquals(listOf(identity(firstUrl)), deleted)
+    }
+
 }
 
 private class OpenedStore(file: File, loadGate: CompletableDeferred<Unit>?) {

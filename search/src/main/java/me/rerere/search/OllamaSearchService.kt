@@ -13,6 +13,7 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
 import me.rerere.ai.core.InputSchema
+import me.rerere.common.http.awaitText
 import me.rerere.search.SearchResult.SearchResultItem
 import me.rerere.search.SearchService.Companion.httpClient
 import me.rerere.search.SearchService.Companion.json
@@ -60,7 +61,7 @@ object OllamaSearchService : SearchService<SearchServiceOptions.OllamaOptions> {
         commonOptions: SearchCommonOptions,
         serviceOptions: SearchServiceOptions.OllamaOptions
     ): Result<SearchResult> = withContext(Dispatchers.IO) {
-        runCatching {
+        runSearchCatching {
             val query = params["query"]?.jsonPrimitive?.content ?: error("query is required")
 
             val body = buildJsonObject {
@@ -74,9 +75,9 @@ object OllamaSearchService : SearchService<SearchServiceOptions.OllamaOptions> {
                 .addHeader("Authorization", "Bearer ${serviceOptions.apiKey}")
                 .build()
 
-            val response = httpClient.newCall(request).await()
+            val response = httpClient.newCall(request).awaitText()
             if (response.isSuccessful) {
-                val responseBody = response.body.string()
+                val responseBody = response.body
                 val searchResponse = json.decodeFromString<OllamaSearchResponse>(responseBody)
 
                 return@withContext Result.success(
@@ -101,7 +102,7 @@ object OllamaSearchService : SearchService<SearchServiceOptions.OllamaOptions> {
         commonOptions: SearchCommonOptions,
         serviceOptions: SearchServiceOptions.OllamaOptions
     ): Result<ScrapedResult> = withContext(Dispatchers.IO) {
-        runCatching {
+        runSearchCatching {
             val url = params["url"]?.jsonPrimitive?.content ?: error("url is required")
 
             val body = buildJsonObject {
@@ -114,11 +115,11 @@ object OllamaSearchService : SearchService<SearchServiceOptions.OllamaOptions> {
                 .addHeader("Authorization", "Bearer ${serviceOptions.apiKey}")
                 .build()
 
-            val response = httpClient.newCall(request).await()
+            val response = httpClient.newCall(request).awaitText()
             if (!response.isSuccessful) {
                 error("response failed for url $url #${response.code}")
             }
-            val responseData = response.body.string().let {
+            val responseData = response.body.let {
                 json.decodeFromString<OllamaScrapeResponse>(it)
             }
 

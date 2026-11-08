@@ -140,13 +140,11 @@ fun ChatDrawerContent(
 
     // 昵称编辑状态
     val nicknameEditState = useEditState<String> { newNickname ->
-        vm.updateSettings(
-            settings.copy(
-                displaySetting = settings.displaySetting.copy(
+        vm.updateSettings { latest -> latest.copy(
+                displaySetting = latest.displaySetting.copy(
                     userNickname = newNickname
                 )
-            )
-        )
+            ) }
     }
 
     // 移动对话状态
@@ -193,13 +191,11 @@ fun ChatDrawerContent(
                     name = settings.displaySetting.userNickname.ifBlank { stringResource(R.string.user_default_name) },
                     value = settings.displaySetting.userAvatar,
                     onUpdate = { newAvatar ->
-                        vm.updateSettings(
-                            settings.copy(
-                                displaySetting = settings.displaySetting.copy(
+                        vm.updateSettings { latest -> latest.copy(
+                                displaySetting = latest.displaySetting.copy(
                                     userAvatar = newAvatar
                                 )
-                            )
-                        )
+                            ) }
                     },
                     modifier = Modifier.size(50.dp),
                 )
@@ -294,20 +290,20 @@ fun ChatDrawerContent(
             // 助手选择器
             AssistantPicker(
                 settings = settings,
-                onUpdateSettings = {
-                    vm.updateSettings(it)
-                    scope.launch {
-                        val id = if (context.readBooleanPreference("create_new_conversation_on_start", true)) {
-                            Uuid.random()
-                        } else {
-                            repo.getConversationsOfAssistant(it.assistantId)
-                                .first()
-                                .firstOrNull()
-                                ?.id ?: Uuid.random()
+                onSelectAssistant = { assistantId ->
+                        vm.updateSettings { latest ->
+                            if (latest.assistants.none { it.id == assistantId }) latest
+                            else latest.copy(assistantId = assistantId)
                         }
-                        navigateToChatPage(navigator = navController, chatId = id)
-                    }
-                },
+                        scope.launch {
+                            val id = if (context.readBooleanPreference("create_new_conversation_on_start", true)) {
+                                Uuid.random()
+                            } else {
+                                repo.getConversationsOfAssistant(assistantId).first().firstOrNull()?.id ?: Uuid.random()
+                            }
+                            navigateToChatPage(navigator = navController, chatId = id)
+                        }
+                    },
                 modifier = Modifier.fillMaxWidth(),
                 onClickSetting = {
                     val currentAssistantId = settings.assistantId

@@ -5,6 +5,8 @@ import me.rerere.rikkahub.data.files.FilesManager
 import org.koin.java.KoinJavaComponent.getKoin
 
 object Base64ImageToLocalFileTransformer : OutputMessageTransformer {
+    override val supportsSingleMessageProjection: Boolean = true
+
     override suspend fun onGenerationFinish(
         ctx: TransformerContext,
         messages: List<UIMessage>,

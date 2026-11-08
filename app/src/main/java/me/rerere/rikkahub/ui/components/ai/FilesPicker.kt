@@ -102,8 +102,8 @@ internal fun FilesPicker(
     state: ChatInputState,
     mcpManager: McpManager,
     onCompressContext: (additionalPrompt: String, targetTokens: Int, keepRecentMessages: Int) -> Job,
-    onUpdateAssistant: (Assistant) -> Unit,
-    onUpdateConversation: (Conversation) -> Unit,
+    onUpdateAssistant: ((Assistant) -> Assistant) -> Unit,
+    onUpdateConversation: ((Conversation) -> Conversation) -> Unit,
     showInjectionSheet: Boolean,
     onShowInjectionSheetChange: (Boolean) -> Unit,
     showCompressDialog: Boolean,
@@ -292,7 +292,7 @@ private fun WorkspaceCwdButton(
     assistant: Assistant,
     conversation: Conversation,
     modifier: Modifier = Modifier,
-    onUpdateConversation: (Conversation) -> Unit,
+    onUpdateConversation: ((Conversation) -> Conversation) -> Unit,
 ) {
     val boundWorkspace = remember(workspaces, assistant.workspaceId) {
         workspaces.find { it.id == assistant.workspaceId?.toString() }
@@ -321,7 +321,7 @@ private fun WorkspaceCwdButton(
                 workspaceId = boundWorkspace.id,
                 currentCwd = conversation.workspaceCwd,
                 onSelectCwd = { newCwd ->
-                    onUpdateConversation(conversation.copy(workspaceCwd = newCwd))
+                    onUpdateConversation { it.copy(workspaceCwd = newCwd) }
                 },
                 onDismiss = { showCwdSheet = false },
             )
@@ -387,8 +387,8 @@ private fun WorkspacePickerListItem(
     assistant: Assistant,
     conversation: Conversation,
     workspaces: List<WorkspaceEntity>,
-    onUpdateAssistant: (Assistant) -> Unit,
-    onUpdateConversation: (Conversation) -> Unit,
+    onUpdateAssistant: ((Assistant) -> Assistant) -> Unit,
+    onUpdateConversation: ((Conversation) -> Conversation) -> Unit,
     onNavigateToDetail: (String) -> Unit,
     onNavigateToTerminal: (String) -> Unit,
     onNavigateToManage: () -> Unit,
@@ -452,10 +452,8 @@ private fun WorkspacePickerListItem(
             onSelect = { workspaceId ->
                 val newId = workspaceId?.let { Uuid.parse(it) }
                 if (newId != assistant.workspaceId) {
-                    onUpdateAssistant(assistant.copy(workspaceId = newId))
-                    if (conversation.workspaceCwd != null) {
-                        onUpdateConversation(conversation.copy(workspaceCwd = null))
-                    }
+                    onUpdateAssistant { currentAssistant -> currentAssistant.copy(workspaceId = newId) }
+                    onUpdateConversation { it.copy(workspaceCwd = null) }
                 }
                 showSheet = false
             },
@@ -473,8 +471,8 @@ private fun InjectionQuickConfigSheet(
     conversation: Conversation,
     assistant: Assistant,
     settings: Settings,
-    onUpdateAssistant: (Assistant) -> Unit,
-    onUpdateConversation: (Conversation) -> Unit,
+    onUpdateAssistant: ((Assistant) -> Assistant) -> Unit,
+    onUpdateConversation: ((Conversation) -> Conversation) -> Unit,
     onDismiss: () -> Unit,
     onDismissAll: () -> Unit,
 ) {

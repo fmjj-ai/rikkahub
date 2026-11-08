@@ -1,5 +1,6 @@
 package me.rerere.rikkahub.data.ai
 
+import me.rerere.rikkahub.data.ai.transformers.OutputMessageProjection
 import android.content.Context
 import android.util.Log
 import kotlinx.coroutines.CancellationException
@@ -131,29 +132,25 @@ class GenerationHandler(
 
             // Skip generation if we have approved/denied tool calls to handle
             if (pendingTools.isEmpty()) {
+                val projection = OutputMessageProjection(
+                    messageLocal = outputTransformers.all {
+                        it is OutputMessageTransformer && it.supportsSingleMessageProjection
+                    },
+                    transform = { input ->
+                        input.transforms(outputTransformers, context, model, assistant, settings)
+                    },
+                    visualTransform = { input ->
+                        input.visualTransforms(outputTransformers, context, model, assistant, settings)
+                    },
+                )
                 generateInternal(
                     assistant = assistant,
                     settings = settings,
                     messages = messages,
                     onUpdateMessages = {
-                        messages = it.transforms(
-                            transformers = outputTransformers,
-                            context = context,
-                            model = model,
-                            assistant = assistant,
-                            settings = settings
-                        )
-                        emit(
-                            GenerationChunk.Messages(
-                                messages.visualTransforms(
-                                    transformers = outputTransformers,
-                                    context = context,
-                                    model = model,
-                                    assistant = assistant,
-                                    settings = settings
-                                )
-                            )
-                        )
+                        val projected = projection.project(it)
+                        messages = projected.messages
+                        emit(GenerationChunk.Messages(projected.visualMessages))
                     },
                     transformers = inputTransformers,
                     model = model,
@@ -472,13 +469,8 @@ class GenerationHandler(
             ).collect {
                 messages = messages.handleMessageChunk(chunk = it, model = model)
                 it.usage?.let { usage ->
-                    messages = messages.mapIndexed { index, message ->
-                        if (index == messages.lastIndex) {
-                            message.copy(usage = message.usage.merge(usage))
-                        } else {
-                            message
-                        }
-                    }
+                    val last = messages.last()
+                    messages = messages.dropLast(1) + last.copy(usage = last.usage.merge(usage))
                 }
                 publishMessages()
             }
@@ -490,15 +482,8 @@ class GenerationHandler(
             )
             messages = messages.handleMessageChunk(chunk = chunk, model = model)
             chunk.usage?.let { usage ->
-                messages = messages.mapIndexed { index, message ->
-                    if (index == messages.lastIndex) {
-                        message.copy(
-                            usage = message.usage.merge(usage)
-                        )
-                    } else {
-                        message
-                    }
-                }
+                val last = messages.last()
+                messages = messages.dropLast(1) + last.copy(usage = last.usage.merge(usage))
             }
             publishMessages()
         }

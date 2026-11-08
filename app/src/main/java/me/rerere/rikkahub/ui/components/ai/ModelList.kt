@@ -1,5 +1,7 @@
 package me.rerere.rikkahub.ui.components.ai
 
+import me.rerere.rikkahub.data.datastore.toggleFavoriteModel
+import me.rerere.rikkahub.data.datastore.reorderFavoriteModels
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -372,29 +374,14 @@ private fun ColumnScope.ModelList(
         initialFirstVisibleItemIndex = selectedModelPosition
     )
     val reorderableState = rememberReorderableLazyListState(lazyListState) { from, to ->
-        // 计算favorite models在列表中的位置偏移
-        var favoriteStartIndex = 0
-        if (providers.isEmpty()) {
-            favoriteStartIndex = 1 // no providers item
-        }
-        if (favoriteModels.isNotEmpty()) {
-            favoriteStartIndex += 1 // favorite header
-        }
-
+        var favoriteStartIndex = if (providers.isEmpty()) 1 else 0
+        if (favoriteModels.isNotEmpty()) favoriteStartIndex += 1
         val fromIndex = from.index - favoriteStartIndex
         val toIndex = to.index - favoriteStartIndex
-
-        // 只处理favorite models范围内的拖拽
-        if (fromIndex >= 0 && toIndex >= 0 &&
-            fromIndex < favoriteModels.size && toIndex < favoriteModels.size
-        ) {
-            val newFavoriteModels = settings.value.favoriteModels.toMutableList().apply {
-                add(toIndex, removeAt(fromIndex))
-            }
+        if (fromIndex in favoriteModels.indices && toIndex in favoriteModels.indices) {
+            val displayedIds = favoriteModels.map { it.first.id }
             coroutineScope.launch {
-                settingsStore.update { oldSettings ->
-                    oldSettings.copy(favoriteModels = newFavoriteModels)
-                }
+                settingsStore.update { latest -> latest.reorderFavoriteModels(displayedIds, fromIndex, toIndex) }
             }
         }
     }
@@ -577,18 +564,7 @@ private fun ColumnScope.ModelList(
                         IconButton(
                             onClick = {
                                 coroutineScope.launch {
-                                    settingsStore.update { settings ->
-                                        if (favorite) {
-                                            settings.copy(
-                                                favoriteModels = settings.favoriteModels.filter { it != model.id }
-                                            )
-
-                                        } else {
-                                            settings.copy(
-                                                favoriteModels = settings.favoriteModels + model.id
-                                            )
-                                        }
-                                    }
+                                    settingsStore.update { latest -> latest.toggleFavoriteModel(model.id) }
                                 }
                             }
                         ) {

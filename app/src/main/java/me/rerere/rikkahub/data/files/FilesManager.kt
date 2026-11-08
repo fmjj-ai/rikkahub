@@ -44,29 +44,12 @@ class FilesManager(
     ): ManagedFileEntity = withContext(Dispatchers.IO) {
         val resolvedName = displayName ?: getFileNameFromUri(uri) ?: "file"
         val resolvedMime = mimeType ?: getFileMimeType(uri) ?: "application/octet-stream"
-        val target = createTargetFile(folder, resolvedName, resolvedMime)
-        try {
+        saveManagedContent(folder, resolvedName, resolvedMime) { target ->
             val input = context.contentResolver.openInputStream(uri) ?: error("无法读取所选文件")
             input.use {
                 target.outputStream().use { output -> it.copyTo(output) }
             }
             check(target.length() > 0) { "所选文件为空或已不可访问" }
-            createManagedFileEntity(
-                folder = folder,
-                file = target,
-                displayName = resolvedName,
-                mimeType = resolvedMime,
-            )
-        } catch (error: Throwable) {
-            // 仅清理本次 UUID 目标，避免权限撤回、磁盘满等错误留下半文件和孤立登记。
-            withContext(NonCancellable) {
-                runCatching { repository.deleteByPath(buildRelativePath(folder, target)) }
-                    .onFailure { error.addSuppressed(it) }
-                if (target.exists() && !target.delete()) {
-                    error.addSuppressed(java.io.IOException("未能清理未完成的导入文件"))
-                }
-            }
-            throw error
         }
     }
 
@@ -91,15 +74,31 @@ class FilesManager(
         text: String,
         displayName: String = "pasted_text.txt",
         mimeType: String = "text/plain",
+    ): ManagedFileEntity = saveManagedContent(folder, displayName, mimeType) { target ->
+        target.writeText(text)
+    }
+
+    /** URI 与文本共用写入、登记和失败清理，避免返回文件 URL 前遗留半成品。 */
+    private suspend fun saveManagedContent(
+        folder: String,
+        displayName: String,
+        mimeType: String,
+        write: (File) -> Unit,
     ): ManagedFileEntity = withContext(Dispatchers.IO) {
         val target = createTargetFile(folder, displayName, mimeType)
-        target.writeText(text)
-        createManagedFileEntity(
-            folder = folder,
-            file = target,
-            displayName = displayName,
-            mimeType = mimeType,
-        )
+        try {
+            write(target)
+            createManagedFileEntity(folder, target, displayName, mimeType)
+        } catch (error: Throwable) {
+            withContext(NonCancellable) {
+                runCatching { repository.deleteByPath(buildRelativePath(folder, target)) }
+                    .onFailure { error.addSuppressed(it) }
+                if (target.exists() && !target.delete()) {
+                    error.addSuppressed(java.io.IOException("未能清理未完成的导入文件"))
+                }
+            }
+            throw error
+        }
     }
 
     fun observe(folder: String = FileFolders.UPLOAD): Flow<List<ManagedFileEntity>> =
@@ -187,6 +186,9 @@ class FilesManager(
     @OptIn(ExperimentalEncodingApi::class)
     suspend fun convertBase64ImagePartToLocalFile(message: UIMessage): UIMessage =
         withContext(Dispatchers.IO) {
+            if (message.parts.none { it is UIMessagePart.Image && it.url.startsWith("data:image") }) {
+                return@withContext message
+            }
             message.copy(
                 parts = message.parts.map { part ->
                     when (part) {
@@ -214,14 +216,21 @@ class FilesManager(
             )
         }
 
+    /** 引用比较与删除共用规范化后的应用内文件身份，不把等价 URI 当成不同文件。 */
+    fun canonicalOwnedFileUrl(url: String): String? = runCatching {
+        val uri = url.toUri()
+        if (uri.scheme != "file") return@runCatching null
+        val file = uri.toFile().canonicalFile
+        if (getRelativePathInFilesDir(file) == null) null else file.toUri().toString()
+    }.getOrNull()
+
     fun deleteChatFiles(uris: List<Uri>) {
         val relativePaths = mutableSetOf<String>()
-        uris.filter { it.toString().startsWith("file:") }.forEach { uri ->
-            val file = uri.toFile()
-            getRelativePathInFilesDir(file)?.let { relativePaths.add(it) }
-            if (file.exists()) {
-                file.delete()
-            }
+        uris.filter { it.scheme == "file" }.forEach { uri ->
+            val file = runCatching { uri.toFile().canonicalFile }.getOrNull() ?: return@forEach
+            val relativePath = getRelativePathInFilesDir(file) ?: return@forEach
+            // 仅删除应用目录中的文件；删除失败时保留登记，供后续清理重试。
+            if (!file.exists() || (file.isFile && file.delete())) relativePaths.add(relativePath)
         }
         if (relativePaths.isNotEmpty()) {
             appScope.launch(Dispatchers.IO) {

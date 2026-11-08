@@ -175,9 +175,8 @@ class SettingsStore internal constructor(
         return state.value
     }
 
-    /** 旧整份替换入口仅为尚未迁移的调用方和备份恢复保留。普通修改应使用变换函数。 */
-    @Deprecated("普通修改请使用 update { latest -> latest.copy(...) }，避免旧快照覆盖新值")
-    suspend fun update(settings: Settings) {
+    /** 仅用于明确的完整备份恢复；普通设置修改必须使用基于最新值的 update。 */
+    suspend fun replace(settings: Settings) {
         if (settings.init) return
         update { settings }
     }
@@ -198,6 +197,36 @@ class SettingsStore internal constructor(
                 if (latest !== persisted) {
                     dataStore.edit { it.putSettings(latest, persisted) }
                     persisted = latest
+                }
+            }
+        }
+    }
+
+    /** 外观文件只在保存成功后回收；当前内存和最后成功落盘的引用都必须已经解除。 */
+    suspend fun updateWithAppearanceCleanup(
+        fileIdentity: (String) -> String?,
+        deleteFiles: (List<String>) -> Unit,
+        fn: (Settings) -> Settings,
+    ) {
+        awaitLoaded()
+        withContext(kotlinx.coroutines.NonCancellable) {
+            var candidates = emptySet<String>()
+            update { current ->
+                fn(current).also { updated ->
+                    candidates = current.appearanceFileUrls() - updated.appearanceFileUrls()
+                }
+            }
+            if (candidates.isNotEmpty()) {
+                persistMutex.withLock {
+                    withContext(kotlinx.coroutines.Dispatchers.IO) {
+                        // 与状态发布共用锁，引用复查和实际删除之间不能接受新的文件引用。
+                        synchronized(stateLock) {
+                            val referenced = (state.value.appearanceFileUrls() +
+                                persisted?.appearanceFileUrls().orEmpty()).mapNotNull(fileIdentity).toSet()
+                            val unused = candidates.mapNotNull(fileIdentity).toSet() - referenced
+                            if (unused.isNotEmpty()) deleteFiles(unused.toList())
+                        }
+                    }
                 }
             }
         }

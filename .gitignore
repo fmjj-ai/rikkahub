@@ -11,3 +11,5 @@ local.properties
 .cursor
 .history
 .kotlin
+/delivery
+Screenrecording_*.mp4

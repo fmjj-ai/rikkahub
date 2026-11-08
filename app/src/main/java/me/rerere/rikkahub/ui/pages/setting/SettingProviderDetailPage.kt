@@ -1,5 +1,6 @@
 package me.rerere.rikkahub.ui.pages.setting
 
+import me.rerere.rikkahub.data.datastore.moveById
 import me.rerere.hugeicons.HugeIcons
 import me.rerere.hugeicons.stroke.Package01
 import me.rerere.hugeicons.stroke.Connect
@@ -102,6 +103,7 @@ import me.rerere.ai.provider.ModelType
 import me.rerere.ai.provider.ProviderManager
 import me.rerere.ai.provider.ProviderProtocol
 import me.rerere.ai.provider.ProviderSetting
+import me.rerere.rikkahub.data.ai.account.preserveCredential
 import me.rerere.ai.provider.TextGenerationParams
 import me.rerere.ai.provider.effectiveDefaultProtocol
 import me.rerere.ai.provider.isConfigured
@@ -151,16 +153,12 @@ fun SettingProviderDetailPage(id: Uuid, vm: SettingVM = koinViewModel()) {
     val toaster = LocalToaster.current
     val context = LocalContext.current
 
-    val onEdit = { newProvider: ProviderSetting ->
-        vm.updateSettings { latest -> latest.copy(
-            providers = latest.providers.map {
-                if (newProvider.id == it.id) {
-                    newProvider
-                } else {
-                    it
-                }
-            }
-        ) }
+    val onEdit: ((ProviderSetting) -> ProviderSetting) -> Unit = { transform ->
+        vm.updateSettings { latest ->
+            latest.copy(providers = latest.providers.map { current ->
+                if (current.id == id) transform(current) else current
+            })
+        }
     }
     val onDelete = {
         vm.updateSettings { latest ->
@@ -190,6 +188,7 @@ fun SettingProviderDetailPage(id: Uuid, vm: SettingVM = koinViewModel()) {
                     val shareSheetState = rememberShareSheetState()
                     ShareSheet(shareSheetState)
                     IconButton(
+                        enabled = provider !is ProviderSetting.Account,
                         onClick = {
                             shareSheetState.show(provider)
                         }
@@ -236,13 +235,23 @@ fun SettingProviderDetailPage(id: Uuid, vm: SettingVM = koinViewModel()) {
                 0 -> {
                     SettingProviderConfigPage(
                         provider = provider,
-                        onEdit = {
-                            onEdit(it)
-                            toaster.show(
-                                context.getString(R.string.setting_provider_page_save_success),
-                                type = ToastType.Success
-                            )
-                        },
+                        onEdit = { transform ->
+                    scope.launch {
+                        runCatching {
+                            vm.saveSettings { latest ->
+                                check(latest.providers.any { it.id == id }) { "提供商已被删除" }
+                                latest.copy(providers = latest.providers.map { current ->
+                                    if (current.id == id) transform(current) else current
+                                })
+                            }
+                        }.onSuccess {
+                            toaster.show(context.getString(R.string.setting_provider_page_save_success), type = ToastType.Success)
+                        }.onFailure { error ->
+                            if (error is kotlinx.coroutines.CancellationException) throw error
+                            toaster.show(error.message ?: "保存失败")
+                        }
+                    }
+                },
                         onDelete = {
                             onDelete()
                         }
@@ -263,11 +272,11 @@ fun SettingProviderDetailPage(id: Uuid, vm: SettingVM = koinViewModel()) {
 @Composable
 private fun SettingProviderConfigPage(
     provider: ProviderSetting,
-    onEdit: (ProviderSetting) -> Unit,
+    onEdit: ((ProviderSetting) -> ProviderSetting) -> Unit,
     onDelete: () -> Unit
 ) {
-    var internalProvider by remember(provider) {
-        mutableStateOf(if (provider.builtIn) provider else provider.toMultiProtocol())
+    var internalProvider by remember(provider.id) {
+        mutableStateOf(if (provider.builtIn || provider is ProviderSetting.Account) provider else provider.toMultiProtocol())
     }
     var showDeleteDialog by remember { mutableStateOf(false) }
     val openAiEndpoint = when (val current = internalProvider) {
@@ -323,7 +332,7 @@ private fun SettingProviderConfigPage(
                 }
             }
 
-            if (internalProvider !is ProviderSetting.MultiProtocol) {
+            if (internalProvider !is ProviderSetting.MultiProtocol && internalProvider !is ProviderSetting.Account) {
                 IconButton(
                     onClick = {
                         internalProvider = internalProvider.resetBaseUrlToDefault()
@@ -339,7 +348,13 @@ private fun SettingProviderConfigPage(
 
             Button(
                 onClick = {
-                    onEdit(internalProvider)
+                    val draft = internalProvider
+                    onEdit { current ->
+                        val models = if (draft is ProviderSetting.MultiProtocol && current !is ProviderSetting.MultiProtocol) {
+                            current.toMultiProtocol().models
+                        } else current.models
+                        draft.copyProvider(models = models).preserveCredential(current)
+                    }
                 }
             ) {
                 Text(stringResource(R.string.setting_provider_page_save))
@@ -388,7 +403,7 @@ private fun SettingProviderConfigPage(
 @Composable
 private fun SettingProviderModelPage(
     provider: ProviderSetting,
-    onEdit: (ProviderSetting) -> Unit
+    onEdit: ((ProviderSetting) -> ProviderSetting) -> Unit
 ) {
     ModelList(
         providerSetting = provider,
@@ -397,13 +412,13 @@ private fun SettingProviderModelPage(
 }
 
 private data class ProtocolModelGroup(
-    val protocol: ProviderProtocol,
+    val protocol: ProviderProtocol?,
     val models: List<Model>,
 )
 
 private data class AvailableModels(
     val groups: List<ProtocolModelGroup> = emptyList(),
-    val errors: Map<ProviderProtocol, String> = emptyMap(),
+    val errors: Map<ProviderProtocol?, String> = emptyMap(),
 ) {
     val allModels: List<Model> get() = groups.flatMap { it.models }
 }
@@ -447,7 +462,7 @@ private suspend fun loadAvailableModels(
             }.toMap(),
         )
     } else {
-        val protocol = ProviderProtocol.of(providerSetting) ?: ProviderProtocol.OPENAI
+        val protocol = ProviderProtocol.of(providerSetting)
         val result = runCatching {
             providerManager.getProviderByType(providerSetting)
                 .listModels(providerSetting)
@@ -465,7 +480,7 @@ private suspend fun loadAvailableModels(
 @Composable
 private fun ModelList(
     providerSetting: ProviderSetting,
-    onUpdateProvider: (ProviderSetting) -> Unit
+    onUpdateProvider: ((ProviderSetting) -> ProviderSetting) -> Unit
 ) {
     val providerManager = koinInject<ProviderManager>()
     val available by produceState(AvailableModels(), providerSetting) {
@@ -474,7 +489,11 @@ private fun ModelList(
     var expanded by rememberSaveable { mutableStateOf(true) }
     val lazyListState = rememberLazyListState()
     val reorderableLazyListState = rememberReorderableLazyListState(lazyListState) { from, to ->
-        onUpdateProvider(providerSetting.moveMove(from.index, to.index))
+        val fromId = providerSetting.models.getOrNull(from.index)?.id
+        val toId = providerSetting.models.getOrNull(to.index)?.id
+        onUpdateProvider { current ->
+            current.copyProvider(models = current.models.moveById(fromId, toId) { it.id })
+        }
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -522,11 +541,15 @@ private fun ModelList(
                         ModelCard(
                             model = item,
                             onDelete = {
-                                onUpdateProvider(providerSetting.delModel(item))
-                            },
+                        onUpdateProvider { current ->
+                            current.copyProvider(models = current.models.filterNot { it.id == item.id })
+                        }
+                    },
                             onEdit = { editedModel ->
-                                onUpdateProvider(providerSetting.editModel(editedModel))
-                            },
+                        onUpdateProvider { current ->
+                            current.copyProvider(models = current.models.map { if (it.id == editedModel.id) editedModel else it })
+                        }
+                    },
                             parentProvider = providerSetting,
                             modifier = Modifier
                                 .longPressDraggableHandle()
@@ -553,12 +576,8 @@ private fun ModelList(
             AddModelButton(
                 available = available,
                 selectedModels = providerSetting.models,
-                onAddModel = {
-                    onUpdateProvider(providerSetting.addModel(it))
-                },
-                onRemoveModel = {
-                    onUpdateProvider(providerSetting.delModel(it))
-                },
+                onAddModel = { model -> onUpdateProvider { current -> current.addModel(model) } },
+                onRemoveModel = { model -> onUpdateProvider { current -> current.delModel(model) } },
                 expanded = expanded,
                 parentProvider = providerSetting,
                 onUpdateProvider = onUpdateProvider
@@ -726,7 +745,7 @@ private fun ModelSettingsForm(
                             .padding(16.dp),
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        ProviderOverrideSettings(
+                        if (parentProvider !is ProviderSetting.Account) ProviderOverrideSettings(
                             providerOverride = model.providerOverwrite,
                             onUpdateProviderOverride = { providerOverride ->
                                 onModelChange(model.copy(providerOverwrite = providerOverride))
@@ -737,14 +756,14 @@ private fun ModelSettingsForm(
                         CustomHeaders(
                             headers = model.customHeaders,
                             onUpdate = { headers ->
-                                onModelChange(model.copy(customHeaders = headers))
+                                onModelChange(model.copy(customHeaders = headers(model.customHeaders)))
                             }
                         )
 
                         CustomBodies(
                             customBodies = model.customBodies,
                             onUpdate = { bodies ->
-                                onModelChange(model.copy(customBodies = bodies))
+                                onModelChange(model.copy(customBodies = bodies(model.customBodies)))
                             }
                         )
                     }
@@ -861,7 +880,7 @@ private fun AddModelButton(
     onAddModel: (Model) -> Unit,
     onRemoveModel: (Model) -> Unit,
     parentProvider: ProviderSetting,
-    onUpdateProvider: (ProviderSetting) -> Unit
+    onUpdateProvider: ((ProviderSetting) -> ProviderSetting) -> Unit
 ) {
     val dialogState = useEditState<Model> { onAddModel(it) }
     val scope = rememberCoroutineScope()
@@ -873,32 +892,27 @@ private fun AddModelButton(
         ModelPicker(
             available = available,
             showProtocolHeaders = parentProvider is ProviderSetting.MultiProtocol,
+            useRegistryMetadata = parentProvider !is ProviderSetting.Account,
             selectedModels = selectedModels,
             onModelSelected = { model ->
-                onAddModel(model.withRegistryMetadata())
+                onAddModel(if (parentProvider is ProviderSetting.Account) model else model.withRegistryMetadata())
             },
             onModelDeselected = { model ->
                 onRemoveModel(model)
             },
-            onAllModelSelected = {
-                onUpdateProvider(
-                    parentProvider.copyProvider(
-                        models = parentProvider.models + it
-                            .filter { model ->
-                                parentProvider.models.none { existing -> existing.sameSelection(model) }
-                            }
-                            .map { model -> model.withRegistryMetadata() }
-                    )
-                )
+            onAllModelSelected = { pickedModels ->
+                onUpdateProvider { current ->
+                    current.copyProvider(models = current.models + pickedModels
+                        .filter { model -> current.models.none { it.sameSelection(model) } }
+                        .map { if (current is ProviderSetting.Account) it else it.withRegistryMetadata() })
+                }
             },
             onAllModelDeselected = { filteredModels ->
-                onUpdateProvider(
-                    parentProvider.copyProvider(
-                        models = parentProvider.models.filter { model ->
-                            filteredModels.none { filtered -> filtered.sameSelection(model) }
-                        }
-                    )
-                )
+                onUpdateProvider { current ->
+                    current.copyProvider(models = current.models.filter { model ->
+                        filteredModels.none { it.sameSelection(model) }
+                    })
+                }
             }
         )
 
@@ -1009,6 +1023,7 @@ private fun AddModelButton(
 private fun ModelPicker(
     available: AvailableModels,
     showProtocolHeaders: Boolean,
+    useRegistryMetadata: Boolean,
     selectedModels: List<Model>,
     onModelSelected: (Model) -> Unit,
     onModelDeselected: (Model) -> Unit,
@@ -1088,7 +1103,7 @@ private fun ModelPicker(
                     contentPadding = PaddingValues(8.dp),
                 ) {
                     filteredGroups.forEach { group ->
-                        if (showProtocolHeaders) {
+                        if (showProtocolHeaders && group.protocol != null) {
                             item(key = "protocol-header-${group.protocol.name}") {
                                 Text(
                                     text = stringResource(
@@ -1107,6 +1122,7 @@ private fun ModelPicker(
                                 model = model,
                                 selected = selected,
                                 showProtocolTag = showProtocolHeaders,
+                                useRegistryMetadata = useRegistryMetadata,
                                 onToggle = {
                                     if (selected) {
                                         selectedModels.firstOrNull { it.sameSelection(model) }
@@ -1130,7 +1146,7 @@ private fun ModelPicker(
                                     Text(
                                         text = stringResource(
                                             R.string.setting_provider_page_fetch_models_failed,
-                                            protocol.displayName,
+                                            protocol?.displayName ?: "ChatGPT",
                                             message
                                         ),
                                         style = MaterialTheme.typography.bodySmall,
@@ -1179,6 +1195,7 @@ private fun ModelPickerRow(
     model: Model,
     selected: Boolean,
     showProtocolTag: Boolean,
+    useRegistryMetadata: Boolean,
     onToggle: () -> Unit,
 ) {
     Card {
@@ -1212,7 +1229,9 @@ private fun ModelPickerRow(
                             Text(protocol.displayName)
                         }
                     }
-                    val modelMeta = remember(model) { model.withRegistryMetadata() }
+                    val modelMeta = remember(model, useRegistryMetadata) {
+                        if (useRegistryMetadata) model.withRegistryMetadata() else model
+                    }
                     ModelModalityTag(model = modelMeta)
                     ModelAbilityTag(model = modelMeta)
                 }

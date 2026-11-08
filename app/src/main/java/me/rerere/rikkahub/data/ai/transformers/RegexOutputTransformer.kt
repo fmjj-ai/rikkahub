@@ -1,5 +1,7 @@
 package me.rerere.rikkahub.data.ai.transformers
 
+import me.rerere.rikkahub.data.model.Assistant
+import me.rerere.rikkahub.utils.mapPreservingIdentity
 import me.rerere.ai.core.MessageRole
 import me.rerere.ai.ui.UIMessage
 import me.rerere.ai.ui.UIMessagePart
@@ -8,32 +10,26 @@ import me.rerere.rikkahub.data.model.replaceRegexes
 import org.koin.core.component.KoinComponent
 
 object RegexOutputTransformer : OutputMessageTransformer, KoinComponent {
-    override suspend fun visualTransform(
-        ctx: TransformerContext,
-        messages: List<UIMessage>,
-    ): List<UIMessage> {
-        val assistant = ctx.assistant
-        if (assistant.regexes.isEmpty()) return messages // No regexes, return original messages
-        return messages.map { message ->
-            val scope = when (message.role) {
-                MessageRole.ASSISTANT -> AssistantAffectScope.ASSISTANT
-                else -> return@map message // Skip non-assistant messages
+    override val supportsSingleMessageProjection: Boolean = true
+
+    override suspend fun visualTransform(ctx: TransformerContext, messages: List<UIMessage>): List<UIMessage> =
+        messages.mapPreservingIdentity { projectAssistantRegexes(it, ctx.assistant) }
+}
+
+internal fun projectAssistantRegexes(message: UIMessage, assistant: Assistant): UIMessage {
+    if (assistant.regexes.isEmpty() || message.role != MessageRole.ASSISTANT) return message
+    val parts = message.parts.mapPreservingIdentity { part ->
+        when (part) {
+            is UIMessagePart.Text -> {
+                val text = part.text.replaceRegexes(assistant, AssistantAffectScope.ASSISTANT, visual = false)
+                if (text == part.text) part else part.copy(text = text)
             }
-            message.copy(
-                parts = message.parts.map { part ->
-                    when (part) {
-                        is UIMessagePart.Text -> {
-                            part.copy(text = part.text.replaceRegexes(assistant, scope, visual = false))
-                        }
-
-                        is UIMessagePart.Reasoning -> {
-                            part.copy(reasoning = part.reasoning.replaceRegexes(assistant, scope, visual = false))
-                        }
-
-                        else -> part
-                    }
-                }
-            )
+            is UIMessagePart.Reasoning -> {
+                val text = part.reasoning.replaceRegexes(assistant, AssistantAffectScope.ASSISTANT, visual = false)
+                if (text == part.reasoning) part else part.copy(reasoning = text)
+            }
+            else -> part
         }
     }
+    return if (parts === message.parts) message else message.copy(parts = parts)
 }

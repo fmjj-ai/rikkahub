@@ -89,7 +89,9 @@ import me.rerere.rikkahub.data.model.Conversation
 import me.rerere.rikkahub.ui.components.message.MessagePartBlock
 import me.rerere.rikkahub.ui.components.message.ThinkingStep
 import me.rerere.rikkahub.ui.components.message.groupMessageParts
+import me.rerere.rikkahub.ui.components.richtext.LocalPreparedMarkdown
 import me.rerere.rikkahub.ui.components.richtext.MarkdownBlock
+import me.rerere.rikkahub.ui.components.richtext.prepareMarkdown
 import me.rerere.rikkahub.ui.components.ui.AutoAIIcon
 import me.rerere.rikkahub.ui.components.ui.BitmapComposer
 import me.rerere.rikkahub.ui.components.ui.ChainOfThought
@@ -398,12 +400,26 @@ private suspend fun exportToImage(
         return
     }
 
+    // 在挂载截图内容前完成实际显示文本的准备，不依赖截图器的固定等待时间。
+    val preparedMarkdown = messages.flatMap { message ->
+        message.parts.mapNotNull { part ->
+            when (part) {
+                is UIMessagePart.Text -> part.text
+                is UIMessagePart.Reasoning -> part.reasoning.takeIf { options.expandReasoning }
+                else -> null
+            }
+        }
+    }.distinct().associateWith { prepareMarkdown(it) }
+
     val bitmap = composer.composableToBitmap(
         activity = activity,
         width = 540.dp,
         screenDensity = density,
         content = {
-            CompositionLocalProvider(LocalSettings provides settings) {
+            CompositionLocalProvider(
+                LocalSettings provides settings,
+                LocalPreparedMarkdown provides preparedMarkdown,
+            ) {
                 ExportedChatImage(
                     conversation = conversation,
                     messages = messages,

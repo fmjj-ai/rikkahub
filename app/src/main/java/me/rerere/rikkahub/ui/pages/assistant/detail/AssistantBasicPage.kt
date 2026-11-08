@@ -103,7 +103,7 @@ internal fun AssistantBasicContent(
     providers: List<me.rerere.ai.provider.ProviderSetting>,
     tags: List<DataTag>,
     workspaces: List<WorkspaceEntity>,
-    onUpdate: (Assistant) -> Unit,
+    onUpdate: ((Assistant) -> Assistant) -> Unit,
     vm: AssistantDetailVM
 ) {
     Column(
@@ -126,11 +126,9 @@ internal fun AssistantBasicContent(
                 value = assistant.avatar,
                 name = assistant.name.ifBlank { stringResource(R.string.assistant_page_default_assistant) },
                 onUpdate = { avatar ->
-                    onUpdate(
-                        assistant.copy(
+                    onUpdate { currentAssistant -> currentAssistant.copy(
                             avatar = avatar
-                        )
-                    )
+                        ) }
                 },
                 modifier = Modifier
                     .size(80.dp)
@@ -151,11 +149,9 @@ internal fun AssistantBasicContent(
                 OutlinedTextField(
                     value = assistant.name,
                     onValueChange = {
-                        onUpdate(
-                            assistant.copy(
+                        onUpdate { currentAssistant -> currentAssistant.copy(
                                 name = it
-                            )
-                        )
+                            ) }
                     },
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -172,9 +168,7 @@ internal fun AssistantBasicContent(
                 TagsInput(
                     value = assistant.tags,
                     tags = tags,
-                    onValueChange = { tagIds, tagList ->
-                        vm.updateTags(tagIds, tagList)
-                    },
+                    onValueChange = vm::updateTags,
                 )
             }
 
@@ -194,11 +188,9 @@ internal fun AssistantBasicContent(
                     options = listOf<WorkspaceEntity?>(null) + workspaces,
                     selectedOption = selectedWorkspace,
                     onOptionSelected = { workspace ->
-                        onUpdate(
-                            assistant.copy(
+                        onUpdate { currentAssistant -> currentAssistant.copy(
                                 workspaceId = workspace?.id?.let { Uuid.parse(it) }
-                            )
-                        )
+                            ) }
                     },
                     modifier = Modifier.fillMaxWidth(),
                     optionToString = { workspace ->
@@ -221,11 +213,9 @@ internal fun AssistantBasicContent(
                     Switch(
                         checked = assistant.useAssistantAvatar,
                         onCheckedChange = {
-                            onUpdate(
-                                assistant.copy(
+                            onUpdate { currentAssistant -> currentAssistant.copy(
                                     useAssistantAvatar = it
-                                )
-                            )
+                                ) }
                         }
                     )
                 }
@@ -249,11 +239,9 @@ internal fun AssistantBasicContent(
                         providers = providers,
                         type = ModelType.CHAT,
                         onSelect = {
-                            onUpdate(
-                                assistant.copy(
+                            onUpdate { currentAssistant -> currentAssistant.copy(
                                     chatModelId = it.id
-                                )
-                            )
+                                ) }
                         },
                     )
                 }
@@ -275,11 +263,9 @@ internal fun AssistantBasicContent(
                     Switch(
                         checked = assistant.temperature != null,
                         onCheckedChange = { enabled ->
-                            onUpdate(
-                                assistant.copy(
+                            onUpdate { currentAssistant -> currentAssistant.copy(
                                     temperature = if (enabled) 1.0f else null
-                                )
-                            )
+                                ) }
                         }
                     )
                 }
@@ -294,11 +280,9 @@ internal fun AssistantBasicContent(
                         onValueChange = { value ->
                             temperatureInput = value
                             value.toFloatOrNull()?.takeIf { it in 0f..2f }?.let { temperature ->
-                                onUpdate(
-                                    assistant.copy(
+                                onUpdate { currentAssistant -> currentAssistant.copy(
                                         temperature = temperature
-                                    )
-                                )
+                                    ) }
                             }
                         },
                         modifier = Modifier.fillMaxWidth(),
@@ -328,11 +312,9 @@ internal fun AssistantBasicContent(
                     Switch(
                         checked = assistant.topP != null,
                         onCheckedChange = { enabled ->
-                            onUpdate(
-                                assistant.copy(
+                            onUpdate { currentAssistant -> currentAssistant.copy(
                                     topP = if (enabled) 1.0f else null
-                                )
-                            )
+                                ) }
                         }
                     )
                 }
@@ -347,11 +329,9 @@ internal fun AssistantBasicContent(
                         onValueChange = { value ->
                             topPInput = value
                             value.toFloatOrNull()?.takeIf { it in 0f..1f }?.let { nextTopP ->
-                                onUpdate(
-                                    assistant.copy(
+                                onUpdate { currentAssistant -> currentAssistant.copy(
                                         topP = nextTopP
-                                    )
-                                )
+                                    ) }
                             }
                         },
                         modifier = Modifier.fillMaxWidth(),
@@ -379,11 +359,9 @@ internal fun AssistantBasicContent(
                 Slider(
                     value = assistant.contextMessageLimit.toFloat(),
                     onValueChange = { value ->
-                        onUpdate(
-                            assistant.copy(
+                        onUpdate { currentAssistant -> currentAssistant.copy(
                                 contextMessageLimit = snapContextMessageLimit(value)
-                            )
-                        )
+                            ) }
                     },
                     valueRange = 0f..512f,
                     steps = 0,
@@ -420,11 +398,9 @@ internal fun AssistantBasicContent(
                     Switch(
                         checked = assistant.streamOutput,
                         onCheckedChange = {
-                            onUpdate(
-                                assistant.copy(
+                            onUpdate { currentAssistant -> currentAssistant.copy(
                                     streamOutput = it
-                                )
-                            )
+                                ) }
                         }
                     )
                 }
@@ -439,7 +415,7 @@ internal fun AssistantBasicContent(
                 ReasoningButton(
                     reasoningLevel = assistant.reasoningLevel,
                     onUpdateReasoningLevel = { level ->
-                        onUpdate(assistant.copy(reasoningLevel = level))
+                        onUpdate { currentAssistant -> currentAssistant.copy(reasoningLevel = level) }
                     }
                 )
             }
@@ -461,11 +437,9 @@ internal fun AssistantBasicContent(
                         } else {
                             text.toIntOrNull()?.takeIf { it > 0 }
                         }
-                        onUpdate(
-                            assistant.copy(
+                        onUpdate { currentAssistant -> currentAssistant.copy(
                                 maxTokens = tokens
-                            )
-                        )
+                            ) }
                     },
                     modifier = Modifier.fillMaxWidth(),
                     placeholder = {
@@ -497,11 +471,9 @@ internal fun AssistantBasicContent(
                     Switch(
                         checked = assistant.useGradientBackground,
                         onCheckedChange = {
-                            onUpdate(
-                                assistant.copy(
+                            onUpdate { currentAssistant -> currentAssistant.copy(
                                     useGradientBackground = it
-                                )
-                            )
+                                ) }
                         }
                     )
                 }
@@ -515,11 +487,9 @@ internal fun AssistantBasicContent(
                     background = assistant.background,
                     backgroundOpacity = assistant.backgroundOpacity,
                     onUpdate = { background ->
-                        onUpdate(
-                            assistant.copy(
+                        onUpdate { currentAssistant -> currentAssistant.copy(
                                 background = background
-                            )
-                        )
+                            ) }
                     }
                 )
             }
@@ -539,11 +509,9 @@ internal fun AssistantBasicContent(
                     Slider(
                         value = backgroundOpacity,
                         onValueChange = {
-                            onUpdate(
-                                assistant.copy(
+                            onUpdate { currentAssistant -> currentAssistant.copy(
                                     backgroundOpacity = it.toFixed(2).toFloatOrNull()?.coerceIn(0f, 1f) ?: 1.0f
-                                )
-                            )
+                                ) }
                         },
                         valueRange = 0f..1f,
                         steps = 19,

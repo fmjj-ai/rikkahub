@@ -98,7 +98,6 @@ import me.rerere.rikkahub.data.datastore.Settings
 import me.rerere.rikkahub.data.datastore.getCurrentAssistant
 import me.rerere.rikkahub.data.datastore.getCurrentChatModel
 import me.rerere.rikkahub.data.datastore.getQuickMessagesOfAssistant
-import me.rerere.rikkahub.data.files.FilesManager
 import me.rerere.rikkahub.data.model.Assistant
 import me.rerere.rikkahub.data.model.QuickMessage
 import me.rerere.rikkahub.ui.components.ai.completion.ChatCompletionContext
@@ -131,12 +130,14 @@ internal fun ChatInput(
     inputFocusRequester: FocusRequester? = null,
     cameraTransition: CameraAttachmentTransitionState? = null,
     onUpdateChatModel: (Model) -> Unit,
-    onUpdateAssistant: (Assistant) -> Unit,
+    onUpdateAssistant: ((Assistant) -> Assistant) -> Unit,
     onUpdateSearchService: (Int) -> Unit,
     onMoreClick: () -> Unit,
     onContextUsageClick: () -> Unit,
     onCancelClick: () -> Unit,
     onSendClick: () -> Unit,
+    onPasteImage: (android.net.Uri) -> Unit,
+    onPasteTextAsFile: (String) -> Unit,
     onLongSendClick: () -> Unit,
 ) {
     val toaster = LocalToaster.current
@@ -159,8 +160,8 @@ internal fun ChatInput(
     }
 
     fun sendMessage() {
-        if (state.pendingGalleryImageCount > 0) {
-            toaster.show("图片正在添加，请稍候")
+        if (!loading && state.pendingAttachmentCount > 0) {
+            toaster.show("附件正在添加，请稍候")
             return
         }
         focusManager.clearFocus(force = true)
@@ -169,8 +170,8 @@ internal fun ChatInput(
     }
 
     fun sendMessageWithoutAnswer() {
-        if (state.pendingGalleryImageCount > 0) {
-            toaster.show("图片正在添加，请稍候")
+        if (!loading && state.pendingAttachmentCount > 0) {
+            toaster.show("附件正在添加，请稍候")
             return
         }
         focusManager.clearFocus(force = true)
@@ -251,6 +252,8 @@ internal fun ChatInput(
                         state = state,
                         completionProviders = completionProviders,
                         inputFocusRequester = inputFocusRequester,
+                        onPasteImage = onPasteImage,
+                        onPasteTextAsFile = onPasteTextAsFile,
                         onSendMessage = { sendMessage() }
                     )
 
@@ -309,7 +312,7 @@ internal fun ChatInput(
                                 ReasoningButton(
                                     reasoningLevel = assistant.reasoningLevel,
                                     onUpdateReasoningLevel = {
-                                        onUpdateAssistant(assistant.copy(reasoningLevel = it))
+                                        onUpdateAssistant { currentAssistant -> currentAssistant.copy(reasoningLevel = it) }
                                     },
                                     onlyIcon = true,
                                 )
@@ -328,7 +331,7 @@ internal fun ChatInput(
                             PriorityTierButton(
                                 enabled = assistant.enablePriorityTier,
                                 onToggle = { enabled ->
-                                    onUpdateAssistant(assistant.copy(enablePriorityTier = enabled))
+                                    onUpdateAssistant { currentAssistant -> currentAssistant.copy(enablePriorityTier = enabled) }
                                 },
                             )
 
@@ -454,10 +457,11 @@ private fun TextInputRow(
     state: ChatInputState,
     completionProviders: List<ChatCompletionProvider>,
     inputFocusRequester: FocusRequester?,
+    onPasteImage: (android.net.Uri) -> Unit,
+    onPasteTextAsFile: (String) -> Unit,
     onSendMessage: () -> Unit,
 ) {
     val settings = LocalSettings.current
-    val filesManager: FilesManager = koinInject()
     val assistant = settings.getCurrentAssistant()
     val quickMessages = remember(settings.quickMessages, assistant.quickMessageIds) {
         settings.getQuickMessagesOfAssistant(assistant)
@@ -493,7 +497,10 @@ private fun TextInputRow(
         var isFullScreen by remember { mutableStateOf(false) }
         var completionList by remember { mutableStateOf<ChatCompletionList?>(null) }
         val receiveContentListener = remember(
-            settings.displaySetting.pasteLongTextAsFile, settings.displaySetting.pasteLongTextThreshold
+            settings.displaySetting.pasteLongTextAsFile,
+            settings.displaySetting.pasteLongTextThreshold,
+            onPasteImage,
+            onPasteTextAsFile,
         ) {
             ReceiveContentListener { transferableContent ->
                 when {
@@ -501,11 +508,7 @@ private fun TextInputRow(
                         transferableContent.consume { item ->
                             val uri = item.uri
                             if (uri != null) {
-                                state.addImages(
-                                    filesManager.createChatFilesByContents(
-                                        listOf(uri)
-                                    )
-                                )
+                                onPasteImage(uri)
                             }
                             uri != null
                         }
@@ -515,8 +518,7 @@ private fun TextInputRow(
                         transferableContent.consume { item ->
                             val text = item.text?.toString()
                             if (text != null && text.length > settings.displaySetting.pasteLongTextThreshold) {
-                                val document = filesManager.createChatTextFile(text)
-                                state.addFiles(listOf(document))
+                                onPasteTextAsFile(text)
                                 true
                             } else {
                                 false
