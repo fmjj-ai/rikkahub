@@ -234,6 +234,7 @@ dependencies {
 
     // serialization
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.exp4j)
 
     // zxing
     implementation(libs.zxing.core)

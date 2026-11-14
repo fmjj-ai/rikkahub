@@ -86,6 +86,7 @@ import me.rerere.rikkahub.R
 import me.rerere.rikkahub.data.datastore.Settings
 import me.rerere.rikkahub.data.datastore.findModelById
 import me.rerere.rikkahub.data.model.Conversation
+import me.rerere.rikkahub.data.graph.GraphProtocol
 import me.rerere.rikkahub.ui.components.message.MessagePartBlock
 import me.rerere.rikkahub.ui.components.message.ThinkingStep
 import me.rerere.rikkahub.ui.components.message.groupMessageParts
@@ -569,6 +570,26 @@ private fun ExportedChatMessage(
         ) {
             groupedParts.forEach { block ->
                 when (block) {
+                    is MessagePartBlock.GraphDisplayBlock -> {
+                        val graphDefinitions = remember(block.tool.output) {
+                            runCatching {
+                                val text = block.tool.output.filterIsInstance<UIMessagePart.Text>()
+                                    .joinToString("\n") { it.text }
+                                GraphProtocol.decodeResult(text)
+                            }.getOrNull()
+                        }
+                        Card {
+                            Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                Text("交互式函数图像 · 请在聊天中打开", style = MaterialTheme.typography.labelMedium)
+                                if (graphDefinitions?.ok == true) {
+                                    graphDefinitions.graphs.forEach { graph ->
+                                        Text(graph.title, style = MaterialTheme.typography.titleSmall)
+                                        graph.curves.forEach { curve -> Text("y = ${curve.expression}") }
+                                    }
+                                } else Text(graphDefinitions?.error?.message ?: "绘图记录不可用")
+                            }
+                        }
+                    }
                     is MessagePartBlock.ThinkingBlock -> {
                         if (block.steps.isNotEmpty()) {
                             ChainOfThought(

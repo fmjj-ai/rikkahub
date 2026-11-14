@@ -2,6 +2,7 @@ package me.rerere.rikkahub.ui.components.message
 
 import androidx.compose.ui.util.fastForEachIndexed
 import me.rerere.ai.ui.UIMessagePart
+import me.rerere.rikkahub.data.graph.PLOT_FUNCTION_TOOL_NAME
 
 /**
  * 思考步骤类型，用于分组 Reasoning 和 Tool
@@ -22,6 +23,7 @@ sealed interface ThinkingStep {
 sealed interface MessagePartBlock {
     data class ThinkingBlock(val steps: List<ThinkingStep>) : MessagePartBlock
     data class ContentBlock(val part: UIMessagePart, val index: Int) : MessagePartBlock
+    data class GraphDisplayBlock(val tool: UIMessagePart.Tool, val index: Int) : MessagePartBlock
 }
 
 /**
@@ -31,6 +33,7 @@ sealed interface MessagePartBlock {
 fun List<UIMessagePart>.groupMessageParts(): List<MessagePartBlock> {
     val result = mutableListOf<MessagePartBlock>()
     var currentThinkingSteps = mutableListOf<ThinkingStep>()
+    val renderedGraphCalls = mutableSetOf<String>()
 
     fun flushThinkingSteps() {
         if (currentThinkingSteps.isNotEmpty()) {
@@ -47,6 +50,11 @@ fun List<UIMessagePart>.groupMessageParts(): List<MessagePartBlock> {
 
             is UIMessagePart.Tool -> {
                 currentThinkingSteps.add(ThinkingStep.ToolStep(part))
+                if (part.toolName == PLOT_FUNCTION_TOOL_NAME &&
+                    renderedGraphCalls.add(part.toolCallId.ifBlank { "part:$index" })) {
+                    flushThinkingSteps()
+                    result.add(MessagePartBlock.GraphDisplayBlock(part, index))
+                }
             }
 
             else -> {

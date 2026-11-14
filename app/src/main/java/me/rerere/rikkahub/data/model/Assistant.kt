@@ -38,10 +38,11 @@ data class Assistant(
     val customHeaders: List<CustomHeader> = emptyList(),
     val customBodies: List<CustomBody> = emptyList(),
     val mcpServers: Set<Uuid> = emptySet(),
-    // 新建助手默认开启画图子 agent；存量助手沿用已保存的配置（不做数据迁移强开）
+    // 新建助手默认开启生图与函数绘图；存量助手沿用已保存的配置，不迁移强开。
     val localTools: List<LocalToolOption> = listOf(
         LocalToolOption.TimeInfo,
         LocalToolOption.ImageGeneration,
+        LocalToolOption.FunctionGraph,
     ),
     val enableWebSearch: Boolean = false, // 网络搜索开关(每个助手独立)
     // 「快速模式 / 优先级模式」开关(每个助手独立, 默认开启)：

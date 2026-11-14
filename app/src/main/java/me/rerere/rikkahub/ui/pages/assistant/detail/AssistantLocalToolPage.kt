@@ -141,6 +141,16 @@ private fun AssistantLocalToolContent(
     ) {
         CardGroup {
             item(
+                headlineContent = { Text("交互式函数绘图") },
+                supportingContent = { Text("绘制数学函数，支持离线查看、缩放和平移；需要模型支持工具调用，无需生图模型。三角函数使用弧度。") },
+                trailingContent = {
+                    Switch(
+                        checked = assistant.localTools.contains(LocalToolOption.FunctionGraph),
+                        onCheckedChange = { toggleLocalTool(LocalToolOption.FunctionGraph, it) }
+                    )
+                }
+            )
+            item(
                 headlineContent = {
                     Text(stringResource(R.string.assistant_page_local_tools_javascript_engine_title))
                 },

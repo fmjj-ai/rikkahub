@@ -31,6 +31,7 @@ import me.rerere.rikkahub.data.ai.account.AccountLoginStatus
 import me.rerere.rikkahub.data.ai.account.ChatGPTAuth
 import me.rerere.rikkahub.data.ai.account.ProviderAccountManager
 import me.rerere.rikkahub.data.datastore.SettingsStore
+import me.rerere.rikkahub.ui.components.ui.RikkaConfirmDialog
 import org.koin.compose.koinInject
 import java.time.Instant
 import java.time.ZoneId
@@ -57,6 +58,8 @@ internal fun ProviderConfigureChatGPT(
     var usage by remember(provider.id, credential?.accountId, credential != null) { mutableStateOf<ChatGPTUsage?>(null) }
     var usageError by remember(provider.id, credential?.accountId, credential != null) { mutableStateOf<String?>(null) }
     var loading by remember(provider.id) { mutableStateOf(false) }
+    // 退出登录和重新登录都会替换当前登录会话，先弹二次确认再执行
+    var pendingAccountAction by remember(provider.id) { mutableStateOf<AccountAction?>(null) }
 
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(12.dp)) {
         OutlinedTextField(
@@ -78,20 +81,19 @@ internal fun ProviderConfigureChatGPT(
             Text(credential?.email ?: if (credential != null) "已登录 ChatGPT" else "尚未登录")
             credential?.plan?.let { Text("订阅：${ChatGPTAuth.planDisplayName(it)}") }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Button(onClick = { accounts.startLogin(provider.id, context) }, enabled = !signingIn) {
+                Button(onClick = {
+                    if (credential == null) {
+                        accounts.startLogin(provider.id, context)
+                    } else {
+                        pendingAccountAction = AccountAction.Relogin
+                    }
+                }, enabled = !signingIn) {
                     Text(if (signingIn) "等待浏览器授权…" else if (credential == null) "登录 ChatGPT" else "重新登录")
                 }
                 if (signingIn) {
                     OutlinedButton(onClick = { accounts.cancelLogin(provider.id) }) { Text("取消") }
                 } else if (credential != null) {
-                    OutlinedButton(onClick = {
-                        scope.launch {
-                            try { accounts.logout(provider.id) } catch (e: Exception) {
-                                if (e is CancellationException) throw e
-                                usageError = e.message ?: "退出登录失败"
-                            }
-                        }
-                    }) { Text("退出登录") }
+                    OutlinedButton(onClick = { pendingAccountAction = AccountAction.Logout }) { Text("退出登录") }
                 }
             }
             if (status is AccountLoginStatus.Failed) {
@@ -137,4 +139,48 @@ internal fun ProviderConfigureChatGPT(
             usageError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
         }
     }
+
+    pendingAccountAction?.let { action ->
+        RikkaConfirmDialog(
+            show = true,
+            title = when (action) {
+                AccountAction.Logout -> "退出 ChatGPT 账号"
+                AccountAction.Relogin -> "重新登录 ChatGPT"
+            },
+            confirmText = when (action) {
+                AccountAction.Logout -> "退出登录"
+                AccountAction.Relogin -> "重新登录"
+            },
+            dismissText = "取消",
+            onConfirm = {
+                pendingAccountAction = null
+                when (action) {
+                    AccountAction.Logout -> scope.launch {
+                        try {
+                            accounts.logout(provider.id)
+                        } catch (e: Exception) {
+                            if (e is CancellationException) throw e
+                            usageError = e.message ?: "退出登录失败"
+                        }
+                    }
+                    AccountAction.Relogin -> accounts.startLogin(provider.id, context)
+                }
+            },
+            onDismiss = { pendingAccountAction = null },
+        ) {
+            Text(
+                when (action) {
+                    AccountAction.Logout ->
+                        "退出后会清除本地保存的登录会话，需要重新登录才能继续使用账号额度。"
+                    AccountAction.Relogin ->
+                        "重新登录会打开浏览器完成授权，成功后替换当前登录会话；授权失败或取消时保留现有会话。"
+                }
+            )
+        }
+    }
+}
+
+private enum class AccountAction {
+    Logout,
+    Relogin,
 }

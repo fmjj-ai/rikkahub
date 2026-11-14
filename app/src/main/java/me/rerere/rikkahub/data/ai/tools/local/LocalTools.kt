@@ -26,6 +26,7 @@ class LocalTools(
     val javascriptTool by lazy { buildJavascriptTool() }
 
     val timeTool by lazy { buildTimeInfoTool() }
+    val plotFunctionTool by lazy { buildPlotFunctionTool() }
 
     val clipboardTool by lazy { buildClipboardTool(context) }
 
@@ -75,6 +76,9 @@ class LocalTools(
 
     fun getTools(options: List<LocalToolOption>): List<Tool> {
         val tools = mutableListOf<Tool>()
+        if (options.contains(LocalToolOption.FunctionGraph)) {
+            tools.add(plotFunctionTool)
+        }
         if (options.contains(LocalToolOption.JavascriptEngine)) {
             tools.add(javascriptTool)
         }
