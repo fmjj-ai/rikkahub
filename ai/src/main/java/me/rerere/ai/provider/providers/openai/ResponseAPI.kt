@@ -38,6 +38,7 @@ import me.rerere.ai.ui.OpenAIReasoningMetadata
 import me.rerere.ai.ui.UIMessage
 import me.rerere.ai.ui.UIMessageChoice
 import me.rerere.ai.ui.UIMessagePart
+import me.rerere.ai.ui.imageStreamMetadata
 import me.rerere.ai.ui.metadataAs
 import me.rerere.ai.ui.toMetadata
 import me.rerere.ai.util.KeyRoulette
@@ -316,6 +317,7 @@ class ResponseAPI(
                                 add(buildJsonObject {
                                     put("type", "image_generation")
                                     put("model", "gpt-image-2")
+                                    if (stream) put("partial_images", 2)
                                 })
                             }
                         }
@@ -512,10 +514,16 @@ class ResponseAPI(
         })
     }
 
-    private fun parseResponseDelta(jsonObject: JsonObject): MessageChunk? {
+    internal fun parseResponseDelta(jsonObject: JsonObject): MessageChunk? {
         val chunkType = jsonObject["type"]?.jsonPrimitive?.content ?: error("chunk type not found")
 
         when (chunkType) {
+            "response.image_generation_call.partial_image" -> {
+                val id = jsonObject["item_id"]?.jsonPrimitive?.contentOrNull ?: return null
+                val data = jsonObject["partial_image_b64"]?.jsonPrimitive?.contentOrNull ?: return null
+                if (data.isBlank()) return null
+                return imageChunk(id, data, jsonObject, complete = false)
+            }
             "response.output_text.delta" -> {
                 return MessageChunk(
                     id = jsonObject["item_id"]?.jsonPrimitive?.contentOrNull ?: "",
@@ -595,7 +603,10 @@ class ResponseAPI(
                                 index = 0,
                                 delta = UIMessage(
                                     role = MessageRole.ASSISTANT,
-                                    parts = listOf(UIMessagePart.Image(url = ""))
+                                    parts = listOf(UIMessagePart.Image(
+                                        url = "",
+                                        metadata = imageStreamMetadata(id, complete = false),
+                                    ))
                                 ),
                                 message = null,
                                 finishReason = null
@@ -664,24 +675,9 @@ class ResponseAPI(
                         )
                     )
                 } else if (type == "image_generation_call") {
-                    val result = item["result"]?.jsonPrimitive?.content ?: error("result not found")
-                    return MessageChunk(
-                        id = item["id"]?.jsonPrimitive?.content ?: error("item_id not found"),
-                        model = "",
-                        choices = listOf(
-                            UIMessageChoice(
-                                index = 0,
-                                delta = UIMessage(
-                                    role = MessageRole.ASSISTANT,
-                                    parts = listOf(
-                                        UIMessagePart.Image(url = result)
-                                    )
-                                ),
-                                message = null,
-                                finishReason = null
-                            )
-                        )
-                    )
+                    val result = item["result"]?.jsonPrimitive?.contentOrNull ?: return null
+                    if (result.isBlank()) return null
+                    return imageChunk(id, result, item, complete = true)
                 }
             }
 
@@ -727,8 +723,33 @@ class ResponseAPI(
         return null
     }
 
-    private fun parseResponseOutput(jsonObject: JsonObject): MessageChunk {
-        println(jsonObject)
+    private fun imagePart(id: String, data: String, item: JsonObject, complete: Boolean): UIMessagePart.Image {
+        val format = item["output_format"]?.jsonPrimitive?.contentOrNull
+        val mime = when (format) {
+            "jpeg", "jpg" -> "image/jpeg"
+            "webp" -> "image/webp"
+            else -> "image/png"
+        }
+        return UIMessagePart.Image(
+            url = if (data.startsWith("data:") || data.startsWith("https://")) data else "data:$mime;base64,$data",
+            metadata = imageStreamMetadata(
+                id, complete, item["partial_image_index"]?.jsonPrimitive?.intOrNull ?: -1,
+            ),
+        )
+    }
+
+    private fun imageChunk(id: String, data: String, item: JsonObject, complete: Boolean) = MessageChunk(
+        id = id,
+        model = "",
+        choices = listOf(UIMessageChoice(
+            index = 0,
+            delta = UIMessage(role = MessageRole.ASSISTANT, parts = listOf(imagePart(id, data, item, complete))),
+            message = null,
+            finishReason = null,
+        )),
+    )
+
+    internal fun parseResponseOutput(jsonObject: JsonObject): MessageChunk {
         val outputs = jsonObject["output"]?.jsonArray ?: error("output not found")
         val parts = arrayListOf<UIMessagePart>()
 
@@ -736,6 +757,15 @@ class ResponseAPI(
             val output = outputItem.jsonObject
             val type = output["type"]?.jsonPrimitive?.content ?: error("output type not found")
             when (type) {
+                "image_generation_call" -> {
+                    val result = output["result"]?.jsonPrimitive?.contentOrNull
+                    if (!result.isNullOrBlank()) {
+                        parts.add(imagePart(
+                            output["id"]?.jsonPrimitive?.contentOrNull ?: "image-${parts.size}",
+                            result, output, complete = true,
+                        ))
+                    }
+                }
                 "reasoning" -> {
                     val summary = output["summary"]?.jsonArray ?: error("summary not found")
                     summary.map { it.jsonObject }.forEach { part ->

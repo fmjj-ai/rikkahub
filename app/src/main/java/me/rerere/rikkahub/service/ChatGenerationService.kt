@@ -190,6 +190,15 @@ class ChatGenerationService : Service() {
         .setSmallIcon(R.drawable.small_icon)
         .setContentTitle(getString(R.string.notification_chat_generation_foreground))
         .setContentIntent(buildLaunchPendingIntent())
+        .addAction(
+            R.drawable.small_icon,
+            "停止生成",
+            PendingIntent.getService(
+                this, NOTIFICATION_ID,
+                Intent(this, ChatGenerationService::class.java).setAction(ACTION_STOP),
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+            ),
+        )
         .setOngoing(true)
         .setOnlyAlertOnce(true)
         .build()

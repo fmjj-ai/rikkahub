@@ -108,6 +108,7 @@ object ToolUIRegistry {
         CalendarCreateToolUI,
         ImageGenerationToolUI,
         PlotFunctionToolUI,
+        PhoneUseToolUI,
         UseSkillToolUI,
         RecentChatsToolUI,
         ConversationSearchToolUI,

@@ -1,7 +1,9 @@
 param(
-    [string[]]$Tasks = @(':ai:testDebugUnitTest', ':app:testDebugUnitTest', ':mediagen:testDebugUnitTest'),
+    [string[]]$Tasks = @(':ai:testDebugUnitTest', ':app:testGithubDebugUnitTest', ':mediagen:testDebugUnitTest', ':document:testDebugUnitTest'),
     [ValidateRange(1, 2)]
-    [int]$MaxWorkers = 2
+    [int]$MaxWorkers = 2,
+    [ValidateRange(1024, 6144)]
+    [int]$HeapMegabytes = 2048
 )
 
 $ErrorActionPreference = 'Stop'
@@ -12,13 +14,13 @@ if (-not (Test-Path -LiteralPath $java) -or -not (Test-Path -LiteralPath $wrappe
     throw '缺少项目既有 JDK 或 Gradle wrapper，未尝试安装或修改环境。'
 }
 if ($Tasks.Count -eq 0 -or @($Tasks | Where-Object { $_ -notmatch '^:[A-Za-z0-9:_-]+$' }).Count -gt 0) {
-    throw '请传入明确的 Gradle 任务路径，例如 :app:testDebugUnitTest。'
+    throw '请传入明确的 Gradle 任务路径，例如 :app:testGithubDebugUnitTest。'
 }
 
 $wrapper = @('-Dfile.encoding=UTF-8', '-classpath', $wrapperJar, 'org.gradle.wrapper.GradleWrapperMain')
 $options = @(
     '--offline', '--no-daemon', "--max-workers=$MaxWorkers",
-    '-Dorg.gradle.parallel=false', '-Dorg.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8',
+    '-Dorg.gradle.parallel=false', "-Dorg.gradle.jvmargs=-Xmx${HeapMegabytes}m -Dfile.encoding=UTF-8",
     '-Pkotlin.compiler.execution.strategy=in-process', '--console=plain', '--quiet'
 )
 $buildExit = 1

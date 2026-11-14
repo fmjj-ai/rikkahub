@@ -152,3 +152,9 @@ CameraX 原生预览不得放入缩放、位移或淡出的 Compose 转场层；
 - If the user does not explicitly request localization, prioritize implementing functionality without considering
   localization. (e.g `Text("Hello world")`)
 - For `locale-tui` operations, use the `locale-tui-localization` skill.
+
+## 迁移与构建回归补充
+
+- 跨克隆迁移时，必须分别确认源目录和目标目录中的完整路径、设置字段及接口签名；源分支存在的组件不能推断目标也存在。纯 Kotlin 替换原生库时，同时检查 `src/main/resources`，字体/CID 表等运行资源遗漏可能只在特定文档中显现。
+- Responses 图片预览同时需要请求 `partial_images` 和解析 `response.image_generation_call.partial_image`；按 item ID 替换快照，不能把完整 base64 快照当字符串增量拼接。
+- 当前 app 使用 github/play 分发维度；集成检查用 `:app:testGithubDebugUnitTest`。2 GB 堆出现 GC thrashing 时，先停止旧构建，再通过脚本 `-MaxWorkers 1 -HeapMegabytes 4096` 单次验证，不改全局配置、不堆叠 daemon。

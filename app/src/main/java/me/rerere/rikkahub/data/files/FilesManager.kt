@@ -156,14 +156,18 @@ class FilesManager(
         return newUris
     }
 
-    fun createChatFilesByByteArrays(byteArrays: List<ByteArray>): List<Uri> {
+    fun createChatFilesByByteArrays(
+        byteArrays: List<ByteArray>,
+        displayName: String = "image.png",
+        mimeType: String = "image/png",
+    ): List<Uri> {
         val newUris = mutableListOf<Uri>()
         val dir = context.filesDir.resolve(FileFolders.UPLOAD)
         if (!dir.exists()) {
             dir.mkdirs()
         }
         byteArrays.forEach { byteArray ->
-            val fileName = buildUuidFileName(displayName = "image.png", mimeType = "image/png")
+            val fileName = buildUuidFileName(displayName = displayName, mimeType = mimeType)
             val file = dir.resolve(fileName)
             if (!file.exists()) {
                 file.createNewFile()
@@ -175,8 +179,8 @@ class FilesManager(
             trackManagedFile(
                 folder = FileFolders.UPLOAD,
                 file = file,
-                displayName = "image.png",
-                mimeType = "image/png"
+                displayName = displayName,
+                mimeType = mimeType,
             )
             newUris.add(newUri)
         }
@@ -195,9 +199,19 @@ class FilesManager(
                         is UIMessagePart.Image -> {
                             if (part.url.startsWith("data:image")) {
                                 val sourceByteArray = Base64.decode(part.url.substringAfter("base64,").toByteArray())
-                                val bitmap = BitmapFactory.decodeByteArray(sourceByteArray, 0, sourceByteArray.size)
-                                val byteArray = FileUtils.compressBitmapToPng(bitmap)
-                                val urls = createChatFilesByByteArrays(listOf(byteArray))
+                                // 仅探测尺寸以验证图片，保存原始编码，避免大图二次解码和 PNG 膨胀。
+                                val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+                                BitmapFactory.decodeByteArray(sourceByteArray, 0, sourceByteArray.size, bounds)
+                                require(bounds.outWidth > 0 && bounds.outHeight > 0) { "生成结果不是有效图片" }
+                                val mime = bounds.outMimeType ?: "image/png"
+                                val extension = when (mime) {
+                                    "image/jpeg" -> "jpg"
+                                    "image/webp" -> "webp"
+                                    else -> "png"
+                                }
+                                val urls = createChatFilesByByteArrays(
+                                    listOf(sourceByteArray), displayName = "image.$extension", mimeType = mime,
+                                )
                                 Log.i(
                                     TAG,
                                     "convertBase64ImagePartToLocalFile: convert base64 img to ${urls.joinToString(", ")}"

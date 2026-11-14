@@ -59,8 +59,24 @@ data class UIMessage(
                     }
 
                     is UIMessagePart.Image -> {
+                        val imageId = deltaPart.streamImageId
                         val lastPart = acc.lastOrNull()
-                        if (lastPart is UIMessagePart.Image) {
+                        if (imageId != null) {
+                            val existingIndex = acc.indexOfFirst {
+                                it is UIMessagePart.Image && it.streamImageId == imageId
+                            }
+                            if (existingIndex < 0) {
+                                acc + deltaPart
+                            } else {
+                                val existing = acc[existingIndex] as UIMessagePart.Image
+                                if (existing.acceptsSnapshot(deltaPart)) {
+                                    acc.toMutableList().apply { this[existingIndex] = deltaPart }
+                                } else acc
+                            }
+                        } else if (deltaPart.url.startsWith("data:") || deltaPart.url.contains("://")) {
+                            // 完整 URI 代表独立图片，不能和相邻图片拼接。
+                            acc + deltaPart
+                        } else if (lastPart is UIMessagePart.Image && lastPart.streamImageId == null) {
                             // Append to the last Image part (for streaming base64)
                             acc.dropLast(1) + lastPart.copy(
                                 url = lastPart.url + deltaPart.url,

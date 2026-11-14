@@ -6,6 +6,10 @@ import kotlinx.serialization.Serializable
 @Serializable
 sealed class LocalToolOption {
     @Serializable
+    @SerialName("phone_use")
+    data object PhoneUse : LocalToolOption()
+
+    @Serializable
     @SerialName("function_graph")
     data object FunctionGraph : LocalToolOption()
 

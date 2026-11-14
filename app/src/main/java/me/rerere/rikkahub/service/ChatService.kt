@@ -38,6 +38,7 @@ import me.rerere.ai.provider.TextGenerationParams
 import me.rerere.ai.ui.ToolApprovalState
 import me.rerere.ai.ui.UIMessage
 import me.rerere.ai.ui.UIMessagePart
+import me.rerere.ai.ui.withoutIncompleteStreamImages
 import me.rerere.ai.ui.canResumeToolExecution
 import me.rerere.ai.ui.finishPendingTools
 import me.rerere.ai.ui.finishReasoning
@@ -617,12 +618,15 @@ class ChatService(
                         }
                     }
                 },
-                tools = createChatTools(settings, assistant, conversation.workspaceCwd),
+                tools = createChatTools(settings, assistant, conversation.workspaceCwd, conversationId),
             ).onCompletion {
+                localTools.finishPhoneUse(conversationId.toString())
                 // 可能被取消了，或者意外结束，兜底更新
                 updateConversationState(conversationId) { current ->
                     val nodes = current.messageNodes.mapPreservingIdentity { node ->
-                        val messages = node.messages.mapPreservingIdentity { it.finishReasoning() }
+                        val messages = node.messages.mapPreservingIdentity {
+                            it.withoutIncompleteStreamImages().finishReasoning()
+                        }
                         if (messages === node.messages) node else node.copy(messages = messages)
                     }
                     current.copy(messageNodes = nodes, updateAt = Instant.now())
@@ -851,7 +855,9 @@ class ChatService(
     }
 
     /** 正常聊天和压缩共用工具集合，保持协议请求前缀一致。 */
-    private suspend fun createChatTools(settings: Settings, assistant: Assistant, cwd: String?): List<Tool> {
+    private suspend fun createChatTools(
+        settings: Settings, assistant: Assistant, cwd: String?, conversationId: Uuid? = null,
+    ): List<Tool> {
         val mcpTools = mcpManager.getAllAvailableTools()
         val invalidNames = mcpTools.map { it.second }.distinct().filter { name ->
             name.isEmpty() || !name.all { it in 'a'..'z' || it in 'A'..'Z' || it in '0'..'9' }
@@ -861,7 +867,9 @@ class ChatService(
         }
         return buildList {
             if (assistant.enableWebSearch) addAll(createSearchTools(settings))
-            addAll(localTools.getTools(assistant.localTools))
+            addAll(localTools.getTools(assistant.localTools, conversationId?.toString()) {
+                conversationId?.let { id -> appScope.launch { stopGeneration(id) } }
+            })
             if (assistant.enableRecentChatsReference) addAll(createConversationTools(conversationRepo, assistant.id))
             addAll(createWorkspaceToolsIfReady(assistant.workspaceId?.toString(), cwd))
             if (assistant.enabledSkills.isNotEmpty()) {

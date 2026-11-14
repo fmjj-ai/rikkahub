@@ -1,6 +1,9 @@
 package me.rerere.rikkahub.ui.pages.assistant.detail
 
 import android.Manifest
+import android.content.Intent
+import android.provider.Settings
+import androidx.compose.material3.TextButton
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -31,6 +34,8 @@ import me.rerere.rikkahub.data.ai.tools.local.LocalToolOption
 import me.rerere.rikkahub.data.datastore.findImageGenerationModel
 import me.rerere.rikkahub.data.datastore.findProvider
 import me.rerere.rikkahub.data.model.Assistant
+import me.rerere.rikkahub.phoneuse.PhoneUseManager
+import org.koin.compose.koinInject
 import me.rerere.rikkahub.ui.components.nav.BackButton
 import me.rerere.rikkahub.ui.components.ui.CardGroup
 import me.rerere.rikkahub.ui.components.ui.permission.PermissionInfo
@@ -87,6 +92,8 @@ private fun AssistantLocalToolContent(
     val context = LocalContext.current
     val toaster = LocalToaster.current
     val settings = LocalSettings.current
+    val phoneUseManager: PhoneUseManager = koinInject()
+    val phoneController by phoneUseManager.controller.collectAsStateWithLifecycle()
     // 画图能力默认开启，但必须能解析到生图模型才会真正注入给模型：
     // 未配置时在这里明确提示，避免用户看到"开了却画不了图"
     val imageModelReady = remember(settings.providers, settings.imageGenerationModelId) {
@@ -114,6 +121,10 @@ private fun AssistantLocalToolContent(
     PermissionManager(permissionState = calendarPermissionState)
 
     fun toggleLocalTool(option: LocalToolOption, enabled: Boolean) {
+        if (enabled && option == LocalToolOption.PhoneUse && phoneController == null) {
+            toaster.show(context.getString(R.string.assistant_page_local_tools_phone_use_enable_service))
+            context.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
+        }
         if (enabled && option == LocalToolOption.ScreenTime && !context.hasUsageStatsPermission()) {
             toaster.show(message = permissionRequiredText, type = ToastType.Warning)
             context.openUsageAccessSettings()
@@ -140,6 +151,26 @@ private fun AssistantLocalToolContent(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         CardGroup {
+            if (PhoneUseManager.isSupported) {
+                item(
+                    headlineContent = { Text(stringResource(R.string.assistant_page_local_tools_phone_use_title)) },
+                    supportingContent = {
+                        Column {
+                            Text(stringResource(R.string.assistant_page_local_tools_phone_use_desc))
+                            Text(if (phoneController == null) "无障碍服务未连接" else "服务已连接；操作期间可从控制条或通知停止")
+                            TextButton(onClick = {
+                                context.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
+                            }) { Text("打开无障碍设置") }
+                        }
+                    },
+                    trailingContent = {
+                        Switch(
+                            checked = LocalToolOption.PhoneUse in assistant.localTools,
+                            onCheckedChange = { toggleLocalTool(LocalToolOption.PhoneUse, it) },
+                        )
+                    },
+                )
+            }
             item(
                 headlineContent = { Text("交互式函数绘图") },
                 supportingContent = { Text("绘制数学函数，支持离线查看、缩放和平移；需要模型支持工具调用，无需生图模型。三角函数使用弧度。") },
