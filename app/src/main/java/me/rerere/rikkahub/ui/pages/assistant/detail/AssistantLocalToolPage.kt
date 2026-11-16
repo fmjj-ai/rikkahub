@@ -151,6 +151,18 @@ private fun AssistantLocalToolContent(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         CardGroup {
+            item(
+                headlineContent = { Text("交互式可视化") },
+                supportingContent = { Text("允许助手在回复中生成可操作的原生图形、步骤模拟和参数滑块；不执行模型生成的脚本。") },
+                trailingContent = {
+                    Switch(
+                        checked = assistant.enableInteractiveVisualization,
+                        onCheckedChange = { enabled ->
+                            onUpdate { it.copy(enableInteractiveVisualization = enabled) }
+                        },
+                    )
+                },
+            )
             if (PhoneUseManager.isSupported) {
                 item(
                     headlineContent = { Text(stringResource(R.string.assistant_page_local_tools_phone_use_title)) },

@@ -12,6 +12,9 @@ import org.intellij.markdown.html.HtmlGenerator
 import org.intellij.markdown.parser.MarkdownParser
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
+import me.rerere.rikkahub.data.visualization.VizFence
+import me.rerere.rikkahub.data.visualization.VizFenceScanner
+import java.util.UUID
 
 /** AST 和 DOM 属于同一输入快照，渲染期间只读；不缓存主题、字号或回调。 */
 internal data class PreparedMarkdown(
@@ -19,12 +22,57 @@ internal data class PreparedMarkdown(
     val preprocessed: String,
     val astTree: ASTNode,
     val document: Document?,
+    val visualizationFences: Map<String, VizFence> = emptyMap(),
+    val visualizationNonce: String? = null,
 )
 
-internal data class MarkdownPreparationState(val source: String, val prepared: PreparedMarkdown?)
+internal data class MarkdownPreparationState(
+    val source: String,
+    val prepared: PreparedMarkdown?,
+    val sourceFences: List<me.rerere.rikkahub.data.visualization.VizSourceFence> = emptyList(),
+    val precedingCounts: List<Pair<String, Int>> = emptyList(),
+)
 
 /** 仅导出作用域提供预准备结果，导出结束即释放，不形成全局长驻 AST 缓存。 */
 internal val LocalPreparedMarkdown = staticCompositionLocalOf<Map<String, PreparedMarkdown>> { emptyMap() }
+internal val LocalPreparedVizFences = staticCompositionLocalOf<Map<String, VizFence>> { emptyMap() }
+internal val LocalVizFenceRenderer = staticCompositionLocalOf<(@androidx.compose.runtime.Composable (VizFence) -> Unit)?> { null }
+
+/** JSON 独立保留，整个 Markdown 文档共享引用与公式上下文；只变化的图块数据不重建 AST/DOM。 */
+internal suspend fun prepareVisualMarkdown(
+    source: String,
+    precedingSources: List<String>,
+    previous: MarkdownPreparationState? = null,
+    transform: (String) -> String,
+): MarkdownPreparationState = withContext(Dispatchers.Default) {
+    val fences = if (previous == null) VizFenceScanner.scan(source)
+        else VizFenceScanner.advance(source, previous.source, previous.sourceFences)
+    if (fences.isEmpty()) return@withContext prepareMarkdownState(transform(source))
+    val counts = precedingSources.mapIndexed { index, text ->
+        val cached = previous?.precedingCounts?.getOrNull(index)
+        if (cached?.first == text) cached else text to VizFenceScanner.scan(text).size
+    }
+    val previousCount = counts.sumOf { it.second }
+    val slots = linkedMapOf<String, VizFence>()
+    val prior = previous?.prepared
+    val nonce = prior?.visualizationNonce ?: UUID.randomUUID().toString()
+    val protectedSource = buildString {
+        var cursor = 0
+        fences.forEach { item ->
+            append(transform(source.substring(cursor, item.start)))
+            if (previousCount + item.fence.ordinal < 4) {
+                val slot = "rikka-viz-slot-$nonce-${item.fence.ordinal}"
+                slots[slot] = item.fence
+                append("\n```$slot\nvisualization\n```\n")
+            } else append(source, item.start, item.end)
+            cursor = item.end
+        }
+        append(transform(source.substring(cursor)))
+    }
+    val prepared = if (prior?.source == protectedSource) prior else prepareMarkdownState(protectedSource).prepared
+    if (prepared == null) MarkdownPreparationState(source, null, fences, counts)
+    else MarkdownPreparationState(source, prepared.copy(visualizationFences = slots, visualizationNonce = nonce), fences, counts)
+}
 
 private val INLINE_LATEX = Regex("""\\\((.+?)\\\)""")
 private val BLOCK_LATEX = Regex("""\\\[(.+?)\\\]""", RegexOption.DOT_MATCHES_ALL)

@@ -159,6 +159,7 @@ data class DisplaySetting(
     val volumeKeyScrollRatio: Float = 1.0f,
     val enableBackgroundKeepAlive: Boolean = true,
     val enableExpandedNavigation: Boolean = false,
+    val enableInlineVisualizations: Boolean = true,
 )
 
 @Serializable

@@ -1,5 +1,7 @@
 package me.rerere.rikkahub.ui.pages.chat
 
+import kotlinx.coroutines.flow.first
+
 import me.rerere.rikkahub.data.datastore.updateAssistant
 import android.app.Application
 import android.content.Context
@@ -71,6 +73,7 @@ class ChatVM(
 ) : ViewModel() {
     private val _conversationId: Uuid = Uuid.parse(id)
     val conversation: StateFlow<Conversation> = chatService.getConversationFlow(_conversationId)
+    val visualizationStore = me.rerere.rikkahub.ui.components.visualization.VizSessionStore()
     var chatListInitialized by mutableStateOf(false) // 聊天列表是否已经滚动到底部
 
     // 聊天输入状态 - 保存在 ViewModel 中避免 TransactionTooLargeException
@@ -184,6 +187,7 @@ class ChatVM(
     }
 
     override fun onCleared() {
+        visualizationStore.clear()
         super.onCleared()
         // 移除对话引用
         chatService.removeConversationReference(_conversationId)
@@ -282,6 +286,42 @@ class ChatVM(
         analytics.logEvent("ai_send_message", null)
 
         chatService.sendMessage(_conversationId, content, answer)
+    }
+
+    private val acceptedVisualizationEvents = LinkedHashSet<String>()
+    var visualizationSendPending by mutableStateOf(false)
+        private set
+
+    /** 图卡点击仍走正常用户消息；发送前重新确认会话、选中分支和源码版本。 */
+    fun handleVisualizationMessage(event: me.rerere.rikkahub.data.visualization.VizMessageEvent): String? {
+        if (event.eventId in acceptedVisualizationEvents) return null
+        if (event.conversationId != _conversationId.toString()) return "图卡不属于当前会话"
+        if (visualizationSendPending || conversationJob.value != null) return "当前回答仍在生成，请稍后发送"
+        val source = conversation.value.messageNodes.firstOrNull {
+            "${it.currentMessage.id}:${it.selectIndex}" == event.messageId
+        }?.currentMessage ?: return "图卡来源已删除或切换分支"
+        val part = source.parts.getOrNull(event.partIndex) as? UIMessagePart.Text ?: return "图卡来源已变化"
+        val fence = me.rerere.rikkahub.data.visualization.VizFenceScanner.scan(part.text)
+            .getOrNull(event.ordinal)?.fence ?: return "图卡来源已变化"
+        if (me.rerere.rikkahub.data.visualization.VizFenceScanner.digest(fence.code) != event.sourceDigest) {
+            return "图卡正在更新，请重新点击"
+        }
+        return try {
+            val text = "${event.text}\n\n来源：会话 ${event.conversationId}，消息 ${event.messageId}，图卡 ${event.ordinal + 1}"
+            visualizationSendPending = true
+            handleMessageSend(listOf(UIMessagePart.Text(text)))
+            acceptedVisualizationEvents += event.eventId
+            while (acceptedVisualizationEvents.size > 128) acceptedVisualizationEvents.iterator().run { next(); remove() }
+            viewModelScope.launch {
+                try {
+                    chatService.getGenerationJobStateFlow(_conversationId).first()?.join()
+                } finally { visualizationSendPending = false }
+            }
+            null
+        } catch (failure: Exception) {
+            visualizationSendPending = false
+            failure.message ?: "发送失败，请重试"
+        }
     }
 
     fun handleMessageEdit(parts: List<UIMessagePart>, messageId: Uuid) {

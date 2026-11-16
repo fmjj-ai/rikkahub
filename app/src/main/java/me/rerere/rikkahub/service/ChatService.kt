@@ -639,7 +639,8 @@ class ChatService(
                         conversationId = conversationId,
                         senderName = senderName,
                         contentPreview = updatedConversation.currentMessages.lastOrNull()
-                            ?.toText()?.take(50)?.trim() ?: "",
+                            ?.toText()?.let(me.rerere.rikkahub.data.visualization.VizFenceScanner::readableText)
+                            ?.take(50)?.trim() ?: "",
                     )
                 )
             }.collect { chunk ->

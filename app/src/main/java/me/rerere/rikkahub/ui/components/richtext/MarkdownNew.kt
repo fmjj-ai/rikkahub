@@ -471,6 +471,13 @@ private fun HtmlCodeBlock(element: Element) {
         ?: "plaintext"
     val code = codeElement?.wholeText()?.trimEnd('\n') ?: element.wholeText().trimEnd('\n')
 
+    val fence = LocalPreparedVizFences.current[language]
+    val renderer = LocalVizFenceRenderer.current
+    if (fence != null && renderer != null) {
+        androidx.compose.runtime.key(fence.ordinal) { renderer(fence) }
+        return
+    }
+
     HighlightCodeBlock(
         code = code,
         language = language,

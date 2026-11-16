@@ -180,8 +180,18 @@ fun MarkdownBlock(
     }
 
     // 准备过程中保留上一份完整快照，AST、DOM 和偏移始终使用同一版本的文本。
-    val current = state ?: MarkdownPreparationState(content, null)
+    PreparedMarkdownContent(state ?: MarkdownPreparationState(content, null), modifier, style, onClickCitation)
+}
+
+@Composable
+internal fun PreparedMarkdownContent(
+    current: MarkdownPreparationState,
+    modifier: Modifier = Modifier,
+    style: TextStyle = LocalTextStyle.current,
+    onClickCitation: (String) -> Unit = {},
+) {
     val prepared = current.prepared
+    CompositionLocalProvider(LocalPreparedVizFences provides prepared?.visualizationFences.orEmpty()) {
     if (prepared == null) {
         Text(text = current.source, modifier = modifier.padding(horizontal = 4.dp), style = style)
     } else if (prepared.document != null) {
@@ -203,6 +213,7 @@ fun MarkdownBlock(
                 }
             }
         }
+    }
     }
 }
 
@@ -523,6 +534,13 @@ private fun MarkdownNode(
 
         // 代码块
         MarkdownElementTypes.CODE_FENCE -> {
+            val slot = node.findChildOfTypeRecursive(MarkdownTokenTypes.FENCE_LANG)?.getTextInNode(content)
+            val fence = LocalPreparedVizFences.current[slot]
+            val renderer = LocalVizFenceRenderer.current
+            if (fence != null && renderer != null) {
+                androidx.compose.runtime.key(fence.ordinal) { renderer(fence) }
+                return
+            }
             // 这里不能直接取CODE_FENCE_CONTENT的内容，因为首行indent没有包含在内
             // 因此，需要往上找到最后一个EOL元素，用它来作为代码块的起始offset
             val contentStartIndex = node.children.indexOfFirst { it.type == MarkdownTokenTypes.CODE_FENCE_CONTENT }

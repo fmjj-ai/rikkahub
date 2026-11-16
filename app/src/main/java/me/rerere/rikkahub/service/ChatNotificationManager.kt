@@ -167,7 +167,7 @@ class ChatNotificationManager(
                 Triple(
                     context.getString(R.string.notification_live_update_chip_writing),
                     context.getString(R.string.notification_live_update_writing),
-                    lastText.text.takeLast(200)
+                    me.rerere.rikkahub.data.visualization.VizFenceScanner.readableText(lastText.text).takeLast(200)
                 )
             }
             // 默认状态

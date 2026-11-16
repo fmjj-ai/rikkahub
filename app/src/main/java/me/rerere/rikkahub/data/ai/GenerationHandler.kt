@@ -423,7 +423,12 @@ class GenerationHandler(
             context, assistant, settings, model, messages, tools, memories, transformers,
             processingStatus, conversationSystemPrompt, conversationModeInjectionIds,
             conversationLorebookIds, workspaceCwd,
-        )
+        ).let { prepared ->
+            me.rerere.rikkahub.data.visualization.VizPrompt.appendToChat(
+                prepared,
+                assistant.enableInteractiveVisualization && settings.displaySetting.enableInlineVisualizations,
+            )
+        }
 
         var internalMessages = prepareMessages()
         val toolTokens = tools.sumOf { tool ->

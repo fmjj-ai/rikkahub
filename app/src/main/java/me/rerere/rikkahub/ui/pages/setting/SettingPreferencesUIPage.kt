@@ -365,6 +365,18 @@ fun SettingPreferencesUIPage(vm: SettingVM = koinViewModel()) {
                     title = { Text(stringResource(R.string.setting_page_code_display_settings)) },
                 ) {
                     item(
+                        headlineContent = { Text("显示交互式可视化") },
+                        supportingContent = { Text("显示助手回复中的交互图形。新回复的生成能力可在助手设置中开启；关闭此项后显示源码。") },
+                        trailingContent = {
+                            Switch(
+                                checked = displaySetting.enableInlineVisualizations,
+                                onCheckedChange = { enabled ->
+                                    updateDisplaySetting { current -> current.copy(enableInlineVisualizations = enabled) }
+                                },
+                            )
+                        },
+                    )
+                    item(
                         headlineContent = { Text(stringResource(R.string.setting_display_page_code_block_auto_wrap_title)) },
                         supportingContent = { Text(stringResource(R.string.setting_display_page_code_block_auto_wrap_desc)) },
                         trailingContent = {

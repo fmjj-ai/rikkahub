@@ -101,8 +101,12 @@ import kotlin.time.Duration.Companion.milliseconds
 @Composable
 fun ChatMessage(
     node: MessageNode,
+    messageIdentity: String = node.currentMessage.id.toString(),
+    conversationId: String = "",
+    visualizationStore: me.rerere.rikkahub.ui.components.visualization.VizSessionStore? = null,
     modifier: Modifier = Modifier,
     loading: Boolean = false,
+    visualizationSendingDisabled: Boolean = loading,
     model: Model? = null,
     assistant: Assistant? = null,
     lastMessage: Boolean = false,
@@ -117,6 +121,7 @@ fun ChatMessage(
     onTranslate: ((UIMessage, Locale) -> Unit)? = null,
     onClearTranslation: (UIMessage) -> Unit = {},
     onToolApproval: ((toolCallId: String, approved: Boolean, reason: String) -> Unit)? = null,
+    onVisualizationMessage: ((me.rerere.rikkahub.data.visualization.VizMessageEvent) -> String?)? = null,
     onToolAnswer: ((toolCallId: String, answer: String) -> Unit)? = null,
 ) {
     val message = node.messages[node.selectIndex]
@@ -166,6 +171,11 @@ fun ChatMessage(
         ProvideTextStyle(textStyle) {
             MessagePartsBlock(
                 assistant = assistant,
+                conversationId = conversationId,
+                messageId = messageIdentity,
+                visualizationStore = visualizationStore,
+                visualizationSendingDisabled = visualizationSendingDisabled,
+                onVisualizationMessage = onVisualizationMessage,
                 role = message.role,
                 parts = message.parts,
                 annotations = message.annotations,
@@ -270,12 +280,17 @@ fun ChatMessage(
 @Composable
 private fun MessagePartsBlock(
     assistant: Assistant?,
+    conversationId: String,
+    messageId: String,
+    visualizationStore: me.rerere.rikkahub.ui.components.visualization.VizSessionStore?,
     role: MessageRole,
     model: Model?,
     parts: List<UIMessagePart>,
     annotations: List<UIMessageAnnotation>,
     loading: Boolean,
+    visualizationSendingDisabled: Boolean = loading,
     onToolApproval: ((toolCallId: String, approved: Boolean, reason: String) -> Unit)? = null,
+    onVisualizationMessage: ((me.rerere.rikkahub.data.visualization.VizMessageEvent) -> String?)? = null,
     onToolAnswer: ((toolCallId: String, answer: String) -> Unit)? = null,
     onUserMessageClick: (() -> Unit)? = null,
 ) {
@@ -392,26 +407,37 @@ private fun MessagePartsBlock(
                                         color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = settings.displaySetting.bubbleOpacity),
                                     ) {
                                         Column(modifier = Modifier.padding(8.dp)) {
-                                            MarkdownBlock(
-                                                content = part.text.replaceRegexes(
-                                                    assistant = assistant,
-                                                    scope = AssistantAffectScope.ASSISTANT,
-                                                    visual = true,
-                                                ),
+                                            AssistantMessageMarkdown(
+                                                source = part.text,
+                                                assistant = assistant,
+                                                conversationId = conversationId,
+                                                messageId = messageId,
+                                                partIndex = block.index,
+                                                store = visualizationStore,
+                                                sendingDisabled = visualizationSendingDisabled,
+                                                onMessage = onVisualizationMessage,
+                                                loading = loading,
+                                                precedingSources = parts.take(block.index).filterIsInstance<UIMessagePart.Text>().map { it.text },
+                                                isAssistant = role == MessageRole.ASSISTANT,
                                                 onClickCitation = handleClickCitation,
                                             )
                                         }
                                     }
                                 } else {
-                                    MarkdownBlock(
-                                        content = part.text.replaceRegexes(
-                                            assistant = assistant,
-                                            scope = AssistantAffectScope.ASSISTANT,
-                                            visual = true,
-                                        ),
+                                    AssistantMessageMarkdown(
+                                        source = part.text,
+                                        assistant = assistant,
+                                        conversationId = conversationId,
+                                        messageId = messageId,
+                                        partIndex = block.index,
+                                        store = visualizationStore,
+                                        sendingDisabled = visualizationSendingDisabled,
+                                        onMessage = onVisualizationMessage,
+                                        loading = loading,
+                                        precedingSources = parts.take(block.index).filterIsInstance<UIMessagePart.Text>().map { it.text },
+                                        isAssistant = role == MessageRole.ASSISTANT,
                                         onClickCitation = handleClickCitation,
-                                        modifier = Modifier
-                                            .animateContentSize()
+                                        modifier = Modifier.animateContentSize(),
                                     )
                                 }
                             }

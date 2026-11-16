@@ -1,6 +1,7 @@
 package me.rerere.rikkahub.ui.pages.chat
 
 import android.net.Uri
+import android.content.ClipData
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -12,7 +13,6 @@ import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
@@ -32,6 +32,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.adaptive.currentWindowDpSize
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -48,6 +49,8 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.ClipEntry
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.LocalWindowInfo
@@ -66,6 +69,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withTimeoutOrNull
 import me.rerere.ai.provider.Model
+import me.rerere.ai.ui.isEmptyInputMessage
 import me.rerere.hugeicons.HugeIcons
 import me.rerere.hugeicons.stroke.Cancel01
 import me.rerere.hugeicons.stroke.LeftToRightListBullet
@@ -90,6 +94,11 @@ import me.rerere.rikkahub.ui.components.ai.FilesPicker
 import me.rerere.rikkahub.ui.components.ai.FilesPickerOverlay
 import me.rerere.rikkahub.ui.components.ai.HalfScreenCamera
 import me.rerere.rikkahub.ui.components.ai.completion.WorkspaceCompletionProvider
+import me.rerere.rikkahub.ui.components.visualization.LocalVizDiagnosticActions
+import me.rerere.rikkahub.ui.components.visualization.LocalVizPresentation
+import me.rerere.rikkahub.ui.components.visualization.VizDiagnosticActions
+import me.rerere.rikkahub.ui.components.visualization.VizPresentationState
+import me.rerere.rikkahub.ui.components.visualization.VisualizationViewerHost
 import me.rerere.rikkahub.ui.components.ui.permission.PermissionCamera
 import me.rerere.rikkahub.ui.components.ui.permission.PermissionManager
 import me.rerere.rikkahub.ui.components.ui.permission.rememberPermissionState
@@ -172,18 +181,22 @@ fun ChatPage(id: Uuid, text: String?, files: List<Uri>, nodeId: Uuid? = null) {
         }
     }
 
-    val chatListState = rememberLazyListState()
-    LaunchedEffect(nodeId, conversation.messageNodes.size) {
-        if (!vm.chatListInitialized && conversation.messageNodes.isNotEmpty()) {
+    val chatListState = rememberSaveable(id, saver = LazyListState.Saver) { LazyListState() }
+    val chatScrollIntent = rememberSaveable(id, saver = ChatScrollIntent.Saver) { ChatScrollIntent() }
+    val chatScrollController = remember(id, chatListState) {
+        ChatScrollController(chatListState, scope, chatScrollIntent)
+    }
+    DisposableEffect(chatScrollController) {
+        onDispose { chatScrollController.close() }
+    }
+    LaunchedEffect(id, nodeId, conversation.messageNodes.size) {
+        if (!chatScrollIntent.initialized && conversation.messageNodes.isNotEmpty()) {
             if (nodeId != null) {
-                val index = conversation.messageNodes.indexOfFirst { it.id == nodeId }
-                if (index >= 0) {
-                    chatListState.scrollToItem(index)
-                }
+                chatScrollController.onInitialNode(nodeId.toString())
             } else {
-                chatListState.requestScrollToItem(conversation.currentMessages.size + 5)
+                chatScrollController.onInitialBottom()
             }
-            vm.chatListInitialized = true
+            chatScrollIntent.initialized = true
         }
     }
 
@@ -191,6 +204,47 @@ fun ChatPage(id: Uuid, text: String?, files: List<Uri>, nodeId: Uuid? = null) {
     val cameraTransition = remember { CameraAttachmentTransitionState() }
     val inputFocusRequester = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
+    val visualizationPresentation = remember(id) { VizPresentationState() }
+    val visualizationMessageIds = conversation.messageNodes.map {
+        "${it.currentMessage.id}:${it.selectIndex}"
+    }.toSet()
+    LaunchedEffect(visualizationPresentation, visualizationMessageIds) {
+        visualizationPresentation.retainMessages(visualizationMessageIds)
+    }
+    val clipboard = LocalClipboard.current
+    val onDiagnosticCopy: (String) -> Unit = { text ->
+        scope.launch {
+            clipboard.setClipEntry(ClipEntry(ClipData.newPlainText("诊断", text)))
+            toaster.show("诊断已复制")
+        }
+    }
+    val onDiagnosticFill: (String) -> Unit = { text ->
+        if (inputState.isEditing()) {
+            toaster.show("请先退出消息编辑")
+        } else {
+            val current = inputState.textContent.text.toString()
+            val separator = when {
+                current.isEmpty() -> ""
+                current.endsWith('\n') -> ""
+                else -> "\n"
+            }
+            inputState.appendText(separator + text)
+            visualizationPresentation.collapse()
+            scope.launch {
+                withFrameNanos { }
+                inputFocusRequester.requestFocus()
+                keyboardController?.show()
+            }
+        }
+    }
+    val viewerOpen = visualizationPresentation.active != null
+    LaunchedEffect(viewerOpen) {
+        chatScrollController.onViewer(viewerOpen)
+        if (!viewerOpen) {
+            withFrameNanos { }
+            chatScrollController.onLayoutChanged()
+        }
+    }
     val windowInfo = LocalWindowInfo.current
     val view = LocalView.current
     val imeVisible = WindowInsets.isImeVisible
@@ -210,6 +264,10 @@ fun ChatPage(id: Uuid, text: String?, files: List<Uri>, nodeId: Uuid? = null) {
         } else keyboardController?.hide()
     }
 
+    CompositionLocalProvider(
+        LocalVizPresentation provides visualizationPresentation,
+        LocalVizDiagnosticActions provides VizDiagnosticActions(onDiagnosticCopy, onDiagnosticFill),
+    ) {
     ChatPageOverlayHost(
         modalOverlayVisible = showFilesSheet,
         content = {
@@ -242,6 +300,7 @@ fun ChatPage(id: Uuid, text: String?, files: List<Uri>, nodeId: Uuid? = null) {
                             navController = navController,
                             vm = vm,
                             chatListState = chatListState,
+                            chatScrollController = chatScrollController,
                             enableWebSearch = enableWebSearch,
                             currentChatModel = currentChatModel,
                             bigScreen = true,
@@ -281,6 +340,7 @@ fun ChatPage(id: Uuid, text: String?, files: List<Uri>, nodeId: Uuid? = null) {
                             navController = navController,
                             vm = vm,
                             chatListState = chatListState,
+                            chatScrollController = chatScrollController,
                             enableWebSearch = enableWebSearch,
                             currentChatModel = currentChatModel,
                             bigScreen = false,
@@ -323,8 +383,22 @@ fun ChatPage(id: Uuid, text: String?, files: List<Uri>, nodeId: Uuid? = null) {
                 cameraActive = false
                 keyboardRestoreRequest++
             }
+
+            VisualizationViewerHost(
+                active = visualizationPresentation.active,
+                store = vm.visualizationStore,
+                loading = loadingJob != null || vm.visualizationSendPending,
+                sendingDisabled = loadingJob != null || vm.visualizationSendPending,
+                conversation = conversation,
+                presentation = visualizationPresentation,
+                onDismiss = { visualizationPresentation.collapse() },
+                onDiagnosticCopy = onDiagnosticCopy,
+                onDiagnosticFill = onDiagnosticFill,
+                onMessage = vm::handleVisualizationMessage,
+            )
         },
     )
+    }
 }
 
 @Composable
@@ -342,6 +416,7 @@ private fun ChatPageContent(
     navController: Navigator,
     vm: ChatVM,
     chatListState: LazyListState,
+    chatScrollController: ChatScrollController,
     enableWebSearch: Boolean,
     currentChatModel: Model?,
     errors: List<ChatError>,
@@ -420,6 +495,7 @@ private fun ChatPageContent(
                             toaster.show("请先选择模型", type = ToastType.Error)
                             return@ChatInput
                         }
+                        if (!inputState.isEditing() && inputState.getContents().isEmptyInputMessage()) return@ChatInput
                         if (inputState.isEditing()) {
                             vm.handleMessageEdit(
                                 parts = inputState.getContents(),
@@ -427,13 +503,12 @@ private fun ChatPageContent(
                             )
                         } else {
                             vm.handleMessageSend(inputState.getContents())
-                            scope.launch {
-                                chatListState.requestScrollToItem(conversation.currentMessages.size + 5)
-                            }
+                            chatScrollController.onSend(conversation.messageNodes.size + 1)
                         }
                         inputState.clearInput()
                     },
                     onLongSendClick = {
+                        if (!inputState.isEditing() && inputState.getContents().isEmptyInputMessage()) return@ChatInput
                         if (inputState.isEditing()) {
                             vm.handleMessageEdit(
                                 parts = inputState.getContents(),
@@ -441,9 +516,7 @@ private fun ChatPageContent(
                             )
                         } else {
                             vm.handleMessageSend(content = inputState.getContents(), answer = false)
-                            scope.launch {
-                                chatListState.requestScrollToItem(conversation.currentMessages.size + 5)
-                            }
+                            chatScrollController.onSend(conversation.messageNodes.size + 1)
                         }
                         inputState.clearInput()
                     },
@@ -471,8 +544,10 @@ private fun ChatPageContent(
             ChatList(
                 innerPadding = innerPadding,
                 conversation = conversation,
+                visualizationStore = vm.visualizationStore,
                 state = chatListState,
-                loading = loadingJob != null,
+                scrollController = chatScrollController,
+                loading = loadingJob != null || vm.visualizationSendPending,
                 processingStatus = processingStatus,
                 previewMode = previewMode,
                 settings = setting,
@@ -522,9 +597,8 @@ private fun ChatPageContent(
                 },
                 onJumpToMessage = { index ->
                     previewMode = false
-                    scope.launch {
-                        chatListState.requestScrollToItem(index)
-                    }
+                    val nodeId = conversation.messageNodes.getOrNull(index)?.id?.toString()
+                    if (nodeId != null) chatScrollController.onPreviewJump(nodeId)
                 },
                 onToolApproval = { toolCallId, approved, reason ->
                     vm.handleToolApproval(toolCallId, approved, reason)
@@ -532,6 +606,7 @@ private fun ChatPageContent(
                 onToolAnswer = { toolCallId, answer ->
                     vm.handleToolAnswer(toolCallId, answer)
                 },
+                onVisualizationMessage = vm::handleVisualizationMessage,
                 onToggleFavorite = { node ->
                     vm.toggleMessageFavorite(node)
                 },

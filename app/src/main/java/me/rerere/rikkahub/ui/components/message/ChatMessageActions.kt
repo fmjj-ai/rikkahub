@@ -138,7 +138,7 @@ fun ColumnScope.ChatMessageActionButtons(
                         indication = LocalIndication.current,
                         onClick = {
                             if (!isSpeaking) {
-                                val text = message.toText()
+                                val text = me.rerere.rikkahub.data.visualization.VizFenceScanner.readableText(message.toText())
                                 var textToSpeak = text
                                 if (settings.displaySetting.ttsOnlyReadQuoted) {
                                     textToSpeak = textToSpeak.extractQuotedContentAsText() ?: textToSpeak
