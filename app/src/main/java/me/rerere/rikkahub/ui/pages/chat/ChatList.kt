@@ -66,6 +66,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.runtime.DisposableEffect
@@ -234,10 +235,10 @@ private fun ChatListNormal(
                 }
                 val scrollAmount = (state.layoutInfo.viewportSize.height - bottomPaddingPx) *
                     settings.displaySetting.volumeKeyScrollRatio
-                scrollController?.onBrowse()
+                scrollController?.onBrowse(towardTail = !isVolumeUp)
                 scope.launch {
                     state.scrollBy(if (isVolumeUp) -scrollAmount else scrollAmount)
-                    scrollController?.onUserScrollFinished()
+                    scrollController?.onUserScrollFinished(explicitUserScroll = true)
                 }
                 true
             } else false
@@ -284,15 +285,10 @@ private fun ChatListNormal(
         add(ChatScrollController.ScrollTailKey)
     }
 
-    LaunchedEffect(scrollController, itemKeys) {
-        scrollController?.onSection(itemKeys, conversation.messageNodes.size)
-        scrollController?.onLayoutChanged()
-    }
-    LaunchedEffect(scrollController, loading) {
-        scrollController?.onGeneration(loading)
-    }
-    LaunchedEffect(scrollController, settings.displaySetting.enableAutoScroll) {
-        scrollController?.onAutoScroll(settings.displaySetting.enableAutoScroll)
+    androidx.compose.runtime.SideEffect {
+        scrollController?.onState(
+            itemKeys, conversation.messageNodes.size, loading, settings.displaySetting.enableAutoScroll,
+        )
     }
     LaunchedEffect(scrollController, state) {
         val controller = scrollController ?: return@LaunchedEffect
@@ -330,6 +326,7 @@ private fun ChatListNormal(
                 modifier = Modifier
                     .fillMaxSize()
                     .hazeSource(state = hazeState)
+                    .then(scrollController?.let { Modifier.nestedScroll(it.nestedScrollConnection) } ?: Modifier)
                     .padding(top = innerPadding.calculateTopPadding()),
             ) {
             itemsIndexed(

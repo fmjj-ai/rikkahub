@@ -59,12 +59,27 @@ internal fun VizWidget(
             "stepper" -> {
                 val count = v.value("count").int()
                 val index = session.frame.state.value(v.string("bind")).int()
+                val compact = LocalVizControlPanel.current
+                if (compact) {
+                    Text("${v["label"]?.displayText().orEmpty()} · " +
+                        if (count == 0) "等待步骤" else "第 ${index + 1} / $count 步",
+                        style = MaterialTheme.typography.labelMedium)
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Button(onClick = { session.enqueueInput(node, JsonPrimitive(index + 1)) },
+                            enabled = !stale && index + 1 < count) { Text("下一步") }
+                        OutlinedButton(onClick = { session.enqueueInput(node, JsonPrimitive(index - 1)) },
+                            enabled = !stale && index > 0) { Text("上一步") }
+                        TextButton(onClick = { session.enqueueInput(node, JsonPrimitive(0)) },
+                            enabled = !stale && index > 0) { Text("回到首步") }
+                    }
+                } else {
                 v["label"]?.let { Text(it.displayText(), style = MaterialTheme.typography.labelLarge) }
                 Text(if (count == 0) "等待步骤" else "第 ${index + 1} / $count 步")
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     TextButton(onClick = { session.enqueueInput(node, JsonPrimitive(0)) }, enabled = !stale && index > 0) { Text("回到首步") }
                     OutlinedButton(onClick = { session.enqueueInput(node, JsonPrimitive(index - 1)) }, enabled = !stale && index > 0) { Text("上一步") }
                     Button(onClick = { session.enqueueInput(node, JsonPrimitive(index + 1)) }, enabled = !stale && index + 1 < count) { Text("下一步") }
+                }
                 }
             }
             "sequence" -> Sequence(node)
@@ -91,6 +106,7 @@ private fun NumberInput(
         mutableStateOf(saved?.text ?: number.displayText())
     }
     var focused by remember { mutableStateOf(false) }
+    var focusVersion by remember { mutableLongStateOf(presentation.transferVersion(sessionKey)) }
     var dirty by remember(session, session.resetRevision) { mutableStateOf(saved?.dirty == true) }
     var issue by remember(session, session.resetRevision) { mutableStateOf(saved?.issue) }
     LaunchedEffect(number, session.resetRevision, session.error) {
@@ -116,6 +132,7 @@ private fun NumberInput(
         dirty = false
         issue = null
         session.enqueueInput(node, JsonPrimitive(value))
+        saveDraft()
     }
     OutlinedTextField(
         value = draft,
@@ -126,11 +143,13 @@ private fun NumberInput(
         singleLine = true,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Done),
         keyboardActions = KeyboardActions(onDone = { commit() }),
-        modifier = Modifier.widthIn(min = 140.dp, max = 280.dp).onFocusChanged {
+        modifier = Modifier.widthIn(max = 280.dp).fillMaxWidth().onFocusChanged {
             // 展开/关闭导致 renderer 转移，不应把尚未确认的输入当作普通失焦提交。
             if (focused && !it.isFocused &&
-                renderedInViewer == (presentation.active?.sessionKey == sessionKey)
+                renderedInViewer == (presentation.active?.sessionKey == sessionKey) &&
+                focusVersion == presentation.transferVersion(sessionKey)
             ) commit()
+            if (it.isFocused && !focused) focusVersion = presentation.transferVersion(sessionKey)
             focused = it.isFocused
             saveDraft()
         },

@@ -3,7 +3,6 @@ package me.rerere.rikkahub.ui.components.visualization
 import android.content.ClipData
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,18 +10,17 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -34,6 +32,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ClipEntry
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
@@ -45,6 +44,8 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.launch
 import me.rerere.ai.ui.UIMessagePart
 import me.rerere.rikkahub.data.model.Conversation
+import me.rerere.rikkahub.data.datastore.getAssistantById
+import me.rerere.rikkahub.ui.context.LocalSettings
 import me.rerere.rikkahub.data.visualization.VizMessageEvent
 import me.rerere.rikkahub.data.visualization.VizFenceScanner
 import me.rerere.rikkahub.data.visualization.diagnosticReport
@@ -68,6 +69,8 @@ internal fun VisualizationViewerHost(
 ) {
     if (active == null) return
     val sessionKey = active.sessionKey
+    val messageAllowed = LocalSettings.current.getAssistantById(conversation.assistantId)
+        ?.enableInteractiveVisualization == true
     var result by remember(sessionKey) { mutableStateOf(store.cached(sessionKey)) }
     var archive by remember(sessionKey) { mutableStateOf<VizDiagnosticArchive?>(null) }
     var showDiagnostics by remember(sessionKey) { mutableStateOf(false) }
@@ -170,6 +173,11 @@ internal fun VisualizationViewerHost(
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background,
         ) {
+            val focus = LocalFocusManager.current
+            fun transfer() {
+                presentation.beginTransfer(sessionKey)
+                focus.clearFocus(force = true)
+            }
             Column(Modifier.safeDrawingPadding().imePadding().padding(12.dp)) {
                 Row(
                     Modifier.fillMaxWidth(),
@@ -181,8 +189,12 @@ internal fun VisualizationViewerHost(
                         style = MaterialTheme.typography.titleLarge,
                     )
                     Box {
-                        TextButton(onClick = { menu = true }) { Text("更多") }
+                        TextButton(onClick = { transfer(); menu = true }) { Text("更多") }
                         DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
+                            DropdownMenuItem(
+                                text = { Text("恢复控制窗位置与尺寸") },
+                                onClick = { menu = false; presentation.panel(sessionKey).resetGeometry() },
+                            )
                             if (session != null) {
                                 DropdownMenuItem(
                                     text = { Text("重置参数") },
@@ -191,7 +203,7 @@ internal fun VisualizationViewerHost(
                             }
                             DropdownMenuItem(
                                 text = { Text(if (showSource) "返回图形" else "查看源码") },
-                                onClick = { menu = false; showSource = !showSource },
+                                onClick = { transfer(); menu = false; showSource = !showSource },
                             )
                             DropdownMenuItem(text = { Text("复制源码") }, onClick = {
                                 menu = false
@@ -221,7 +233,7 @@ internal fun VisualizationViewerHost(
                             }
                         }
                     }
-                    TextButton(onClick = onDismiss) { Text("关闭") }
+                    TextButton(onClick = { transfer(); onDismiss() }) { Text("关闭") }
                 }
                 if ((result?.diagnosticCount ?: 0) > 0) {
                     Text(
@@ -229,13 +241,6 @@ internal fun VisualizationViewerHost(
                         color = MaterialTheme.colorScheme.error,
                         style = MaterialTheme.typography.bodySmall,
                     )
-                    if (showDiagnostics) {
-                        Column(Modifier.heightIn(max = 160.dp).verticalScroll(rememberScrollState())) {
-                            (archive?.items ?: result?.diagnostics.orEmpty()).forEach {
-                                Text(it.summary(), style = MaterialTheme.typography.bodySmall)
-                            }
-                        }
-                    }
                 } else {
                     result?.error?.let {
                         Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
@@ -252,14 +257,16 @@ internal fun VisualizationViewerHost(
                     }
                 }
                 if (showSource) {
+                    Box(Modifier.weight(1f).fillMaxWidth()) {
                     SelectionContainer {
                         Text(
                             fence.code,
-                            Modifier.weight(1f).verticalScroll(rememberScrollState()),
+                            Modifier.fillMaxSize().verticalScroll(rememberScrollState()),
                             style = MaterialTheme.typography.bodySmall.copy(
                                 fontFamily = FontFamily.Monospace,
                             ),
                         )
+                    }
                     }
                 } else if (session == null) {
                     Text(
@@ -267,38 +274,29 @@ internal fun VisualizationViewerHost(
                         style = MaterialTheme.typography.bodySmall,
                     )
                 } else {
-                    BoxWithConstraints(Modifier.weight(1f).fillMaxWidth()) {
-                        CompositionLocalProvider(LocalVizCanvasHeight provides (maxHeight - 84.dp).coerceAtLeast(80.dp)) {
-                            Box(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
-                                VizRenderer(
-                                    session = session,
-                                    sendingDisabled = sendingDisabled || sending,
-                                    presentation = presentation,
-                                    sessionKey = sessionKey,
-                                    interactive = true,
-                                ) { action ->
-                                    if (!sending && !sendingDisabled) {
-                                        sending = true
-                                        scope.launch {
-                                            try {
-                                                val text = session.message(action)
-                                                sendError = onMessage(
-                                                    VizMessageEvent(
-                                                        java.util.UUID.randomUUID().toString(),
-                                                        active.conversationId,
-                                                        active.messageIdentity,
-                                                        active.partIndex,
-                                                        fence.ordinal,
-                                                        VizFenceScanner.digest(fence.code),
-                                                        text,
-                                                    ),
-                                                )
-                                            } catch (failure: IllegalArgumentException) {
-                                                sendError = failure.message
-                                            } finally {
-                                                sending = false
-                                            }
-                                        }
+                    Box(Modifier.weight(1f).fillMaxWidth()) {
+                        VizFullscreenContent(
+                            session = session,
+                            sendingDisabled = sendingDisabled || sending || !messageAllowed,
+                            presentation = presentation,
+                            sessionKey = sessionKey,
+                        ) { action ->
+                            if (!sending && !sendingDisabled && messageAllowed) {
+                                sending = true
+                                scope.launch {
+                                    try {
+                                        val text = session.message(action)
+                                        sendError = onMessage(
+                                            VizMessageEvent(
+                                                java.util.UUID.randomUUID().toString(),
+                                                active.conversationId, active.messageIdentity, active.partIndex,
+                                                fence.ordinal, VizFenceScanner.digest(fence.code), text,
+                                            ),
+                                        )
+                                    } catch (failure: IllegalArgumentException) {
+                                        sendError = failure.message
+                                    } finally {
+                                        sending = false
                                     }
                                 }
                             }
@@ -310,6 +308,20 @@ internal fun VisualizationViewerHost(
                 }
                 sendError?.let {
                     Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+                }
+                if (showDiagnostics) {
+                    AlertDialog(
+                        onDismissRequest = { showDiagnostics = false },
+                        title = { Text("可视化诊断") },
+                        text = {
+                            Column(Modifier.verticalScroll(rememberScrollState())) {
+                                (archive?.items ?: result?.diagnostics.orEmpty()).forEach {
+                                    Text(it.summary(), style = MaterialTheme.typography.bodySmall)
+                                }
+                            }
+                        },
+                        confirmButton = { TextButton(onClick = { showDiagnostics = false }) { Text("关闭") } },
+                    )
                 }
             }
         }

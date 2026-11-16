@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -54,6 +55,7 @@ internal fun VizCanvas(
     presentation: VizPresentationState,
     identity: String,
     interactive: Boolean = false,
+    fillStage: Boolean = false,
     onOpen: (() -> Unit)? = null,
 ) {
     val width = node.values.number("width").toFloat()
@@ -87,11 +89,15 @@ internal fun VizCanvas(
         "@warning" -> if (dark) Color(0xFFFFCE72) else Color(0xFF815600)
         else -> Color((0xFF000000L or token.drop(1).toLong(16)).toInt())
     }
-    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+    Column(
+        modifier = if (fillStage) Modifier.fillMaxSize() else Modifier,
+        verticalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
         Canvas(
             Modifier
                 .fillMaxWidth()
-                .then(if (interactive && expandedHeight != null) Modifier.height(expandedHeight)
+                .then(if (fillStage) Modifier.fillMaxSize()
+                    else if (interactive && expandedHeight != null) Modifier.height(expandedHeight)
                     else Modifier.aspectRatio(width / height))
                 .clipToBounds()
                 .then(
@@ -99,11 +105,11 @@ internal fun VizCanvas(
                         Modifier
                             .onSizeChanged { canvasSize = it }
                             .nestedScroll(nestedConnection, dispatcher)
-                            .pointerInput(sessionKey, identity, width, height, canvasSize) {
+                            .pointerInput(sessionKey, identity, width, height, canvasSize, fillStage) {
                                 detectTransformGestures { centroid, pan, zoom, _ ->
                                     val consumed = viewport.transform(width, height, canvasSize, centroid, pan, zoom)
                                     // 适配视图不能平移时及放大后触边时，把剩余单指位移交给页面。
-                                    if (zoom == 1f) dispatcher.dispatchPostScroll(
+                                    if (!fillStage && zoom == 1f) dispatcher.dispatchPostScroll(
                                         consumed = consumed,
                                         available = pan - consumed,
                                         source = NestedScrollSource.UserInput,
@@ -213,7 +219,7 @@ internal fun VizCanvas(
                 }
             }
         }
-        if (interactive) {
+        if (interactive && !fillStage) {
             FlowRow(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
                 TextButton(
                     onClick = { viewport.zoomBy(0.8f, width, height, canvasSize) },

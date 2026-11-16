@@ -380,6 +380,16 @@ private fun MessagePartsBlock(
             is MessagePartBlock.ContentBlock -> key(block.index) {
                 when (val part = block.part) {
                     is UIMessagePart.Text -> {
+                        val prepared = if (role != MessageRole.USER) rememberMessageMarkdown(
+                            source = part.text,
+                            assistant = assistant,
+                            conversationId = conversationId,
+                            messageId = messageId,
+                            partIndex = block.index,
+                            precedingSources = parts.take(block.index).filterIsInstance<UIMessagePart.Text>().map { it.text },
+                            visualizations = role == MessageRole.ASSISTANT && visualizationStore != null &&
+                                settings.displaySetting.enableInlineVisualizations,
+                        ) else null
                         val textContent = @Composable {
                             if (role == MessageRole.USER) {
                                 Surface(
@@ -408,7 +418,7 @@ private fun MessagePartsBlock(
                                     ) {
                                         Column(modifier = Modifier.padding(8.dp)) {
                                             AssistantMessageMarkdown(
-                                                source = part.text,
+                                                prepared = checkNotNull(prepared).snapshot,
                                                 assistant = assistant,
                                                 conversationId = conversationId,
                                                 messageId = messageId,
@@ -417,15 +427,13 @@ private fun MessagePartsBlock(
                                                 sendingDisabled = visualizationSendingDisabled,
                                                 onMessage = onVisualizationMessage,
                                                 loading = loading,
-                                                precedingSources = parts.take(block.index).filterIsInstance<UIMessagePart.Text>().map { it.text },
-                                                isAssistant = role == MessageRole.ASSISTANT,
                                                 onClickCitation = handleClickCitation,
                                             )
                                         }
                                     }
                                 } else {
                                     AssistantMessageMarkdown(
-                                        source = part.text,
+                                        prepared = checkNotNull(prepared).snapshot,
                                         assistant = assistant,
                                         conversationId = conversationId,
                                         messageId = messageId,
@@ -434,8 +442,6 @@ private fun MessagePartsBlock(
                                         sendingDisabled = visualizationSendingDisabled,
                                         onMessage = onVisualizationMessage,
                                         loading = loading,
-                                        precedingSources = parts.take(block.index).filterIsInstance<UIMessagePart.Text>().map { it.text },
-                                        isAssistant = role == MessageRole.ASSISTANT,
                                         onClickCitation = handleClickCitation,
                                         modifier = Modifier.animateContentSize(),
                                     )
@@ -446,8 +452,8 @@ private fun MessagePartsBlock(
                         // 流式生成期间不启用 SelectionContainer：Markdown 在不断重渲染，
                         // 内部可选择的 Text 会频繁注册/注销，与 Compose 选择工具栏在绘制阶段
                         // 对 selectable 列表的排序产生并发修改，导致 ConcurrentModificationException。
-                        // 生成结束后内容稳定，再启用文本选择。
-                        if (loading) {
+                        // 生成结束且最终准备输入提交后才启用选择，避免最后一份异步快照仍在替换正文。
+                        if (loading || prepared?.settled == false) {
                             textContent()
                         } else {
                             SelectionContainer {

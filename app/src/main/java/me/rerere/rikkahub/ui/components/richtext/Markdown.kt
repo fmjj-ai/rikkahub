@@ -191,9 +191,12 @@ internal fun PreparedMarkdownContent(
     onClickCitation: (String) -> Unit = {},
 ) {
     val prepared = current.prepared
-    CompositionLocalProvider(LocalPreparedVizFences provides prepared?.visualizationFences.orEmpty()) {
+    CompositionLocalProvider(
+        LocalPreparedVizFences provides prepared?.visualizationFences.orEmpty(),
+        LocalOverflowVizFences provides prepared?.overflowFences.orEmpty(),
+    ) {
     if (prepared == null) {
-        Text(text = current.source, modifier = modifier.padding(horizontal = 4.dp), style = style)
+        Text(text = current.fallbackText, modifier = modifier.padding(horizontal = 4.dp), style = style)
     } else if (prepared.document != null) {
         MarkdownNew(
             document = prepared.document,
@@ -214,6 +217,7 @@ internal fun PreparedMarkdownContent(
             }
         }
     }
+    current.error?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
     }
 }
 
@@ -535,6 +539,10 @@ private fun MarkdownNode(
         // 代码块
         MarkdownElementTypes.CODE_FENCE -> {
             val slot = node.findChildOfTypeRecursive(MarkdownTokenTypes.FENCE_LANG)?.getTextInNode(content)
+            LocalOverflowVizFences.current[slot]?.let {
+                VisualizationQuotaNotice(it)
+                return
+            }
             val fence = LocalPreparedVizFences.current[slot]
             val renderer = LocalVizFenceRenderer.current
             if (fence != null && renderer != null) {

@@ -23,12 +23,22 @@ internal class VizPresentationState {
     private var viewports = emptyMap<String, VizViewportState>()
     private val owners = linkedMapOf<String, String>()
     private val sessions = mutableMapOf<String, VizSession>()
+    private val panels = mutableMapOf<String, VizPanelState>()
+    private val transferVersions = mutableMapOf<String, Long>()
+
+    fun panel(sessionKey: String): VizPanelState = panels.getOrPut(sessionKey) { VizPanelState() }
+    fun transferVersion(sessionKey: String): Long = transferVersions[sessionKey] ?: 0L
+    fun beginTransfer(sessionKey: String) {
+        transferVersions[sessionKey] = transferVersion(sessionKey) + 1L
+    }
 
     fun prepareSession(sessionKey: String, session: VizSession) {
         val previous = sessions.put(sessionKey, session)
         if (previous != null && previous !== session) {
             numberDrafts = numberDrafts.filterKeys { !it.startsWith("$sessionKey:") }
             viewports = viewports.filterKeys { !it.startsWith("$sessionKey:") }
+            panels.remove(sessionKey)
+            beginTransfer(sessionKey)
         }
     }
 
@@ -47,6 +57,8 @@ internal class VizPresentationState {
     private fun removeSession(sessionKey: String) {
         owners.remove(sessionKey)
         sessions.remove(sessionKey)
+        panels.remove(sessionKey)
+        transferVersions.remove(sessionKey)
         numberDrafts = numberDrafts.filterKeys { !it.startsWith("$sessionKey:") }
         viewports = viewports.filterKeys { !it.startsWith("$sessionKey:") }
     }
@@ -71,6 +83,7 @@ internal class VizPresentationState {
             streaming = streaming,
         )
         if (active != null && active?.sessionKey != descriptor.sessionKey) return null
+        beginTransfer(sessionKey)
         active = descriptor
         location = VizLocation.Expanded
         return descriptor
@@ -98,6 +111,7 @@ internal class VizPresentationState {
     }
 
     fun collapse() {
+        active?.sessionKey?.let(::beginTransfer)
         active = null
         location = VizLocation.Card
     }
@@ -153,3 +167,4 @@ internal data class VizDiagnosticActions(
 internal val LocalVizPresentation = staticCompositionLocalOf<VizPresentationState?> { null }
 internal val LocalVizDiagnosticActions = staticCompositionLocalOf<VizDiagnosticActions?> { null }
 internal val LocalVizCanvasHeight = staticCompositionLocalOf<Dp?> { null }
+internal val LocalVizControlPanel = staticCompositionLocalOf { false }

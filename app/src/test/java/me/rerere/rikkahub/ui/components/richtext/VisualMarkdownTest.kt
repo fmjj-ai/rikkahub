@@ -57,9 +57,11 @@ class VisualMarkdownTest {
         assertTrue(prepared.preprocessed.contains("\$x\$"))
         val multiple = prepareVisualMarkdown(List(5) { block }.joinToString("\n\n"), emptyList()) { it }.prepared!!
         assertEquals(4, multiple.visualizationFences.size)
+        assertEquals(1, multiple.overflowFences.size)
         val laterPart = prepareVisualMarkdown(block, List(4) { block }) { it }.prepared!!
         assertTrue(laterPart.visualizationFences.isEmpty())
-        assertTrue(laterPart.preprocessed.contains("计数器"))
+        assertFalse(laterPart.preprocessed.contains("计数器"))
+        assertEquals(1, laterPart.overflowFences.size)
     }
 
     @Test

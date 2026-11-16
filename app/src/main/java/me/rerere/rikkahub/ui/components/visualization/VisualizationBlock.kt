@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
@@ -54,6 +55,7 @@ internal fun VisualizationBlock(
     val density = LocalDensity.current
     val scope = rememberCoroutineScope()
     val clipboard = LocalClipboard.current
+    val focus = LocalFocusManager.current
     val latestFence by rememberUpdatedState(fence)
     val latestLoading by rememberUpdatedState(loading)
     val expanded = presentation.active?.sessionKey == sessionKey
@@ -113,6 +115,7 @@ internal fun VisualizationBlock(
             fence = fence,
             streaming = streaming,
         )
+        focus.clearFocus(force = true)
     }
 
     if (expanded) {
@@ -160,19 +163,16 @@ internal fun VisualizationBlock(
                             session?.spec?.title ?: "交互式可视化",
                             style = MaterialTheme.typography.titleSmall,
                         )
-                        if (session != null) {
-                            Text(
-                                "点击查看全屏交互",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
                     }
                     if (session != null) {
                         TextButton(onClick = { expandCard() }) { Text("放大") }
                     }
                     Box {
-                        TextButton(onClick = { menu = true }) { Text("更多") }
+                        TextButton(onClick = {
+                            presentation.beginTransfer(sessionKey)
+                            focus.clearFocus(force = true)
+                            menu = true
+                        }) { Text("更多") }
                         DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
                             if (session != null) {
                                 DropdownMenuItem(
@@ -318,11 +318,12 @@ internal fun VizRenderer(
     sessionKey: String,
     interactive: Boolean = false,
     onOpen: (() -> Unit)? = null,
+    nodes: List<VizNode> = session.frame.nodes,
     onMessage: (String) -> Unit,
 ) {
     presentation.prepareSession(sessionKey, session)
     Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        session.frame.nodes.forEachIndexed { index, node ->
+        nodes.forEachIndexed { index, node ->
             key(node.values["id"]?.str() ?: "node:$index") {
                 RenderNode(
                     session,

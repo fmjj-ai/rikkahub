@@ -182,6 +182,10 @@ fun ChatPage(id: Uuid, text: String?, files: List<Uri>, nodeId: Uuid? = null) {
     }
 
     val chatListState = rememberSaveable(id, saver = LazyListState.Saver) { LazyListState() }
+    val markdownStore = remember(id) {
+        me.rerere.rikkahub.ui.components.message.MessageMarkdownStateStore(scope)
+    }
+    DisposableEffect(markdownStore) { onDispose { markdownStore.close() } }
     val chatScrollIntent = rememberSaveable(id, saver = ChatScrollIntent.Saver) { ChatScrollIntent() }
     val chatScrollController = remember(id, chatListState) {
         ChatScrollController(chatListState, scope, chatScrollIntent)
@@ -238,6 +242,21 @@ fun ChatPage(id: Uuid, text: String?, files: List<Uri>, nodeId: Uuid? = null) {
         }
     }
     val viewerOpen = visualizationPresentation.active != null
+    val markdownParts = conversation.messageNodes.flatMap { node ->
+        node.currentMessage.parts.mapIndexedNotNull { index, part ->
+            if (part is me.rerere.ai.ui.UIMessagePart.Text) "${node.currentMessage.id}:${node.selectIndex}" to index
+            else null
+        }
+    }.toSet()
+    val markdownPins = buildSet {
+        visualizationPresentation.active?.messageIdentity?.let(::add)
+        if (loadingJob != null || vm.visualizationSendPending) conversation.messageNodes.lastOrNull()?.let {
+            add("${it.currentMessage.id}:${it.selectIndex}")
+        }
+    }
+    LaunchedEffect(markdownStore, markdownParts, markdownPins) {
+        markdownStore.retainParts(markdownParts, markdownPins)
+    }
     LaunchedEffect(viewerOpen) {
         chatScrollController.onViewer(viewerOpen)
         if (!viewerOpen) {
@@ -265,6 +284,7 @@ fun ChatPage(id: Uuid, text: String?, files: List<Uri>, nodeId: Uuid? = null) {
     }
 
     CompositionLocalProvider(
+        me.rerere.rikkahub.ui.components.message.LocalMessageMarkdownStore provides markdownStore,
         LocalVizPresentation provides visualizationPresentation,
         LocalVizDiagnosticActions provides VizDiagnosticActions(onDiagnosticCopy, onDiagnosticFill),
     ) {

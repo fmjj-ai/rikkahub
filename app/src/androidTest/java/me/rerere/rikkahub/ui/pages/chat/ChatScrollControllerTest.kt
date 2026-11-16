@@ -8,12 +8,14 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -46,15 +48,15 @@ class ChatScrollControllerTest {
                 add(ChatScrollController.ScrollTailKey)
             }
             DisposableEffect(controller) { onDispose { controller.close() } }
-            LaunchedEffect(keys) { controller.onSection(keys, messages.intValue) }
-            LaunchedEffect(generating.value) { controller.onGeneration(generating.value) }
+            SideEffect { controller.onState(keys, messages.intValue, generating.value, true) }
             LaunchedEffect(list) {
                 snapshotFlow {
                     Triple(list.layoutInfo.visibleItemsInfo.map { it.key to (it.offset to it.size) },
                         list.layoutInfo.totalItemsCount, list.canScrollForward)
                 }.collect { controller.onLayoutChanged() }
             }
-            LazyColumn(Modifier.fillMaxWidth().height(400.dp).testTag("messages"), state = list) {
+            LazyColumn(Modifier.fillMaxWidth().height(400.dp).testTag("messages")
+                .nestedScroll(controller.nestedScrollConnection), state = list) {
                 repeat(messages.intValue) { index ->
                     item(key = "message:$index") {
                         Box(Modifier.fillMaxWidth().height(
@@ -72,19 +74,24 @@ class ChatScrollControllerTest {
     }
 
     @Test
-    fun generationCompletionAndFinalHeightChangeKeepFollowingRealTail() {
+    fun generationCompletionAndLaterHeightChangesDoNotFollowTail() {
         content()
+        var anchor: ChatScrollController.Anchor? = null
         compose.runOnIdle {
             assertFalse(list.canScrollForward)
             assertTrue(intent.following)
+            anchor = controller.currentAnchor()
             generating.value = false
             lastHeight.intValue = 550
         }
         compose.waitForIdle()
         compose.runOnIdle {
-            assertFalse(list.canScrollForward)
-            assertTrue(intent.following)
+            assertTrue(list.canScrollForward)
+            assertEquals(anchor, controller.currentAnchor())
+            lastHeight.intValue = 850
         }
+        compose.waitForIdle()
+        compose.runOnIdle { assertEquals(anchor, controller.currentAnchor()) }
     }
 
     @Test
@@ -154,5 +161,82 @@ class ChatScrollControllerTest {
         }
         compose.waitForIdle()
         compose.runOnIdle { assertFalse(list.canScrollForward) }
+    }
+
+    @Test
+    fun queuedFollowIsRevokedAtEndButExplicitBottomStillWorksOnce() {
+        content()
+        compose.runOnIdle {
+            controller.onLayoutChanged()
+            controller.onGeneration(false)
+            generating.value = false
+            lastHeight.intValue = 700
+        }
+        compose.waitForIdle()
+        compose.runOnIdle {
+            assertTrue(list.canScrollForward)
+            controller.onJumpToBottom()
+        }
+        compose.waitForIdle()
+        compose.runOnIdle {
+            assertFalse(list.canScrollForward)
+            lastHeight.intValue = 1000
+        }
+        compose.waitForIdle()
+        compose.runOnIdle { assertTrue(list.canScrollForward) }
+    }
+
+    @Test
+    fun unfinishedSendTailIsCancelledButExplicitNodeSurvivesCompletion() {
+        content()
+        compose.runOnIdle {
+            controller.onSend(minMessages = 20)
+            generating.value = false
+        }
+        compose.waitForIdle()
+        compose.runOnIdle { messages.intValue = 21 }
+        compose.waitForIdle()
+        compose.runOnIdle {
+            assertTrue(list.canScrollForward)
+            controller.onPreviewJump("message:18")
+        }
+        compose.waitForIdle()
+        compose.runOnIdle { assertEquals(18, list.firstVisibleItemIndex) }
+    }
+
+    @Test
+    fun viewerCloseAfterCompletionDoesNotUseStaleFollowingIntent() {
+        content()
+        var anchor: ChatScrollController.Anchor? = null
+        compose.runOnIdle {
+            controller.onViewer(true)
+            anchor = controller.currentAnchor()
+            generating.value = false
+            lastHeight.intValue = 700
+        }
+        compose.waitForIdle()
+        compose.runOnIdle { controller.onViewer(false) }
+        compose.waitForIdle()
+        compose.runOnIdle {
+            assertEquals(anchor, controller.currentAnchor())
+            assertTrue(list.canScrollForward)
+        }
+    }
+
+    @Test
+    fun layoutBecomingShorterDoesNotReauthorizeFollowing() {
+        content()
+        compose.runOnIdle {
+            controller.onBrowse()
+            lastHeight.intValue = 20
+        }
+        compose.waitForIdle()
+        compose.runOnIdle {
+            controller.onUserScrollFinished()
+            assertFalse(intent.following)
+            lastHeight.intValue = 800
+        }
+        compose.waitForIdle()
+        compose.runOnIdle { assertTrue(list.canScrollForward) }
     }
 }

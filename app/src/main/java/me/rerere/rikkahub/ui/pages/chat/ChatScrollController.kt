@@ -9,6 +9,10 @@ import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.withFrameNanos
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.unit.Velocity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -40,6 +44,12 @@ internal class ChatScrollController(
     private var itemKeys: List<String?> = emptyList()
     private var messageCount = 0
     private var pendingTail = false
+    private var tailFromSend = false
+    private var generating = false
+    private var requestVersion = 0L
+    private var userMovedTowardTail = false
+    private var userReachedTail = false
+    private var userFling = false
     private var pendingTailMinMessages = 0
     private var pendingNode: String? = null
     private var pendingNodeOffset = 0
@@ -53,17 +63,57 @@ internal class ChatScrollController(
         state.interactionSource.interactions.collect { interaction ->
             // isScrollInProgress 也包含程序定位，不能据此判定用户上翻。
             if (interaction is DragInteraction.Start) onBrowse()
-            if (interaction is DragInteraction.Stop) {
-                settleJob = scope.launch {
-                    withFrameNanos { }
-                    snapshotFlow { state.isScrollInProgress }.first { !it }
-                    onUserScrollFinished()
-                }
+            if (interaction is DragInteraction.Stop) awaitUserScrollEnd()
+            if (interaction is DragInteraction.Cancel) onBrowse()
+        }
+    }
+
+    /** 只观察真实输入，不把程序定位、键盘避让和布局变化当成用户回底。 */
+    val nestedScrollConnection = object : NestedScrollConnection {
+        override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+            if (source == NestedScrollSource.UserInput && available.y != 0f) {
+                // 同一手势到达尾部后的越界位移不能抹掉真实到达证据；反向浏览则立即清除。
+                val reached = userMovedTowardTail && userReachedTail && available.y < 0f
+                onBrowse(towardTail = available.y < 0f)
+                userReachedTail = reached
+                awaitUserScrollEnd()
             }
+            return Offset.Zero
+        }
+
+        override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
+            if ((source == NestedScrollSource.UserInput || userFling) && consumed.y != 0f) {
+                userMovedTowardTail = consumed.y < 0f
+                userReachedTail = userMovedTowardTail && !state.canScrollForward &&
+                    state.layoutInfo.visibleItemsInfo.any { it.key == ScrollTailKey }
+                awaitUserScrollEnd()
+            }
+            return Offset.Zero
+        }
+
+        override suspend fun onPreFling(available: Velocity): Velocity {
+            userFling = userMovedTowardTail || available.y != 0f
+            return Velocity.Zero
+        }
+
+        override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
+            userFling = false
+            awaitUserScrollEnd()
+            return Velocity.Zero
+        }
+    }
+
+    private fun awaitUserScrollEnd() {
+        settleJob?.cancel()
+        settleJob = scope.launch {
+            withFrameNanos { }
+            snapshotFlow { state.isScrollInProgress }.first { !it }
+            onUserScrollFinished()
         }
     }
 
     private fun cancelRequest() {
+        requestVersion++
         syncJob?.cancel()
         syncJob = null
         settleJob?.cancel()
@@ -74,6 +124,7 @@ internal class ChatScrollController(
         intent.initialized = true
         cancelRequest()
         pendingTail = true
+        tailFromSend = true
         pendingTailMinMessages = minMessages
         pendingNode = null
         intent.following = autoScrollEnabled
@@ -95,6 +146,7 @@ internal class ChatScrollController(
     fun onJumpToBottom() {
         cancelRequest()
         pendingTail = true
+        tailFromSend = false
         pendingTailMinMessages = 0
         pendingNode = null
         intent.following = autoScrollEnabled
@@ -104,22 +156,36 @@ internal class ChatScrollController(
 
     fun onScrollTop() = onBrowse()
 
-    fun onBrowse() {
+    fun onBrowse(towardTail: Boolean = false) {
         cancelRequest()
+        userMovedTowardTail = towardTail
+        userReachedTail = false
+        userFling = false
         pendingTail = false
         pendingNode = null
         intent.following = false
         resumeAfterViewer = null
     }
 
-    fun onGeneration(@Suppress("UNUSED_PARAMETER") generating: Boolean) = onLayoutChanged()
+    fun onGeneration(generating: Boolean) {
+        if (this.generating && !generating) {
+            cancelRequest()
+            if (tailFromSend) pendingTail = false
+            tailFromSend = false
+        }
+        this.generating = generating
+        onLayoutChanged()
+    }
 
-    fun onUserScrollFinished() {
-        if (!viewerOpen && !state.isScrollInProgress && !state.canScrollForward &&
+    fun onUserScrollFinished(explicitUserScroll: Boolean = false) {
+        if (state.isScrollInProgress || userFling) return
+        if (userMovedTowardTail && (userReachedTail || explicitUserScroll) && !viewerOpen && !state.canScrollForward &&
             state.layoutInfo.visibleItemsInfo.any { it.key == ScrollTailKey }
         ) {
             intent.following = autoScrollEnabled
         }
+        userMovedTowardTail = false
+        userReachedTail = false
     }
 
     fun onViewer(open: Boolean) {
@@ -150,19 +216,31 @@ internal class ChatScrollController(
         onLayoutChanged()
     }
 
+    /** 列表结构、生成资格和设置一次发布，避免先看到新布局却仍使用上一轮生成资格。 */
+    fun onState(keys: List<String?>, messageCount: Int, generating: Boolean, autoScroll: Boolean) {
+        itemKeys = keys
+        this.messageCount = messageCount
+        autoScrollEnabled = autoScroll
+        if (!autoScroll) intent.following = false
+        onGeneration(generating)
+    }
+
     fun onSection(keys: List<String?>, messageCount: Int) {
         itemKeys = keys
         this.messageCount = messageCount
         onLayoutChanged()
     }
 
-    /** 一个布局周期只提交一次；完成生成后仍按原意图处理最终重排。 */
+    private fun canFollow() = generating && autoScrollEnabled && intent.following && !viewerOpen
+
+    /** 布局不是授权。结束后只允许尚未完成的显式定位，不再排队跟随。 */
     fun onLayoutChanged() {
         if (viewerOpen || syncJob?.isActive == true || state.isScrollInProgress) return
-        if (pendingNode == null && !pendingTail && !intent.following) return
+        if (pendingNode == null && !pendingTail && !canFollow()) return
+        val version = requestVersion
         syncJob = scope.launch {
             withFrameNanos { }
-            if (viewerOpen || state.isScrollInProgress) return@launch
+            if (version != requestVersion || viewerOpen || state.isScrollInProgress) return@launch
             val node = pendingNode
             if (node != null) {
                 if (scrollToKey(node, pendingNodeOffset)) pendingNode = null
@@ -171,7 +249,7 @@ internal class ChatScrollController(
                 if (messageCount >= pendingTailMinMessages && scrollToKey(ScrollTailKey)) {
                     pendingTail = false
                 }
-            } else if (intent.following && state.canScrollForward) {
+            } else if (canFollow() && state.canScrollForward) {
                 scrollToKey(ScrollTailKey)
             }
         }
