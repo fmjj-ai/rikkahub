@@ -1,6 +1,7 @@
 package me.rerere.rikkahub.data.db.fts
 
 import android.util.Log
+import androidx.sqlite.db.SupportSQLiteDatabase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import me.rerere.ai.ui.UIMessage
@@ -20,9 +21,9 @@ data class MessageSearchResult(
 )
 
 enum class MessageSearchSort(val orderBy: String) {
-    RELEVANCE("rank, update_at DESC"),
-    NEWEST_FIRST("update_at DESC, rank"),
-    OLDEST_FIRST("update_at ASC, rank"),
+    RELEVANCE("message_fts.rank, c.update_at DESC"),
+    NEWEST_FIRST("c.update_at DESC, message_fts.rank"),
+    OLDEST_FIRST("c.update_at ASC, message_fts.rank"),
 }
 
 private const val TAG = "MessageFtsManager"
@@ -31,35 +32,63 @@ class MessageFtsManager(private val database: AppDatabase) {
 
     private val db get() = database.openHelper.writableDatabase
 
-    suspend fun indexConversation(conversation: Conversation) = withContext(Dispatchers.IO) {
-        val conversationId = conversation.id.toString()
-        db.execSQL("DELETE FROM message_fts WHERE conversation_id = ?", arrayOf(conversationId))
-        conversation.messageNodes.forEach { node ->
-            node.messages.forEach { message ->
-                val text = message.extractFtsText()
-                if (text.isNotBlank()) {
-                    db.execSQL(
-                        "INSERT INTO message_fts(text, node_id, message_id, conversation_id, title, update_at) VALUES (?, ?, ?, ?, ?, ?)",
-                        arrayOf(
-                            text,
-                            node.id.toString(),
-                            message.id.toString(),
-                            conversationId,
-                            conversation.title,
-                            conversation.updateAt.toEpochMilli().toString(),
-                        )
-                    )
+    private fun transactionDatabase(): SupportSQLiteDatabase = db.also {
+        check(it.inTransaction()) { "FTS 写入必须在调用方的 Room 事务内执行" }
+    }
+
+    fun syncNodesInTransaction(
+        conversationId: String,
+        previous: List<MessageNode>,
+        current: List<MessageNode>,
+    ) {
+        val target = transactionDatabase()
+        val mutations = planFtsNodeMutations(previous, current)
+        if (mutations.isEmpty()) return
+        // 合并删除，避免对未建立普通索引的 FTS 元数据列逐消息扫描。
+        mutations.map { it.nodeId }.chunked(900).forEach { nodeIds ->
+            val placeholders = nodeIds.joinToString(",") { "?" }
+            target.execSQL(
+                "DELETE FROM message_fts WHERE conversation_id = ? AND node_id IN ($placeholders)",
+                arrayOf(conversationId, *nodeIds.toTypedArray()),
+            )
+        }
+        insertNodes(target, conversationId, mutations)
+    }
+
+    fun replaceConversationInTransaction(conversation: Conversation) {
+        val target = transactionDatabase()
+        val id = conversation.id.toString()
+        target.execSQL("DELETE FROM message_fts WHERE conversation_id = ?", arrayOf(id))
+        insertNodes(target, id, conversation.messageNodes.map { FtsNodeMutation(it.id.toString(), it.ftsMessages()) })
+    }
+
+    fun deleteConversationInTransaction(conversationId: String) {
+        transactionDatabase().execSQL("DELETE FROM message_fts WHERE conversation_id = ?", arrayOf(conversationId))
+    }
+
+    fun deleteAllInTransaction() {
+        transactionDatabase().execSQL("DELETE FROM message_fts")
+    }
+
+    private fun insertNodes(
+        target: SupportSQLiteDatabase,
+        conversationId: String,
+        mutations: List<FtsNodeMutation>,
+    ) {
+        if (mutations.none { it.messages.isNotEmpty() }) return
+        target.compileStatement(
+            "INSERT INTO message_fts(text, node_id, message_id, conversation_id) VALUES (?, ?, ?, ?)",
+        ).use { statement ->
+            mutations.forEach { node ->
+                node.messages.forEach { message ->
+                    statement.bindString(1, message.text)
+                    statement.bindString(2, node.nodeId)
+                    statement.bindString(3, message.messageId)
+                    statement.bindString(4, conversationId)
+                    statement.executeInsert()
                 }
             }
         }
-    }
-
-    suspend fun deleteConversation(conversationId: String) = withContext(Dispatchers.IO) {
-        db.execSQL("DELETE FROM message_fts WHERE conversation_id = ?", arrayOf(conversationId))
-    }
-
-    suspend fun deleteAll() = withContext(Dispatchers.IO) {
-        db.execSQL("DELETE FROM message_fts")
     }
 
     suspend fun search(
@@ -69,10 +98,12 @@ class MessageFtsManager(private val database: AppDatabase) {
         val results = mutableListOf<MessageSearchResult>()
         val cursor = db.query(
             """
-            SELECT node_id, message_id, conversation_id, title, update_at,
+            SELECT message_fts.node_id, message_fts.message_id, message_fts.conversation_id,
+                   c.title, c.update_at,
                    simple_snippet(message_fts, 0, '[', ']', '...', 30) AS snippet
             FROM message_fts
-            WHERE text MATCH jieba_query(?)
+            JOIN conversationentity AS c ON c.id = message_fts.conversation_id
+            WHERE message_fts.text MATCH jieba_query(?)
             ORDER BY ${sort.orderBy}
             LIMIT 50
             """.trimIndent(),
@@ -97,7 +128,7 @@ class MessageFtsManager(private val database: AppDatabase) {
     }
 }
 
-private fun UIMessage.extractFtsText(): String =
+internal fun UIMessage.extractFtsText(): String =
     parts.filterIsInstance<UIMessagePart.Text>()
         .joinToString("\n") { it.text }
         .take(10_000)

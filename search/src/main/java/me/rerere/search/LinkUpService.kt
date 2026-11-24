@@ -15,6 +15,7 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
 import me.rerere.ai.core.InputSchema
+import me.rerere.common.http.awaitText
 import me.rerere.search.SearchResult.SearchResultItem
 import me.rerere.search.SearchService.Companion.httpClient
 import me.rerere.search.SearchService.Companion.json
@@ -66,7 +67,7 @@ object LinkUpService : SearchService<SearchServiceOptions.LinkUpOptions> {
         commonOptions: SearchCommonOptions,
         serviceOptions: SearchServiceOptions.LinkUpOptions
     ): Result<SearchResult> = withContext(Dispatchers.IO) {
-        runCatching {
+        runSearchCatching {
             val query = params["query"]?.jsonPrimitive?.content ?: error("query is required")
             val body = buildJsonObject {
                 put("q", JsonPrimitive(query))
@@ -85,9 +86,9 @@ object LinkUpService : SearchService<SearchServiceOptions.LinkUpOptions> {
 
             Log.i(TAG, "search: $query")
 
-            val response = httpClient.newCall(request).await()
+            val response = httpClient.newCall(request).awaitText()
             if (response.isSuccessful) {
-                val responseBody = response.body.string().let {
+                val responseBody = response.body.let {
                     json.decodeFromString<LinkUpSearchResponse>(it)
                 }
 
@@ -104,7 +105,7 @@ object LinkUpService : SearchService<SearchServiceOptions.LinkUpOptions> {
                     )
                 )
             } else {
-                error("response failed #${response.code}: ${response.body?.string()}")
+                error("response failed #${response.code}: ${response.body}")
             }
         }
     }
@@ -114,7 +115,7 @@ object LinkUpService : SearchService<SearchServiceOptions.LinkUpOptions> {
         commonOptions: SearchCommonOptions,
         serviceOptions: SearchServiceOptions.LinkUpOptions
     ): Result<ScrapedResult> = withContext(Dispatchers.IO) {
-        runCatching {
+        runSearchCatching {
             val url = params["url"]?.jsonPrimitive?.content ?: error("url is required")
             val body = buildJsonObject {
                 put("url", JsonPrimitive(url))
@@ -131,9 +132,9 @@ object LinkUpService : SearchService<SearchServiceOptions.LinkUpOptions> {
                 .addHeader("Content-Type", "application/json")
                 .build()
 
-            val response = httpClient.newCall(request).await()
+            val response = httpClient.newCall(request).awaitText()
             if (response.isSuccessful) {
-                val responseBody = response.body.string().let {
+                val responseBody = response.body.let {
                     json.decodeFromString<LinkUpFetchResponse>(it)
                 }
 
@@ -148,7 +149,7 @@ object LinkUpService : SearchService<SearchServiceOptions.LinkUpOptions> {
                     )
                 )
             } else {
-                error("response failed #${response.code}: ${response.body?.string()}")
+                error("response failed #${response.code}: ${response.body}")
             }
         }
     }

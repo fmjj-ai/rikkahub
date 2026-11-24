@@ -1,6 +1,5 @@
 package me.rerere.rikkahub.data.repository
 
-import android.database.sqlite.SQLiteBlobTooBigException
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
@@ -267,12 +266,9 @@ class ConversationRepository(
             }
         }
 
-    suspend fun getConversationById(uuid: Uuid): Conversation? {
-        val entity = conversationDAO.getConversationById(uuid.toString())
-        return if (entity != null) {
-            val nodes = loadMessageNodes(entity.id)
-            conversationEntityToConversation(entity, nodes)
-        } else null
+    suspend fun getConversationById(uuid: Uuid): Conversation? = database.withTransaction {
+        val entity = conversationDAO.getConversationById(uuid.toString()) ?: return@withTransaction null
+        conversationEntityToConversation(entity, loadMessageNodes(entity.id))
     }
 
     suspend fun existsConversationById(uuid: Uuid): Boolean {
@@ -285,25 +281,46 @@ class ConversationRepository(
 
     suspend fun insertConversation(conversation: Conversation) {
         database.withTransaction {
-            conversationDAO.insert(
-                conversationToConversationEntity(conversation)
-            )
+            conversationDAO.insert(conversationToConversationEntity(conversation))
             saveMessageNodes(conversation.id.toString(), conversation.messageNodes)
+            messageFtsManager.replaceConversationInTransaction(conversation)
         }
-        messageFtsManager.indexConversation(conversation)
     }
 
     suspend fun updateConversation(conversation: Conversation) {
         database.withTransaction {
-            conversationDAO.update(
-                conversationToConversationEntity(conversation)
-            )
-            // 删除旧的节点，插入新的节点
-            messageNodeDAO.deleteByConversation(conversation.id.toString())
-            saveMessageNodes(conversation.id.toString(), conversation.messageNodes)
+            val id = conversation.id.toString()
+            if (!conversationDAO.existsById(id)) return@withTransaction
+            val plan = planMessageNodeWrites(id, loadMessageNodeEntities(id), conversation.messageNodes)
+            conversationDAO.update(conversationToConversationEntity(conversation))
+            plan.deletedIds.forEach { messageNodeDAO.deleteById(it) }
+            if (plan.inserts.isNotEmpty()) messageNodeDAO.insertAll(plan.inserts)
+            plan.updates.forEach { messageNodeDAO.update(it) }
+            plan.positions.forEach { messageNodeDAO.updatePosition(id, it.id, it.nodeIndex, it.selectIndex) }
+            messageFtsManager.syncNodesInTransaction(id, plan.previousFtsNodes, plan.currentFtsNodes)
         }
-        messageFtsManager.indexConversation(conversation)
     }
+
+    /** 仅在父表的最新元数据上应用变换，不加载、检查或序列化历史消息。 */
+    internal suspend fun updateConversationMetadata(
+        conversationId: Uuid,
+        update: (Conversation) -> Conversation,
+    ): ConversationMetadataChange? = database.withTransaction {
+        val entity = conversationDAO.getConversationById(conversationId.toString()) ?: return@withTransaction null
+        val current = conversationEntityToConversation(entity, emptyList())
+        val updated = update(current)
+        val change = ConversationMetadataChange(current, updated)
+        validateConversationFolderChange(current, updated) { folderId ->
+            database.folderDao().getFolderById(folderId.toString())?.assistantId
+        }
+        if (updated != current) conversationDAO.update(conversationToConversationEntity(updated))
+        change
+    }
+
+    suspend fun getConversationMetadata(conversationId: Uuid): Conversation? =
+        conversationDAO.getConversationById(conversationId.toString())?.let {
+            conversationEntityToConversation(it, emptyList())
+        }
 
     suspend fun deleteConversation(conversation: Conversation) {
         // 获取完整的 Conversation（包含 messageNodes）以正确清理文件
@@ -312,8 +329,8 @@ class ConversationRepository(
         } else {
             conversation
         }
-        messageFtsManager.deleteConversation(conversation.id.toString())
         database.withTransaction {
+            messageFtsManager.deleteConversationInTransaction(conversation.id.toString())
             // message_node 会通过 CASCADE 自动删除
             conversationDAO.delete(
                 conversationToConversationEntity(conversation)
@@ -328,15 +345,15 @@ class ConversationRepository(
     ) = messageFtsManager.search(keyword, sort)
 
     suspend fun rebuildAllIndexes(onProgress: (current: Int, total: Int) -> Unit = { _, _ -> }) {
-        messageFtsManager.deleteAll()
-        val allIds = conversationDAO.getAllIds()
-        val total = allIds.size
-        allIds.forEachIndexed { index, id ->
-            val entity = conversationDAO.getConversationById(id) ?: return@forEachIndexed
-            val nodes = loadMessageNodes(entity.id)
-            val conversation = conversationEntityToConversation(entity, nodes)
-            messageFtsManager.indexConversation(conversation)
-            onProgress(index + 1, total)
+        database.withTransaction {
+            messageFtsManager.deleteAllInTransaction()
+            val allIds = conversationDAO.getAllIds()
+            allIds.forEachIndexed { index, id ->
+                val entity = conversationDAO.getConversationById(id) ?: return@forEachIndexed
+                val conversation = conversationEntityToConversation(entity, loadMessageNodes(entity.id))
+                messageFtsManager.replaceConversationInTransaction(conversation)
+                onProgress(index + 1, allIds.size)
+            }
         }
     }
 
@@ -347,7 +364,6 @@ class ConversationRepository(
     }
 
     fun conversationToConversationEntity(conversation: Conversation): ConversationEntity {
-        require(conversation.messageNodes.none { it.messages.any { message -> message.hasBase64Part() } })
         return ConversationEntity(
             id = conversation.id.toString(),
             title = conversation.title,
@@ -397,10 +413,10 @@ class ConversationRepository(
     }
 
     suspend fun togglePinStatus(conversationId: Uuid) {
-        conversationDAO.updatePinStatus(
-            id = conversationId.toString(),
-            isPinned = !(getConversationById(conversationId)?.isPinned ?: false)
-        )
+        database.withTransaction {
+            val current = conversationDAO.getConversationById(conversationId.toString()) ?: return@withTransaction
+            conversationDAO.updatePinStatus(id = current.id, isPinned = !current.isPinned)
+        }
     }
 
     /**
@@ -426,49 +442,33 @@ class ConversationRepository(
         )
     }
 
-    private suspend fun loadMessageNodes(conversationId: String): List<MessageNode> {
-        val favoriteNodeIds = favoriteDAO
-            .getFavoriteNodeIdsOfConversation(conversationId)
-            .mapNotNull { runCatching { Uuid.parse(it) }.getOrNull() }
-            .toSet()
+    private suspend fun loadMessageNodeEntities(conversationId: String): List<MessageNodeEntity> {
+        val result = mutableListOf<MessageNodeEntity>()
+        var offset = 0
+        while (true) {
+            // 完整会话的加载失败应交给调用方重试，不能跳页后再把遗漏记录解释为删除。
+            val page = messageNodeDAO.getNodesOfConversationPaged(conversationId, 64, offset)
+            if (page.isEmpty()) return result
+            result.addAll(page)
+            offset += page.size
+        }
+    }
 
-        return database.withTransaction {
-            val nodes = mutableListOf<MessageNode>()
-            var offset = 0
-            val pageSize = 64
-            while (true) {
-                val page = try {
-                    messageNodeDAO.getNodesOfConversationPaged(conversationId, pageSize, offset)
-                } catch (e: SQLiteBlobTooBigException) {
-                    e.printStackTrace()
-                    offset += pageSize
-                    continue
-                } catch (e: IllegalStateException) {
-                    e.printStackTrace()
-                    offset += pageSize
-                    continue
-                }
-                if (page.isEmpty()) break
-                page.forEach { entity ->
-                    val messages = JsonInstant.decodeFromString<List<UIMessage>>(entity.messages)
-                    val nodeId = Uuid.parse(entity.id)
-                    nodes.add(
-                        MessageNode(
-                            id = nodeId,
-                            messages = messages,
-                            selectIndex = entity.selectIndex,
-                            isFavorite = favoriteNodeIds.contains(nodeId)
-                        )
-                    )
-                }
-                offset += page.size
-            }
-            nodes
+    private suspend fun loadMessageNodes(conversationId: String): List<MessageNode> = database.withTransaction {
+        val favorites = favoriteDAO.getFavoriteNodeIdsOfConversation(conversationId).toSet()
+        loadMessageNodeEntities(conversationId).map { entity ->
+            MessageNode(
+                id = Uuid.parse(entity.id),
+                messages = JsonInstant.decodeFromString<List<UIMessage>>(entity.messages),
+                selectIndex = entity.selectIndex,
+                isFavorite = entity.id in favorites,
+            )
         }
     }
 
     private suspend fun saveMessageNodes(conversationId: String, nodes: List<MessageNode>) {
         val entities = nodes.mapIndexed { index, node ->
+            require(node.messages.none { it.hasBase64Part() })
             MessageNodeEntity(
                 id = node.id.toString(),
                 conversationId = conversationId,

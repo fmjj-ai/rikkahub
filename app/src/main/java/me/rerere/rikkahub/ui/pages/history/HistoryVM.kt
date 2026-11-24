@@ -1,5 +1,6 @@
 package me.rerere.rikkahub.ui.pages.history
 
+import me.rerere.rikkahub.service.ChatService
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -21,6 +22,7 @@ private const val TAG = "HistoryVM"
 class HistoryVM(
     private val conversationRepo: ConversationRepository,
     private val settingsStore: SettingsStore,
+    private val chatService: ChatService,
 ) : ViewModel() {
     val assistant = settingsStore.settingsFlow
         .map { it.getCurrentAssistant() }
@@ -47,7 +49,9 @@ class HistoryVM(
 
     fun togglePinStatus(conversationId: Uuid) {
         viewModelScope.launch {
-            conversationRepo.togglePinStatus(conversationId)
+            chatService.updateConversationMetadataAndSave(conversationId, createIfMissing = false) {
+                it.copy(isPinned = !it.isPinned)
+            }
         }
     }
 

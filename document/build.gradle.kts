@@ -26,6 +26,14 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+    sourceSets {
+        // 文本提取改用纯 Kotlin 实现，保留旧源文件供回滚，但不编译/打包 MuPDF。
+        getByName("main") {
+            java.directories.clear()
+            java.directories.add("src/main/java/me")
+            jniLibs.directories.clear()
+        }
+    }
 }
 
 dependencies {

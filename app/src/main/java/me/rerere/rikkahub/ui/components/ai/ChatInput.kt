@@ -61,6 +61,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalFocusManager
@@ -96,7 +98,6 @@ import me.rerere.rikkahub.data.datastore.Settings
 import me.rerere.rikkahub.data.datastore.getCurrentAssistant
 import me.rerere.rikkahub.data.datastore.getCurrentChatModel
 import me.rerere.rikkahub.data.datastore.getQuickMessagesOfAssistant
-import me.rerere.rikkahub.data.files.FilesManager
 import me.rerere.rikkahub.data.model.Assistant
 import me.rerere.rikkahub.data.model.QuickMessage
 import me.rerere.rikkahub.ui.components.ai.completion.ChatCompletionContext
@@ -116,7 +117,7 @@ import org.koin.compose.koinInject
 import kotlin.time.Duration.Companion.seconds
 
 @Composable
-fun ChatInput(
+internal fun ChatInput(
     state: ChatInputState,
     loading: Boolean,
     settings: Settings,
@@ -126,13 +127,17 @@ fun ChatInput(
     onToggleSearch: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
     completionProviders: List<ChatCompletionProvider> = emptyList(),
+    inputFocusRequester: FocusRequester? = null,
+    cameraTransition: CameraAttachmentTransitionState? = null,
     onUpdateChatModel: (Model) -> Unit,
-    onUpdateAssistant: (Assistant) -> Unit,
+    onUpdateAssistant: ((Assistant) -> Assistant) -> Unit,
     onUpdateSearchService: (Int) -> Unit,
     onMoreClick: () -> Unit,
     onContextUsageClick: () -> Unit,
     onCancelClick: () -> Unit,
     onSendClick: () -> Unit,
+    onPasteImage: (android.net.Uri) -> Unit,
+    onPasteTextAsFile: (String) -> Unit,
     onLongSendClick: () -> Unit,
 ) {
     val toaster = LocalToaster.current
@@ -155,12 +160,20 @@ fun ChatInput(
     }
 
     fun sendMessage() {
+        if (!loading && state.pendingAttachmentCount > 0) {
+            toaster.show("附件正在添加，请稍候")
+            return
+        }
         focusManager.clearFocus(force = true)
         keyboardController?.hide()
         if (loading) onCancelClick() else onSendClick()
     }
 
     fun sendMessageWithoutAnswer() {
+        if (!loading && state.pendingAttachmentCount > 0) {
+            toaster.show("附件正在添加，请稍候")
+            return
+        }
         focusManager.clearFocus(force = true)
         keyboardController?.hide()
         if (loading) onCancelClick() else onLongSendClick()
@@ -232,12 +245,15 @@ fun ChatInput(
                     verticalArrangement = Arrangement.spacedBy(2.dp)
                 ) {
                     if (state.messageContent.isNotEmpty()) {
-                        MediaFileInputRow(state = state)
+                        MediaFileInputRow(state = state, cameraTransition = cameraTransition)
                     }
 
                     TextInputRow(
                         state = state,
                         completionProviders = completionProviders,
+                        inputFocusRequester = inputFocusRequester,
+                        onPasteImage = onPasteImage,
+                        onPasteTextAsFile = onPasteTextAsFile,
                         onSendMessage = { sendMessage() }
                     )
 
@@ -296,7 +312,7 @@ fun ChatInput(
                                 ReasoningButton(
                                     reasoningLevel = assistant.reasoningLevel,
                                     onUpdateReasoningLevel = {
-                                        onUpdateAssistant(assistant.copy(reasoningLevel = it))
+                                        onUpdateAssistant { currentAssistant -> currentAssistant.copy(reasoningLevel = it) }
                                     },
                                     onlyIcon = true,
                                 )
@@ -315,7 +331,7 @@ fun ChatInput(
                             PriorityTierButton(
                                 enabled = assistant.enablePriorityTier,
                                 onToggle = { enabled ->
-                                    onUpdateAssistant(assistant.copy(enablePriorityTier = enabled))
+                                    onUpdateAssistant { currentAssistant -> currentAssistant.copy(enablePriorityTier = enabled) }
                                 },
                             )
 
@@ -440,10 +456,12 @@ private fun ActionIconButton(
 private fun TextInputRow(
     state: ChatInputState,
     completionProviders: List<ChatCompletionProvider>,
+    inputFocusRequester: FocusRequester?,
+    onPasteImage: (android.net.Uri) -> Unit,
+    onPasteTextAsFile: (String) -> Unit,
     onSendMessage: () -> Unit,
 ) {
     val settings = LocalSettings.current
-    val filesManager: FilesManager = koinInject()
     val assistant = settings.getCurrentAssistant()
     val quickMessages = remember(settings.quickMessages, assistant.quickMessageIds) {
         settings.getQuickMessagesOfAssistant(assistant)
@@ -479,7 +497,10 @@ private fun TextInputRow(
         var isFullScreen by remember { mutableStateOf(false) }
         var completionList by remember { mutableStateOf<ChatCompletionList?>(null) }
         val receiveContentListener = remember(
-            settings.displaySetting.pasteLongTextAsFile, settings.displaySetting.pasteLongTextThreshold
+            settings.displaySetting.pasteLongTextAsFile,
+            settings.displaySetting.pasteLongTextThreshold,
+            onPasteImage,
+            onPasteTextAsFile,
         ) {
             ReceiveContentListener { transferableContent ->
                 when {
@@ -487,11 +508,7 @@ private fun TextInputRow(
                         transferableContent.consume { item ->
                             val uri = item.uri
                             if (uri != null) {
-                                state.addImages(
-                                    filesManager.createChatFilesByContents(
-                                        listOf(uri)
-                                    )
-                                )
+                                onPasteImage(uri)
                             }
                             uri != null
                         }
@@ -501,8 +518,7 @@ private fun TextInputRow(
                         transferableContent.consume { item ->
                             val text = item.text?.toString()
                             if (text != null && text.length > settings.displaySetting.pasteLongTextThreshold) {
-                                val document = filesManager.createChatTextFile(text)
-                                state.addFiles(listOf(document))
+                                onPasteTextAsFile(text)
                                 true
                             } else {
                                 false
@@ -569,6 +585,7 @@ private fun TextInputRow(
             modifier = Modifier
                 .fillMaxWidth()
                 .testTag("chat_input")
+                .then(if (inputFocusRequester != null) Modifier.focusRequester(inputFocusRequester) else Modifier)
                 .contentReceiver(receiveContentListener)
                 .onFocusChanged {
                     isFocused = it.isFocused

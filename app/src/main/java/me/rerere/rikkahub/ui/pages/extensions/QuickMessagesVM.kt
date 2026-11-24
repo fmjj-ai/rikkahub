@@ -17,41 +17,34 @@ class QuickMessagesVM(
         .stateIn(viewModelScope, SharingStarted.Lazily, Settings.dummy())
 
     fun addQuickMessage(title: String, content: String) {
-        updateQuickMessages(
-            settings.value.quickMessages + QuickMessage(
-                title = title,
-                content = content,
-            )
-        )
+        val message = QuickMessage(title = title, content = content)
+        updateQuickMessages { it + message }
     }
 
     fun updateQuickMessage(updated: QuickMessage) {
-        updateQuickMessages(
-            settings.value.quickMessages.map { quickMessage ->
-                if (quickMessage.id == updated.id) updated else quickMessage
+        updateQuickMessages { current ->
+            current.map { message ->
+                if (message.id == updated.id) message.copy(title = updated.title, content = updated.content)
+                else message
             }
-        )
+        }
     }
 
     fun deleteQuickMessage(id: Uuid) {
-        updateQuickMessages(
-            settings.value.quickMessages.filterNot { quickMessage ->
-                quickMessage.id == id
-            }
-        )
+        updateQuickMessages { current -> current.filterNot { it.id == id } }
     }
 
-    private fun updateQuickMessages(quickMessages: List<QuickMessage>) {
-        val validIds = quickMessages.map { it.id }.toSet()
+    private fun updateQuickMessages(transform: (List<QuickMessage>) -> List<QuickMessage>) {
         viewModelScope.launch {
-            settingsStore.update { settings ->
-                settings.copy(
-                    quickMessages = quickMessages,
-                    assistants = settings.assistants.map { assistant ->
-                        assistant.copy(
-                            quickMessageIds = assistant.quickMessageIds.filter { it in validIds }.toSet()
-                        )
-                    }
+            settingsStore.update { latest ->
+                val updated = transform(latest.quickMessages)
+                val validIds = updated.map { it.id }.toSet()
+                latest.copy(
+                    quickMessages = updated,
+                    assistants = latest.assistants.map { assistant ->
+                        val selected = assistant.quickMessageIds.filter { it in validIds }.toSet()
+                        if (selected == assistant.quickMessageIds) assistant else assistant.copy(quickMessageIds = selected)
+                    },
                 )
             }
         }

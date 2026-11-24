@@ -10,6 +10,7 @@ import me.rerere.rikkahub.data.datastore.findProvider
 import me.rerere.rikkahub.data.event.AppEventBus
 import me.rerere.rikkahub.data.files.FilesManager
 import me.rerere.rikkahub.data.repository.GenMediaRepository
+import me.rerere.rikkahub.phoneuse.PhoneUseManager
 import me.rerere.tts.provider.TTSManager
 
 private const val TAG = "LocalTools"
@@ -22,10 +23,12 @@ class LocalTools(
     private val providerManager: ProviderManager,
     private val filesManager: FilesManager,
     private val genMediaRepository: GenMediaRepository,
+    private val phoneUseManager: PhoneUseManager,
 ) {
     val javascriptTool by lazy { buildJavascriptTool() }
 
     val timeTool by lazy { buildTimeInfoTool() }
+    val plotFunctionTool by lazy { buildPlotFunctionTool() }
 
     val clipboardTool by lazy { buildClipboardTool(context) }
 
@@ -73,8 +76,32 @@ class LocalTools(
         return true
     }
 
-    fun getTools(options: List<LocalToolOption>): List<Tool> {
+    fun finishPhoneUse(owner: String) = phoneUseManager.finish(owner)
+
+    fun getTools(
+        options: List<LocalToolOption>,
+        phoneUseOwner: String? = null,
+        onPhoneUseStop: () -> Unit = {},
+    ): List<Tool> {
         val tools = mutableListOf<Tool>()
+        if (LocalToolOption.PhoneUse in options && PhoneUseManager.isSupported) {
+            tools.add(buildPhoneUseTool(
+                ownPackageName = context.packageName,
+                manager = phoneUseManager,
+                // 控制面板由无障碍服务提供，无需另开普通悬浮窗权限。
+                isFloatingWindowOn = { phoneUseManager.controller.value != null },
+                saveScreenshot = { bytes ->
+                    filesManager.createChatFilesByByteArrays(
+                        listOf(bytes), displayName = "screenshot.jpg", mimeType = "image/jpeg",
+                    ).first().toString()
+                },
+                owner = phoneUseOwner ?: Any(),
+                onStop = onPhoneUseStop,
+            ))
+        }
+        if (options.contains(LocalToolOption.FunctionGraph)) {
+            tools.add(plotFunctionTool)
+        }
         if (options.contains(LocalToolOption.JavascriptEngine)) {
             tools.add(javascriptTool)
         }

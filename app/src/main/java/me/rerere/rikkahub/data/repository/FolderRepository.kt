@@ -1,5 +1,7 @@
 package me.rerere.rikkahub.data.repository
 
+import me.rerere.rikkahub.data.db.AppDatabase
+import androidx.room.withTransaction
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import me.rerere.rikkahub.data.db.dao.ConversationDAO
@@ -12,6 +14,7 @@ import kotlin.uuid.Uuid
 class FolderRepository(
     private val folderDAO: FolderDAO,
     private val conversationDAO: ConversationDAO,
+    private val database: AppDatabase,
 ) {
     fun getFoldersOfAssistant(assistantId: Uuid): Flow<List<Folder>> {
         return folderDAO.getFoldersOfAssistant(assistantId.toString())
@@ -40,8 +43,10 @@ class FolderRepository(
      * 删除文件夹，先把归属该文件夹的会话 folder_id 清空，再删除文件夹本身（不影响会话）。
      */
     suspend fun deleteFolder(id: Uuid) {
-        conversationDAO.clearFolder(id.toString())
-        folderDAO.deleteById(id.toString())
+        database.withTransaction {
+            conversationDAO.clearFolder(id.toString())
+            folderDAO.deleteById(id.toString())
+        }
     }
 }
 

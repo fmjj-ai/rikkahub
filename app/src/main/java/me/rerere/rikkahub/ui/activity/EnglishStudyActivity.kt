@@ -261,9 +261,10 @@ class EnglishBridge(
             val id = conversationId
 
             if (!inlineInitialized) {
-                chatService.updateConversationState(id) {
-                    Conversation.ofId(id = id, assistantId = assistant.id)
-                }
+                chatService.replaceConversationState(
+                    id,
+                    Conversation.ofId(id = id, assistantId = assistant.id),
+                )
                 inlineInitialized = true
             }
             chatService.configureEnglishSession(

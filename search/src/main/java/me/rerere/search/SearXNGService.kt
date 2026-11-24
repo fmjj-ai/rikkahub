@@ -13,6 +13,7 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
 import me.rerere.ai.core.InputSchema
+import me.rerere.common.http.awaitText
 import me.rerere.search.SearchResult.SearchResultItem
 import me.rerere.search.SearchService.Companion.httpClient
 import me.rerere.search.SearchService.Companion.json
@@ -50,7 +51,7 @@ object SearXNGService : SearchService<SearchServiceOptions.SearXNGOptions> {
         commonOptions: SearchCommonOptions,
         serviceOptions: SearchServiceOptions.SearXNGOptions
     ): Result<SearchResult> = withContext(Dispatchers.IO) {
-        runCatching {
+        runSearchCatching {
             require(serviceOptions.url.isNotBlank()) {
                 "SearXNG URL cannot be empty"
             }
@@ -87,9 +88,9 @@ object SearXNGService : SearchService<SearchServiceOptions.SearXNGOptions> {
 
             Log.i(TAG, "search: $url")
 
-            val response = httpClient.newCall(request).await()
+            val response = httpClient.newCall(request).awaitText()
             if (response.isSuccessful) {
-                val bodyRaw = response.body.string()
+                val bodyRaw = response.body
                 val searchResponse = runCatching {
                     json.decodeFromString<SearXNGResponse>(bodyRaw)
                 }.onFailure {
@@ -111,7 +112,7 @@ object SearXNGService : SearchService<SearchServiceOptions.SearXNGOptions> {
 
                 return@withContext Result.success(SearchResult(items = items))
             } else {
-                val errorBody = response.body?.string()
+                val errorBody = response.body
                 println("SearXNG API error: ${response.code} - $errorBody")
                 error("SearXNG request failed with status ${response.code}")
             }

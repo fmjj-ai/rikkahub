@@ -36,10 +36,11 @@ import me.rerere.rikkahub.R
 import me.rerere.rikkahub.Screen
 import me.rerere.rikkahub.data.model.Assistant
 import me.rerere.rikkahub.ui.components.nav.BackButton
+import me.rerere.rikkahub.ui.components.nav.navigationSourceModifiers
 import me.rerere.rikkahub.ui.components.ui.CardGroup
 import me.rerere.rikkahub.ui.components.ui.UIAvatar
 import me.rerere.rikkahub.ui.context.LocalNavController
-import me.rerere.rikkahub.ui.hooks.heroAnimation
+import me.rerere.rikkahub.ui.hooks.assistantAvatarNavigation
 import me.rerere.rikkahub.ui.theme.CustomColors
 import me.rerere.rikkahub.utils.plus
 import org.koin.androidx.compose.koinViewModel
@@ -54,6 +55,15 @@ fun AssistantDetailPage(id: String) {
     )
     val assistant by vm.assistant.collectAsStateWithLifecycle()
     val navController = LocalNavController.current
+    val navigationSources = navigationSourceModifiers(
+        Screen.AssistantBasic(id),
+        Screen.AssistantPrompt(id),
+        Screen.AssistantInjections(id),
+        Screen.AssistantMemory(id),
+        Screen.AssistantRequest(id),
+        Screen.AssistantMcp(id),
+        Screen.AssistantLocalTool(id),
+    )
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
     Scaffold(
@@ -94,6 +104,7 @@ fun AssistantDetailPage(id: String) {
                     modifier = Modifier.padding(horizontal = 8.dp),
                 ) {
                     item(
+                        modifier = navigationSources.getValue(Screen.AssistantBasic(id)),
                         onClick = { navController.navigate(Screen.AssistantBasic(id)) },
                         leadingContent = { Icon(HugeIcons.Settings03, null) },
                         supportingContent = { Text(stringResource(R.string.assistant_detail_basic_desc)) },
@@ -101,6 +112,7 @@ fun AssistantDetailPage(id: String) {
                         trailingContent = { Icon(HugeIcons.ArrowRight01, null) },
                     )
                     item(
+                        modifier = navigationSources.getValue(Screen.AssistantPrompt(id)),
                         onClick = { navController.navigate(Screen.AssistantPrompt(id)) },
                         leadingContent = { Icon(HugeIcons.Message02, null) },
                         supportingContent = { Text(stringResource(R.string.assistant_detail_prompt_desc)) },
@@ -108,6 +120,7 @@ fun AssistantDetailPage(id: String) {
                         trailingContent = { Icon(HugeIcons.ArrowRight01, null) },
                     )
                     item(
+                        modifier = navigationSources.getValue(Screen.AssistantInjections(id)),
                         onClick = { navController.navigate(Screen.AssistantInjections(id)) },
                         leadingContent = { Icon(HugeIcons.Puzzle, null) },
                         supportingContent = { Text(stringResource(R.string.assistant_detail_extensions_desc)) },
@@ -115,6 +128,7 @@ fun AssistantDetailPage(id: String) {
                         trailingContent = { Icon(HugeIcons.ArrowRight01, null) },
                     )
                     item(
+                        modifier = navigationSources.getValue(Screen.AssistantMemory(id)),
                         onClick = { navController.navigate(Screen.AssistantMemory(id)) },
                         leadingContent = { Icon(HugeIcons.Brain02, null) },
                         supportingContent = { Text(stringResource(R.string.assistant_detail_memory_desc)) },
@@ -122,6 +136,7 @@ fun AssistantDetailPage(id: String) {
                         trailingContent = { Icon(HugeIcons.ArrowRight01, null) },
                     )
                     item(
+                        modifier = navigationSources.getValue(Screen.AssistantRequest(id)),
                         onClick = { navController.navigate(Screen.AssistantRequest(id)) },
                         leadingContent = { Icon(HugeIcons.Code, null) },
                         supportingContent = { Text(stringResource(R.string.assistant_detail_request_desc)) },
@@ -129,6 +144,7 @@ fun AssistantDetailPage(id: String) {
                         trailingContent = { Icon(HugeIcons.ArrowRight01, null) },
                     )
                     item(
+                        modifier = navigationSources.getValue(Screen.AssistantMcp(id)),
                         onClick = { navController.navigate(Screen.AssistantMcp(id)) },
                         leadingContent = { Icon(HugeIcons.Wrench01, null) },
                         supportingContent = { Text(stringResource(R.string.assistant_detail_mcp_desc)) },
@@ -136,6 +152,7 @@ fun AssistantDetailPage(id: String) {
                         trailingContent = { Icon(HugeIcons.ArrowRight01, null) },
                     )
                     item(
+                        modifier = navigationSources.getValue(Screen.AssistantLocalTool(id)),
                         onClick = { navController.navigate(Screen.AssistantLocalTool(id)) },
                         leadingContent = { Icon(HugeIcons.BookOpen01, null) },
                         supportingContent = { Text(stringResource(R.string.assistant_detail_local_tools_desc)) },
@@ -164,7 +181,7 @@ private fun AssistantHeader(
             onUpdate = null,
             modifier = Modifier
                 .size(100.dp)
-                .heroAnimation("assistant_${assistant.id}")
+                .assistantAvatarNavigation("assistant_${assistant.id}")
         )
 
         Text(

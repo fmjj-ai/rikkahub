@@ -40,9 +40,9 @@ fun ExtensionSelector(
     modifier: Modifier = Modifier,
     assistant: Assistant,
     settings: Settings,
-    onUpdate: (Assistant) -> Unit,
+    onUpdate: ((Assistant) -> Assistant) -> Unit,
     conversation: Conversation? = null,
-    onUpdateConversation: ((Conversation) -> Unit)? = null,
+    onUpdateConversation: (((Conversation) -> Conversation) -> Unit)? = null,
     onNavigateToQuickMessages: () -> Unit = {},
     onNavigateToPrompts: () -> Unit = {},
     onNavigateToSkills: () -> Unit = {},
@@ -129,7 +129,7 @@ fun ExtensionSelector(
                                 } else {
                                     assistant.quickMessageIds - id
                                 }
-                                onUpdate(assistant.copy(quickMessageIds = newIds))
+                                onUpdate { currentAssistant -> currentAssistant.copy(quickMessageIds = newIds) }
                             },
                             onManage = onNavigateToQuickMessages,
                         )
@@ -148,15 +148,20 @@ fun ExtensionSelector(
                             modeInjections = settings.modeInjections,
                             selectedIds = selectedModeInjectionIds,
                             onToggle = { id, checked ->
-                                val newIds = if (checked) {
-                                    selectedModeInjectionIds + id
-                                } else {
-                                    selectedModeInjectionIds - id
-                                }
                                 if (useConversationInjections) {
-                                    onUpdateConversation(conversation.copy(modeInjectionIds = newIds))
+                                    onUpdateConversation { current ->
+                                        current.copy(
+                                            modeInjectionIds = if (checked) current.modeInjectionIds + id
+                                            else current.modeInjectionIds - id
+                                        )
+                                    }
                                 } else {
-                                    onUpdate(assistant.copy(modeInjectionIds = newIds))
+                                    val newIds = if (checked) {
+                                        selectedModeInjectionIds + id
+                                    } else {
+                                        selectedModeInjectionIds - id
+                                    }
+                                    onUpdate { currentAssistant -> currentAssistant.copy(modeInjectionIds = newIds) }
                                 }
                             },
                             onManage = onNavigateToPrompts,
@@ -176,15 +181,20 @@ fun ExtensionSelector(
                             lorebooks = settings.lorebooks,
                             selectedIds = selectedLorebookIds,
                             onToggle = { id, checked ->
-                                val newIds = if (checked) {
-                                    selectedLorebookIds + id
-                                } else {
-                                    selectedLorebookIds - id
-                                }
                                 if (useConversationInjections) {
-                                    onUpdateConversation(conversation.copy(lorebookIds = newIds))
+                                    onUpdateConversation { current ->
+                                        current.copy(
+                                            lorebookIds = if (checked) current.lorebookIds + id
+                                            else current.lorebookIds - id
+                                        )
+                                    }
                                 } else {
-                                    onUpdate(assistant.copy(lorebookIds = newIds))
+                                    val newIds = if (checked) {
+                                        selectedLorebookIds + id
+                                    } else {
+                                        selectedLorebookIds - id
+                                    }
+                                    onUpdate { currentAssistant -> currentAssistant.copy(lorebookIds = newIds) }
                                 }
                             },
                             onManage = onNavigateToPrompts,
@@ -209,7 +219,7 @@ fun ExtensionSelector(
                                 } else {
                                     assistant.enabledSkills - name
                                 }
-                                onUpdate(assistant.copy(enabledSkills = newSkills))
+                                onUpdate { currentAssistant -> currentAssistant.copy(enabledSkills = newSkills) }
                             },
                             onManage = onNavigateToSkills,
                         )

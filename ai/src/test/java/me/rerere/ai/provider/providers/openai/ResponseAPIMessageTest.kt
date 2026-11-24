@@ -398,6 +398,17 @@ class ResponseAPIMessageTest {
         assertFalse("tools key should not be written", requestBody.containsKey("tools"))
     }
 
+    @Test
+    fun `streaming image tool requests previews without changing nonstreaming requests`() {
+        val provider = ProviderSetting.OpenAI(baseUrl = "https://api.openai.com/v1")
+        val params = createToolParams(builtInTools = setOf(BuiltInTools.ImageGeneration))
+        val streaming = invokeBuildRequestBody(provider, params, stream = true)
+        assertEquals("true", streaming["stream"]?.jsonPrimitive?.content)
+        assertEquals("2", streaming["tools"]!!.jsonArray.single().jsonObject["partial_images"]?.jsonPrimitive?.content)
+        val normal = invokeBuildRequestBody(provider, params, stream = false)
+        assertFalse(normal["tools"]!!.jsonArray.single().jsonObject.containsKey("partial_images"))
+    }
+
     // ==================== Helper Functions ====================
 
     private fun createToolParams(

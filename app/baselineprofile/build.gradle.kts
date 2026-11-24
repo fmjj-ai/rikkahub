@@ -28,6 +28,12 @@ android {
 
     targetProjectPath = ":app"
 
+    flavorDimensions += "distribution"
+    productFlavors {
+        create("github") { dimension = "distribution" }
+        create("play") { dimension = "distribution" }
+    }
+
 }
 
 // This is the configuration block for the Baseline Profile plugin.

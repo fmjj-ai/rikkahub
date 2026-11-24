@@ -73,6 +73,7 @@ import me.rerere.rikkahub.data.db.entity.WorkspaceEntity
 import androidx.compose.ui.res.stringResource
 import me.rerere.rikkahub.R
 import me.rerere.rikkahub.ui.components.nav.BackButton
+import me.rerere.rikkahub.ui.components.nav.navigationSource
 import me.rerere.rikkahub.ui.components.ui.ImagePreviewDialog
 import me.rerere.rikkahub.ui.components.ui.RikkaConfirmDialog
 import me.rerere.rikkahub.ui.context.LocalNavController
@@ -151,7 +152,11 @@ fun WorkspaceDetailPage(id: String) {
                         Icon(HugeIcons.Refresh01, contentDescription = null)
                     }
                     if (state.workspace?.shellStatus != WorkspaceShellStatus.DISABLED.name) {
-                        IconButton(onClick = { navController.navigate(Screen.WorkspaceTerminal(id)) }) {
+                        val terminal = Screen.WorkspaceTerminal(id)
+                        IconButton(
+                            onClick = { navController.navigate(terminal) },
+                            modifier = Modifier.navigationSource(terminal),
+                        ) {
                             Icon(HugeIcons.ComputerTerminal01, contentDescription = null)
                         }
                     }
@@ -192,6 +197,7 @@ fun WorkspaceDetailPage(id: String) {
                 )
 
                 1 -> WorkspaceFilesPage(
+                    workspaceId = id,
                     state = state,
                     contentPadding = PaddingValues(),
                     onSelectArea = vm::selectArea,
@@ -579,6 +585,7 @@ private fun InstallRootfsDialog(
 
 @Composable
 private fun WorkspaceFilesPage(
+    workspaceId: String,
     state: WorkspaceDetailState,
     contentPadding: PaddingValues,
     onSelectArea: (WorkspaceStorageArea) -> Unit,
@@ -621,8 +628,12 @@ private fun WorkspaceFilesPage(
         }
 
         items(state.entries, key = { "${state.area.name}:${it.path}" }) { entry ->
+            val anchor = if (!entry.isDirectory && entry.detectFileType() == WorkspaceFileType.TEXT) {
+                Modifier.navigationSource(Screen.WorkspaceFileEditor(workspaceId, state.area.name, entry.path))
+            } else Modifier
             WorkspaceFileCard(
                 entry = entry,
+                modifier = anchor,
                 onOpen = { onOpen(entry) },
                 onDelete = { onDelete(entry) },
                 onExport = { onExport(entry) },
@@ -685,6 +696,7 @@ private fun WorkspacePathBar(
 @Composable
 private fun WorkspaceFileCard(
     entry: WorkspaceFileEntry,
+    modifier: Modifier,
     onOpen: () -> Unit,
     onDelete: () -> Unit,
     onExport: () -> Unit,
@@ -693,7 +705,7 @@ private fun WorkspaceFileCard(
     var menuExpanded by remember { mutableStateOf(false) }
 
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .clickable(onClick = onOpen),
         colors = CustomColors.cardColorsOnSurfaceContainer,

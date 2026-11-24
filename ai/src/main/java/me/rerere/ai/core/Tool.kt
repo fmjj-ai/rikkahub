@@ -2,6 +2,8 @@ package me.rerere.ai.core
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.EncodeDefault
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import me.rerere.ai.provider.Model
@@ -25,5 +27,8 @@ sealed class InputSchema {
     data class Obj(
         val properties: JsonObject,
         val required: List<String>? = null,
+        @OptIn(ExperimentalSerializationApi::class)
+        @EncodeDefault(EncodeDefault.Mode.NEVER)
+        val additionalProperties: Boolean? = null,
     ) : InputSchema()
 }

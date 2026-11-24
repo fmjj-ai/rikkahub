@@ -223,7 +223,7 @@ private fun AppSearchSettings(
             IconButton(
                 onClick = {
                     onDismiss()
-                    navBackStack.navigate(Screen.SettingSearch)
+                    navBackStack.navigateWithoutAnchor(Screen.SettingSearch)
                 }
             ) {
                 Icon(HugeIcons.Settings03, null)
@@ -326,21 +326,18 @@ private fun BuiltInSearchSetting(model: Model) {
             Switch(
                 checked = model.tools.contains(BuiltInTools.Search),
                 onCheckedChange = { checked ->
-                    val settings = settingsStore.settingsFlow.value
-                    scope.launch {
-                        settingsStore.update(
-                            settings.copy(
-                                providers = settings.providers.map { providerSetting ->
-                                    providerSetting.editModel(
-                                        model.copy(
-                                            tools = if (checked) model.tools + BuiltInTools.Search else model.tools - BuiltInTools.Search
-                                        )
-                                    )
-                                }
+                scope.launch {
+                    settingsStore.update { latest ->
+                        latest.copy(providers = latest.providers.map { provider ->
+                            val currentModel = provider.models.firstOrNull { it.id == model.id }
+                            if (currentModel == null) provider else provider.editModel(
+                                currentModel.copy(tools = if (checked) currentModel.tools + BuiltInTools.Search
+                                    else currentModel.tools - BuiltInTools.Search),
                             )
-                        )
+                        })
                     }
                 }
+            }
             )
         }
     }

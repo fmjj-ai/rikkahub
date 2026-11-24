@@ -160,7 +160,7 @@ fun SettingThemePage(vm: SettingVM = koinViewModel()) {
                                 themeId = settings.themeId,
                                 modifier = Modifier.fillMaxWidth(),
                                 onChangeTheme = {
-                                    vm.updateSettings(settings.copy(themeId = it))
+                                    vm.updateSettings { latest -> latest.copy(themeId = it) }
                                 }
                             )
                         }
@@ -224,7 +224,7 @@ fun SettingThemePage(vm: SettingVM = koinViewModel()) {
                         theme = theme,
                         isSelected = settings.themeId == theme.id,
                         onSelect = {
-                            vm.updateSettings(settings.copy(themeId = theme.id))
+                            vm.updateSettings { latest -> latest.copy(themeId = theme.id) }
                         },
                         onExport = {
                             val json = themeJson.encodeToString(theme)
@@ -253,17 +253,15 @@ fun SettingThemePage(vm: SettingVM = koinViewModel()) {
             theme = editingTheme,
             onDismiss = { showEditSheet = false },
             onSave = { theme ->
-                val newThemes = if (editingTheme != null) {
-                    settings.customThemes.map { if (it.id == theme.id) theme else it }
-                } else {
-                    settings.customThemes + theme
-                }
-                vm.updateSettings(
-                    settings.copy(
-                        customThemes = newThemes,
-                        themeId = theme.id
+                val isEditing = editingTheme != null
+                vm.updateSettings { latest ->
+                    if (isEditing && latest.customThemes.none { it.id == theme.id }) latest
+                    else latest.copy(
+                        customThemes = if (isEditing) latest.customThemes.map { if (it.id == theme.id) theme else it }
+                            else latest.customThemes + theme,
+                        themeId = theme.id,
                     )
-                )
+                }
                 showEditSheet = false
             }
         )
@@ -274,12 +272,9 @@ fun SettingThemePage(vm: SettingVM = koinViewModel()) {
             onDismiss = { showImportDialog = false },
             onImport = { theme ->
                 val importedTheme = theme.copy(id = Uuid.random().toString())
-                vm.updateSettings(
-                    settings.copy(
-                        customThemes = settings.customThemes + importedTheme,
-                        themeId = importedTheme.id
-                    )
-                )
+                vm.updateSettings { latest ->
+                    latest.copy(customThemes = latest.customThemes + importedTheme, themeId = importedTheme.id)
+                }
                 showImportDialog = false
                 toaster.show(importSuccessMsg, type = ToastType.Success)
             }
@@ -292,13 +287,16 @@ fun SettingThemePage(vm: SettingVM = koinViewModel()) {
         confirmText = stringResource(android.R.string.ok),
         dismissText = stringResource(android.R.string.cancel),
         onConfirm = {
-            deletingTheme?.let { theme ->
-                val newThemes = settings.customThemes.filter { it.id != theme.id }
-                val newThemeId = if (settings.themeId == theme.id) "sakura" else settings.themeId
-                vm.updateSettings(settings.copy(customThemes = newThemes, themeId = newThemeId))
-            }
-            deletingTheme = null
-        },
+                deletingTheme?.let { theme ->
+                    vm.updateSettings { latest ->
+                        latest.copy(
+                            customThemes = latest.customThemes.filterNot { it.id == theme.id },
+                            themeId = if (latest.themeId == theme.id) "sakura" else latest.themeId,
+                        )
+                    }
+                }
+                deletingTheme = null
+            },
         onDismiss = { deletingTheme = null },
         text = {
             Text(stringResource(R.string.setting_theme_page_delete_theme_message))

@@ -179,12 +179,16 @@ private fun ProviderMergeConfirm(
         }
     }
 
-    val merged = plan.merged(selections)
+    val mergeResult = runCatching { plan.merged(selections) }
+    val merged = mergeResult.getOrNull()
+    mergeResult.exceptionOrNull()?.let {
+        Text(it.message ?: "模型配置冲突，不能合并", color = MaterialTheme.colorScheme.error)
+    }
     Text(
         text = stringResource(
             R.string.setting_provider_page_merge_summary,
             group.size,
-            merged.models.size,
+            merged?.models?.size ?: 0,
             group.size - 1,
         ),
         style = MaterialTheme.typography.bodySmall,
@@ -196,8 +200,9 @@ private fun ProviderMergeConfirm(
         horizontalArrangement = Arrangement.End,
     ) {
         TextButton(
+            enabled = merged != null,
             onClick = {
-                onMerge(primary, others, merged)
+                merged?.let { onMerge(primary, others, it) }
             },
         ) {
             Text(stringResource(R.string.setting_provider_page_merge_confirm))
@@ -206,6 +211,7 @@ private fun ProviderMergeConfirm(
 }
 
 private fun ProviderSetting.mergeProtocols(): List<ProviderProtocol> = when (this) {
+    is ProviderSetting.Account -> emptyList()
     is ProviderSetting.MultiProtocol -> configuredProtocols()
     is ProviderSetting.OpenAI -> listOf(ProviderProtocol.OPENAI)
     is ProviderSetting.Google -> listOf(ProviderProtocol.GOOGLE)

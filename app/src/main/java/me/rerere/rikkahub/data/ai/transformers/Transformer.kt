@@ -39,6 +39,12 @@ interface InputMessageTransformer : MessageTransformer
 
 interface OutputMessageTransformer : MessageTransformer {
     /**
+     * 仅声明 transform/visualTransform 在固定上下文和当前展示阶段内可逐消息、一入一出地计算。
+     * 不得依赖列表顺序或其他消息；完成阶段永不使用此缓存。未知实现默认整批处理。
+     */
+    val supportsSingleMessageProjection: Boolean get() = false
+
+    /**
      * 一个视觉的转换，例如转换think tag为reasoning parts
      * 但是不实际转换消息，因为流式输出需要处理消息delta chunk
      * 不能还没结束生成就transform，因此提供一个visualTransform

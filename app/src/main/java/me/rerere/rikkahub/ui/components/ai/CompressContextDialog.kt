@@ -38,7 +38,7 @@ fun CompressContextDialog(
 ) {
     var additionalPrompt by remember { mutableStateOf("") }
     var selectedTokens by remember { mutableIntStateOf(2000) }
-    var keepRecentMessages by remember { mutableIntStateOf(32) }
+    var keepRecentMessages by remember { mutableIntStateOf(0) }
     val tokenOptions = listOf(500, 1000, 2000, 4000)
     var currentJob by remember { mutableStateOf<Job?>(null) }
     val isLoading = currentJob?.isActive == true
@@ -106,9 +106,15 @@ fun CompressContextDialog(
                     // Keep recent messages input
                     OutlinedNumberInput(
                         value = keepRecentMessages,
-                        onValueChange = { keepRecentMessages = it },
+                        onValueChange = { keepRecentMessages = it.coerceAtLeast(0) },
                         label = stringResource(R.string.chat_page_compress_keep_recent),
                         modifier = Modifier.fillMaxWidth(),
+                    )
+
+                    Text(
+                        "0 表示压缩全部活动上下文；大于 0 时按完整用户轮次保留最近消息。",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
 
                     // Additional context input
@@ -127,7 +133,7 @@ fun CompressContextDialog(
 
                     // Warning text
                     Text(
-                        text = stringResource(R.string.chat_page_compress_warning),
+                        text = "原始记录和分支保留，摘要用于后续请求。正常使用聊天模型；发送前判断超预算时使用分块备用路径。",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.error
                     )

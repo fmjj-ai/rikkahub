@@ -32,6 +32,7 @@ import org.koin.compose.koinInject
 @Composable
 fun ImagePreviewDialog(
     images: List<String>,
+    showSaveAction: Boolean = true,
     onDismissRequest: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -56,7 +57,7 @@ fun ImagePreviewDialog(
                 },
             )
 
-            Row(
+            if (showSaveAction) Row(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .zIndex(1f)

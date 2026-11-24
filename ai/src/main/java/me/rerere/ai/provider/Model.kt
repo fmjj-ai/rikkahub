@@ -36,6 +36,18 @@ data class Model(
 const val DEFAULT_CONTEXT_WINDOW_TOKENS = 1_000_000
 const val DEFAULT_AUTO_COMPRESS_THRESHOLD_TOKENS = 472_000
 
+/** 官方多关键词搜索：每个关键词均须命中模型 ID 或显示名，顺序与大小写不限。 */
+fun List<Model>.filterByKeywords(query: String): List<Model> {
+    val keywords = query.split(" ").filter { it.isNotBlank() }
+    if (keywords.isEmpty()) return this
+    return filter { model ->
+        keywords.all { keyword ->
+            model.modelId.contains(keyword, ignoreCase = true) ||
+                model.displayName.contains(keyword, ignoreCase = true)
+        }
+    }
+}
+
 @Serializable
 enum class ModelType {
     CHAT,

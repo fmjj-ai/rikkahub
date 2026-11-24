@@ -1,5 +1,8 @@
 package me.rerere.rikkahub.ui.pages.assistant.detail
 
+import me.rerere.rikkahub.data.datastore.cleanupAssistantTags
+import me.rerere.rikkahub.data.datastore.updateAssistantTags
+import me.rerere.rikkahub.data.datastore.updateAssistant
 import android.util.Log
 import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
@@ -60,10 +63,11 @@ class AssistantDetailVM(
 
     val assistant: StateFlow<Assistant> = settingsStore
         .settingsFlow
-        .map { settings ->
-            settings.assistants.find { it.id == assistantId } ?: Assistant()
-        }.stateIn(
-            scope = viewModelScope, started = SharingStarted.Eagerly, initialValue = Assistant()
+        .map { settings -> resolveDetailAssistant(settings, assistantId) }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Eagerly,
+            initialValue = resolveDetailAssistant(settingsStore.settingsFlow.value, assistantId),
         )
 
     val memories = assistant
@@ -102,79 +106,22 @@ class AssistantDetailVM(
             initialValue = emptyList(),
         )
 
-    fun updateTags(tagIds: List<Uuid>, tags: List<Tag>) {
+    fun updateTags(transform: (List<Uuid>, List<Tag>) -> Pair<List<Uuid>, List<Tag>>) {
         viewModelScope.launch {
-            val settings = settings.value
-            settingsStore.update(
-                settings = settings.copy(
-                    assistantTags = tags
-                )
-            )
-            update(
-                assistant.value.copy(
-                    tags = tagIds.toList()
-                )
-            )
-            Log.d(TAG, "updateTags: ${tagIds.joinToString(",")}")
-            cleanupUnusedTags()
+            settingsStore.update { it.updateAssistantTags(assistantId, transform) }
         }
     }
 
     fun cleanupUnusedTags() {
-        viewModelScope.launch {
-            val settings = settings.value
-            val validTagIds = settings.assistantTags.map { it.id }.toSet()
-
-            // 清理 assistant 中的无效 tag id
-            val cleanedAssistants = settings.assistants.map { assistant ->
-                val validTags = assistant.tags.filter { tagId ->
-                    validTagIds.contains(tagId)
-                }
-                if (validTags.size != assistant.tags.size) {
-                    assistant.copy(tags = validTags)
-                } else {
-                    assistant
-                }
-            }
-
-            // 获取清理后的 assistant 中使用的 tag id
-            val usedTagIds = cleanedAssistants.flatMap { it.tags }.toSet()
-
-            // 清理未使用的 tags
-            val cleanedTags = settings.assistantTags.filter { tag ->
-                usedTagIds.contains(tag.id)
-            }
-
-            // 检查是否需要更新
-            val needUpdateAssistants = cleanedAssistants != settings.assistants
-            val needUpdateTags = cleanedTags.size != settings.assistantTags.size
-
-            if (needUpdateAssistants || needUpdateTags) {
-                settingsStore.update(
-                    settings = settings.copy(
-                        assistants = cleanedAssistants,
-                        assistantTags = cleanedTags
-                    )
-                )
-            }
-        }
+        viewModelScope.launch { settingsStore.update { it.cleanupAssistantTags() } }
     }
 
-    fun update(assistant: Assistant) {
+    fun update(transform: (Assistant) -> Assistant) {
         viewModelScope.launch {
-            val settings = settings.value
-            settingsStore.update(
-                settings = settings.copy(
-                    assistants = settings.assistants.map {
-                        if (it.id == assistant.id) {
-                            checkAvatarDelete(old = it, new = assistant) // 删除旧头像
-                            checkBackgroundDelete(old = it, new = assistant) // 删除旧背景
-                            assistant
-                        } else {
-                            it
-                        }
-                    })
-            )
+            settingsStore.updateWithAppearanceCleanup(
+                fileIdentity = filesManager::canonicalOwnedFileUrl,
+                deleteFiles = { urls -> filesManager.deleteChatFiles(urls.map { it.toUri() }) },
+            ) { latest -> latest.updateAssistant(assistantId, transform) }
         }
     }
 
@@ -204,25 +151,11 @@ class AssistantDetailVM(
         }
     }
 
-    fun checkAvatarDelete(old: Assistant, new: Assistant) {
-        if (old.avatar is Avatar.Image && old.avatar != new.avatar) {
-            filesManager.deleteChatFiles(listOf(old.avatar.url.toUri()))
-        }
-    }
 
-    fun checkBackgroundDelete(old: Assistant, new: Assistant) {
-        val oldBackground = old.background
-        val newBackground = new.background
 
-        if (oldBackground != null && oldBackground != newBackground) {
-            try {
-                val oldUri = oldBackground.toUri()
-                if (oldUri.scheme == "content" || oldUri.scheme == "file") {
-                    filesManager.deleteChatFiles(listOf(oldUri))
-                }
-            } catch (e: Exception) {
-                Log.w(TAG, "Failed to delete background file: $oldBackground", e)
-            }
-        }
-    }
+
 }
+
+/** 首帧优先复用内存配置；缺失时仍保留路由 ID，避免共享头像 key 随机变化。 */
+internal fun resolveDetailAssistant(settings: Settings, assistantId: Uuid): Assistant =
+    settings.assistants.find { it.id == assistantId } ?: Assistant(id = assistantId)

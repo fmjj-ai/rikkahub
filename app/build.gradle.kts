@@ -24,8 +24,8 @@ android {
         applicationId = "me.rerere.rikkahub"
         minSdk = 26
         targetSdk = 37
-        versionCode = 2026092701
-        versionName = "2.4.3-english-v16"
+        versionCode = 2026111601
+        versionName = "2.4.3-english-v18"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -92,6 +92,18 @@ android {
             buildConfigField("String", "VERSION_CODE", "\"${android.defaultConfig.versionCode}\"")
         }
     }
+    flavorDimensions += "distribution"
+    productFlavors {
+        create("github") {
+            dimension = "distribution"
+            isDefault = true
+            buildConfigField("boolean", "IS_PLAY_STORE", "false")
+        }
+        create("play") {
+            dimension = "distribution"
+            buildConfigField("boolean", "IS_PLAY_STORE", "true")
+        }
+    }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -103,8 +115,16 @@ android {
     sourceSets {
         getByName("androidTest").assets.srcDirs("$projectDir/schemas")
     }
+    testOptions {
+        unitTests.all {
+            // JVM 回归中的本机 Ktor 服务不应加载需要 Android Log 的运行时日志绑定。
+            it.systemProperty("slf4j.provider", "org.slf4j.helpers.NOP_FallbackServiceProvider")
+        }
+    }
     androidResources {
         generateLocaleConfig = true
+        // 三张历史 banner 没有运行时引用，保留源码但不带入安装包。
+        ignoreAssetsPatterns += "banner"
     }
     packaging {
         jniLibs {
@@ -133,7 +153,7 @@ composeCompiler {
 }
 
 tasks.register("buildAll") {
-    dependsOn("assembleRelease", "bundleRelease")
+    dependsOn("assembleGithubRelease", "bundlePlayRelease")
     description = "Build both APK and AAB"
 }
 
@@ -211,8 +231,7 @@ dependencies {
     implementation(libs.ktor.client.content.negotiation)
     implementation(libs.ktor.serialization.kotlinx.json)
 
-    // ucrop
-    implementation(libs.ucrop)
+    implementation(libs.androidx.exifinterface)
 
     // pebble (template engine)
     implementation(libs.pebble)
@@ -229,14 +248,20 @@ dependencies {
 
     // serialization
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.exp4j)
 
     // zxing
     implementation(libs.zxing.core)
 
-    // quickie (qrcode scanner)
-    implementation(libs.quickie.bundled)
-    implementation(libs.barcode.scanning)
+    // 扫码复用 ZXing 和 CameraX，避免捆绑额外原生库及识别模型。
     implementation(libs.androidx.camera.core)
+    implementation(libs.androidx.camera.camera2)
+    implementation(libs.androidx.camera.lifecycle)
+    implementation(libs.androidx.camera.view)
+    constraints {
+        implementation("com.google.guava:guava:33.3.1-android")
+        implementation("com.google.errorprone:error_prone_annotations:2.36.0")
+    }
 
     // Room
     implementation(libs.androidx.room.runtime)
@@ -286,6 +311,7 @@ dependencies {
 
     // modules
     implementation(project(":ai"))
+    implementation(project(":mediagen"))
     implementation(project(":web"))
     implementation(project(":document"))
     implementation(project(":highlight"))
@@ -294,6 +320,7 @@ dependencies {
     implementation(project(":common"))
     implementation(project(":material3"))
     implementation(project(":workspace"))
+    implementation(project(":oauth"))
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar", "*.aar"))))
     implementation(kotlin("reflect"))
 
@@ -302,6 +329,7 @@ dependencies {
 
     // tests
     testImplementation(libs.junit)
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test-jvm:1.11.0")
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))

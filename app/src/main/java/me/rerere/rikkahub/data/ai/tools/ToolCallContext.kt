@@ -12,6 +12,9 @@ import kotlin.coroutines.CoroutineContext
  * 需要关联信息的工具（如生图）用 `currentCoroutineContext()[ToolCallContext]?.toolCallId` 取出即可，
  * 其他工具完全不受影响。
  */
-class ToolCallContext(val toolCallId: String) : AbstractCoroutineContextElement(ToolCallContext) {
+class ToolCallContext(
+    val toolCallId: String,
+    val messages: List<me.rerere.ai.ui.UIMessage> = emptyList(),
+) : AbstractCoroutineContextElement(ToolCallContext) {
     companion object Key : CoroutineContext.Key<ToolCallContext>
 }

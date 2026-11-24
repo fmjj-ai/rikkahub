@@ -14,6 +14,7 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
 import me.rerere.ai.core.InputSchema
+import me.rerere.common.http.awaitText
 import me.rerere.search.SearchResult.SearchResultItem
 import me.rerere.search.SearchService.Companion.httpClient
 import me.rerere.search.SearchService.Companion.json
@@ -63,7 +64,7 @@ object TinyfishSearchService : SearchService<SearchServiceOptions.TinyfishOption
         commonOptions: SearchCommonOptions,
         serviceOptions: SearchServiceOptions.TinyfishOptions
     ): Result<SearchResult> = withContext(Dispatchers.IO) {
-        runCatching {
+        runSearchCatching {
             val query = params["query"]?.jsonPrimitive?.content ?: error("query is required")
             val url = "https://api.search.tinyfish.ai" +
                     "?query=${java.net.URLEncoder.encode(query, "UTF-8")}"
@@ -73,9 +74,9 @@ object TinyfishSearchService : SearchService<SearchServiceOptions.TinyfishOption
                 .addHeader("X-API-Key", serviceOptions.apiKey)
                 .build()
 
-            val response = httpClient.newCall(request).await()
+            val response = httpClient.newCall(request).awaitText()
             if (response.isSuccessful) {
-                val responseBody = response.body.string()
+                val responseBody = response.body
                 val searchResponse = json.decodeFromString<TinyfishSearchResponse>(responseBody)
 
                 val items = searchResponse.results.map { result ->
@@ -103,7 +104,7 @@ object TinyfishSearchService : SearchService<SearchServiceOptions.TinyfishOption
         commonOptions: SearchCommonOptions,
         serviceOptions: SearchServiceOptions.TinyfishOptions
     ): Result<ScrapedResult> = withContext(Dispatchers.IO) {
-        runCatching {
+        runSearchCatching {
             val url = params["url"]?.jsonPrimitive?.content ?: error("url is required")
             val body = buildJsonObject {
                 put("urls", kotlinx.serialization.json.buildJsonArray {
@@ -118,9 +119,9 @@ object TinyfishSearchService : SearchService<SearchServiceOptions.TinyfishOption
                 .addHeader("X-API-Key", serviceOptions.apiKey)
                 .build()
 
-            val response = httpClient.newCall(request).await()
+            val response = httpClient.newCall(request).awaitText()
             if (response.isSuccessful) {
-                val responseBody = response.body.string()
+                val responseBody = response.body
                 val fetchResponse = json.decodeFromString<TinyfishFetchResponse>(responseBody)
 
                 return@withContext Result.success(

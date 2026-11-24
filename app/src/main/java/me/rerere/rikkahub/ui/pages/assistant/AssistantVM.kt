@@ -24,62 +24,43 @@ class AssistantVM(
     val settings: StateFlow<Settings> = settingsStore.settingsFlow
         .stateIn(viewModelScope, SharingStarted.Eagerly, Settings.dummy())
 
-    fun updateSettings(settings: Settings) {
+    fun updateSettings(update: (Settings) -> Settings) {
         viewModelScope.launch {
-            settingsStore.update(settings)
+            settingsStore.updateWithAppearanceCleanup(
+                fileIdentity = filesManager::canonicalOwnedFileUrl,
+                deleteFiles = { urls -> filesManager.deleteChatFiles(urls.map { it.toUri() }) },
+                fn = update,
+            )
         }
     }
 
     fun addAssistant(assistant: Assistant) {
-        viewModelScope.launch {
-            val settings = settings.value
-            settingsStore.update(
-                settings.copy(
-                    assistants = settings.assistants.plus(assistant)
-                )
-            )
-        }
+        updateSettings { it.copy(assistants = it.assistants + assistant) }
     }
 
     fun removeAssistant(assistant: Assistant) {
         viewModelScope.launch {
-            cleanupAssistantFiles(assistant)
-
-            val settings = settings.value
-            settingsStore.update(
-                settings.copy(
-                    assistants = settings.assistants.filter { it.id != assistant.id }
-                )
-            )
+            settingsStore.updateWithAppearanceCleanup(
+                fileIdentity = filesManager::canonicalOwnedFileUrl,
+                deleteFiles = { urls -> filesManager.deleteChatFiles(urls.map { it.toUri() }) },
+            ) { latest -> latest.copy(assistants = latest.assistants.filterNot { it.id == assistant.id }) }
             memoryRepository.deleteMemoriesOfAssistant(assistant.id.toString())
             conversationRepo.deleteConversationOfAssistant(assistant.id)
         }
     }
 
-    private fun cleanupAssistantFiles(assistant: Assistant) {
-        val uris = buildList {
-            (assistant.avatar as? Avatar.Image)?.let { add(it.url.toUri()) }
-            assistant.background?.let { add(it.toUri()) }
-        }
 
-        if (uris.isNotEmpty()) {
-            filesManager.deleteChatFiles(uris)
-        }
-    }
 
     fun copyAssistant(assistant: Assistant) {
-        viewModelScope.launch {
-            val settings = settings.value
-            val copiedAssistant = assistant.copy(
-                id = kotlin.uuid.Uuid.random(),
-                name = "${assistant.name} (Clone)",
-                avatar = if(assistant.avatar is Avatar.Image) Avatar.Dummy else assistant.avatar,
+        val copiedId = kotlin.uuid.Uuid.random()
+        updateSettings { latest ->
+            val current = latest.assistants.find { it.id == assistant.id } ?: return@updateSettings latest
+            val copied = current.copy(
+                id = copiedId,
+                name = current.name + " (Clone)",
+                avatar = if (current.avatar is Avatar.Image) Avatar.Dummy else current.avatar,
             )
-            settingsStore.update(
-                settings.copy(
-                    assistants = settings.assistants.plus(copiedAssistant)
-                )
-            )
+            latest.copy(assistants = latest.assistants + copied)
         }
     }
 

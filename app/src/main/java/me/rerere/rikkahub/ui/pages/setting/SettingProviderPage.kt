@@ -56,25 +56,27 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dokar.sonner.ToastType
-import io.github.g00fy2.quickie.QRResult
-import io.github.g00fy2.quickie.ScanQRCode
+import me.rerere.rikkahub.ui.components.ui.QRCodeScannerDialog
 import me.rerere.ai.provider.ProviderSetting
 import me.rerere.rikkahub.R
 import me.rerere.rikkahub.Screen
 import me.rerere.rikkahub.data.datastore.DEFAULT_PROVIDERS
+import me.rerere.rikkahub.data.datastore.moveById
+import me.rerere.rikkahub.data.datastore.mergeUrlIdentity
+import me.rerere.rikkahub.data.datastore.applyProviderMerge
 import me.rerere.rikkahub.data.datastore.mergeBaseUrl
 import me.rerere.rikkahub.ui.components.nav.BackButton
 import me.rerere.rikkahub.ui.components.ui.AutoAIIcon
 import me.rerere.rikkahub.ui.components.ui.Tag
 import me.rerere.rikkahub.ui.components.ui.TagType
 import me.rerere.rikkahub.ui.components.ui.decodeProviderSetting
+import me.rerere.rikkahub.ui.components.nav.navigationSource
 import me.rerere.rikkahub.ui.context.LocalNavController
 import me.rerere.rikkahub.ui.context.LocalToaster
 import me.rerere.rikkahub.ui.hooks.useEditState
@@ -84,6 +86,8 @@ import me.rerere.rikkahub.ui.theme.CustomColors
 import me.rerere.rikkahub.utils.ImageUtils
 import me.rerere.rikkahub.utils.plus
 import org.koin.androidx.compose.koinViewModel
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 import kotlin.uuid.Uuid
@@ -92,6 +96,7 @@ import kotlin.uuid.Uuid
 fun SettingProviderPage(vm: SettingVM = koinViewModel()) {
     val settings by vm.settings.collectAsStateWithLifecycle()
     val navController = LocalNavController.current
+    val scope = rememberCoroutineScope()
     val toaster = LocalToaster.current
     val context = LocalContext.current
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
@@ -102,7 +107,7 @@ fun SettingProviderPage(vm: SettingVM = koinViewModel()) {
         settings.providers
             .filter { !it.builtIn }
             .filter { it.mergeBaseUrl().isNotBlank() }
-            .groupBy { it.mergeBaseUrl().trim().trimEnd('/').lowercase() }
+            .groupBy { it.mergeUrlIdentity() }
             .values
             .filter { it.size > 1 }
             .toList()
@@ -131,13 +136,8 @@ fun SettingProviderPage(vm: SettingVM = koinViewModel()) {
     val reorderableState = rememberReorderableLazyListState(lazyListState) { from, to ->
         val fromId = filteredProviders.getOrNull(from.index)?.id
         val toId = filteredProviders.getOrNull(to.index)?.id
-        val fromIndex = fromId?.let { id -> settings.providers.indexOfFirst { it.id == id } } ?: -1
-        val toIndex = toId?.let { id -> settings.providers.indexOfFirst { it.id == id } } ?: -1
-        if (fromIndex >= 0 && toIndex >= 0) {
-            val newProviders = settings.providers.toMutableList().apply {
-                add(toIndex, removeAt(fromIndex))
-            }
-            vm.updateSettings(settings.copy(providers = newProviders))
+        vm.updateSettings { latest ->
+            latest.copy(providers = latest.providers.moveById(fromId, toId) { it.id })
         }
     }
 
@@ -151,19 +151,12 @@ fun SettingProviderPage(vm: SettingVM = koinViewModel()) {
                     BackButton()
                 },
                 actions = {
-                    ImportProviderButton {
-                        vm.updateSettings(
-                            settings.copy(
-                                providers = listOf(it.copyProvider(Uuid.random())) + settings.providers
-                            )
-                        )
+                    ImportProviderButton { imported ->
+                        val added = imported.copyProvider(Uuid.random())
+                        vm.updateSettings { latest -> latest.copy(providers = listOf(added) + latest.providers) }
                     }
-                    AddButton {
-                        vm.updateSettings(
-                            settings.copy(
-                                providers = listOf(it) + settings.providers
-                            )
-                        )
+                    AddButton { added ->
+                        vm.updateSettings { latest -> latest.copy(providers = listOf(added) + latest.providers) }
                     }
                 },
                 scrollBehavior = scrollBehavior,
@@ -247,9 +240,11 @@ fun SettingProviderPage(vm: SettingVM = koinViewModel()) {
                         state = reorderableState,
                         key = provider.id
                     ) { isDragging ->
+                        val detail = Screen.SettingProviderDetail(provider.id.toString())
                         ProviderItem(
                             modifier = Modifier
                                 .scale(if (isDragging) 0.95f else 1f)
+                                .navigationSource(detail)
                                 .fillMaxWidth(),
                             provider = provider,
                             dragHandle = {
@@ -273,7 +268,7 @@ fun SettingProviderPage(vm: SettingVM = koinViewModel()) {
                                 }
                             },
                             onClick = {
-                                navController.navigate(Screen.SettingProviderDetail(providerId = provider.id.toString()))
+                                navController.navigate(detail)
                             }
                         )
                     }
@@ -287,16 +282,17 @@ fun SettingProviderPage(vm: SettingVM = koinViewModel()) {
             groups = mergeGroups,
             onDismiss = { showMergeSheet = false },
             onMerge = { primary, others, merged ->
-                val otherIds = others.map { it.id }.toSet()
-                val newProviders = settings.providers
-                    .map { if (it.id == primary.id) merged else it }
-                    .filter { it.id !in otherIds }
-                vm.updateSettings(settings.copy(providers = newProviders))
-                showMergeSheet = false
-                toaster.show(
-                    context.getString(R.string.setting_provider_page_merge_success),
-                    type = ToastType.Success
-                )
+                scope.launch {
+                    try {
+                        vm.saveSettings { latest -> latest.applyProviderMerge(primary, others, merged) }
+                        showMergeSheet = false
+                        toaster.show(context.getString(R.string.setting_provider_page_merge_success), type = ToastType.Success)
+                    } catch (e: kotlinx.coroutines.CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        toaster.show(e.message ?: "合并失败", type = ToastType.Error)
+                    }
+                }
             }
         )
     }
@@ -310,8 +306,27 @@ private fun ImportProviderButton(
     val context = LocalContext.current
     var showImportDialog by remember { mutableStateOf(false) }
 
-    val scanQrCodeLauncher = rememberLauncherForActivityResult(ScanQRCode()) { result ->
-        handleQRResult(result, onAdd, toaster, context)
+    var showScanner by remember { mutableStateOf(false) }
+    if (showScanner) {
+        QRCodeScannerDialog(
+            onResult = { text ->
+                showScanner = false
+                runCatching { onAdd(decodeProviderSetting(text)) }
+                    .onSuccess {
+                        toaster.show(context.getString(R.string.setting_provider_page_import_success), ToastType.Success)
+                    }.onFailure {
+                        toaster.show(
+                            context.getString(R.string.setting_provider_page_qr_decode_failed, it.message ?: ""),
+                            ToastType.Error,
+                        )
+                    }
+            },
+            onPermissionDenied = {
+                showScanner = false
+                toaster.show(context.getString(R.string.setting_provider_page_no_permission), ToastType.Error)
+            },
+            onDismissRequest = { showScanner = false },
+        )
     }
 
     val pickImageLauncher = rememberLauncherForActivityResult(
@@ -357,7 +372,7 @@ private fun ImportProviderButton(
                         Button(
                             onClick = {
                                 showImportDialog = false
-                                scanQrCodeLauncher.launch(null)
+                                showScanner = true
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -433,49 +448,6 @@ private fun ImportProviderButton(
     }
 }
 
-private fun handleQRResult(
-    result: QRResult,
-    onAdd: (ProviderSetting) -> Unit,
-    toaster: com.dokar.sonner.ToasterState,
-    context: android.content.Context
-) {
-    runCatching {
-        when (result) {
-            is QRResult.QRError -> {
-                toaster.show(
-                    context.getString(
-                        R.string.setting_provider_page_scan_error,
-                        result
-                    ), type = ToastType.Error
-                )
-            }
-
-            QRResult.QRMissingPermission -> {
-                toaster.show(
-                    context.getString(R.string.setting_provider_page_no_permission),
-                    type = ToastType.Error
-                )
-            }
-
-            is QRResult.QRSuccess -> {
-                val setting = decodeProviderSetting(result.content.rawValue ?: "")
-                onAdd(setting)
-                toaster.show(
-                    context.getString(R.string.setting_provider_page_import_success),
-                    type = ToastType.Success
-                )
-            }
-
-            QRResult.QRUserCanceled -> {}
-        }
-    }.onFailure { error ->
-        toaster.show(
-            context.getString(R.string.setting_provider_page_qr_decode_failed, error.message ?: ""),
-            type = ToastType.Error
-        )
-    }
-}
-
 private fun handleImageQRCode(
     uri: Uri,
     onAdd: (ProviderSetting) -> Unit,
@@ -511,22 +483,38 @@ private fun handleImageQRCode(
 
 @Composable
 private fun AddButton(onAdd: (ProviderSetting) -> Unit) {
+    var chooseType by remember { mutableStateOf(false) }
     val dialogState = useEditState<ProviderSetting> {
         onAdd(it)
     }
 
     IconButton(
         onClick = {
-            dialogState.open(
-                ProviderSetting.MultiProtocol(
-                    name = "",
-                    baseUrl = "",
-                    openai = ProviderSetting.OpenAI(apiKey = "", baseUrl = ""),
-                )
-            )
+            chooseType = true
         }
     ) {
         Icon(HugeIcons.Add01, "Add")
+    }
+
+    if (chooseType) {
+        AlertDialog(
+            onDismissRequest = { chooseType = false },
+            title = { Text("添加提供商") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    TextButton(onClick = {
+                        chooseType = false
+                        dialogState.open(ProviderSetting.MultiProtocol(name = "", baseUrl = "",
+                            openai = ProviderSetting.OpenAI(apiKey = "", baseUrl = "")))
+                    }) { Text("API Key / 多协议提供商") }
+                    TextButton(onClick = {
+                        chooseType = false
+                        dialogState.open(ProviderSetting.ChatGPT())
+                    }) { Text("ChatGPT · 账号登录") }
+                }
+            },
+            confirmButton = { TextButton(onClick = { chooseType = false }) { Text("取消") } },
+        )
     }
 
     if (dialogState.isEditing) {

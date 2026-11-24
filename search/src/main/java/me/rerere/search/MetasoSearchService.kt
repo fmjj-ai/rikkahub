@@ -15,6 +15,7 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
 import me.rerere.ai.core.InputSchema
+import me.rerere.common.http.awaitText
 import me.rerere.search.SearchResult.SearchResultItem
 import me.rerere.search.SearchService.Companion.httpClient
 import me.rerere.search.SearchService.Companion.json
@@ -53,7 +54,7 @@ object MetasoSearchService : SearchService<SearchServiceOptions.MetasoOptions> {
         commonOptions: SearchCommonOptions,
         serviceOptions: SearchServiceOptions.MetasoOptions
     ): Result<SearchResult> = withContext(Dispatchers.IO) {
-        runCatching {
+        runSearchCatching {
             val query = params["query"]?.jsonPrimitive?.content ?: error("query is required")
 
             val requestBody = buildJsonObject {
@@ -71,9 +72,9 @@ object MetasoSearchService : SearchService<SearchServiceOptions.MetasoOptions> {
                 .addHeader("Content-Type", "application/json")
                 .build()
 
-            val response = httpClient.newCall(request).await()
+            val response = httpClient.newCall(request).awaitText()
             if (response.isSuccessful) {
-                val bodyRaw = response.body?.string() ?: error("Failed to get response body")
+                val bodyRaw = response.body
                 val searchResponse = runCatching {
                     json.decodeFromString<MetasoSearchResponse>(bodyRaw)
                 }.onFailure {
@@ -94,7 +95,7 @@ object MetasoSearchService : SearchService<SearchServiceOptions.MetasoOptions> {
                     )
                 )
             } else {
-                val errorBody = response.body?.string()
+                val errorBody = response.body
                 println("Metaso search failed with code ${response.code}: $errorBody")
                 error("Search request failed with code ${response.code}: $errorBody")
             }

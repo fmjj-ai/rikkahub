@@ -13,6 +13,7 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
 import me.rerere.ai.core.InputSchema
+import me.rerere.common.http.awaitText
 import me.rerere.search.SearchResult.SearchResultItem
 import me.rerere.search.SearchService.Companion.httpClient
 import me.rerere.search.SearchService.Companion.json
@@ -55,7 +56,7 @@ object SerperSearchService : SearchService<SearchServiceOptions.SerperOptions> {
         commonOptions: SearchCommonOptions,
         serviceOptions: SearchServiceOptions.SerperOptions
     ): Result<SearchResult> = withContext(Dispatchers.IO) {
-        runCatching {
+        runSearchCatching {
             val query = params["query"]?.jsonPrimitive?.content ?: error("query is required")
 
             val body = buildJsonObject {
@@ -71,9 +72,9 @@ object SerperSearchService : SearchService<SearchServiceOptions.SerperOptions> {
                 .addHeader("Content-Type", "application/json")
                 .build()
 
-            val response = httpClient.newCall(request).await()
+            val response = httpClient.newCall(request).awaitText()
             if (response.isSuccessful) {
-                val responseBody = response.body.string()
+                val responseBody = response.body
                 val searchResponse = json.decodeFromString<SerperSearchResponse>(responseBody)
 
                 val answer = searchResponse.answerBox?.let { it.answer ?: it.snippet }

@@ -1,5 +1,8 @@
 package me.rerere.rikkahub.ui.pages.chat
 
+import kotlinx.coroutines.flow.first
+
+import me.rerere.rikkahub.data.datastore.updateAssistant
 import android.app.Application
 import android.content.Context
 import androidx.compose.runtime.Composable
@@ -35,6 +38,7 @@ import me.rerere.rikkahub.data.datastore.Settings
 import me.rerere.rikkahub.data.datastore.SettingsStore
 import me.rerere.rikkahub.data.datastore.getCurrentAssistant
 import me.rerere.rikkahub.data.datastore.getCurrentChatModel
+import me.rerere.rikkahub.data.files.FileFolders
 import me.rerere.rikkahub.data.files.FilesManager
 import me.rerere.rikkahub.data.model.Assistant
 import me.rerere.rikkahub.data.model.Avatar
@@ -47,6 +51,8 @@ import me.rerere.rikkahub.service.ChatError
 import me.rerere.rikkahub.service.ChatService
 import me.rerere.rikkahub.ui.hooks.writeStringPreference
 import me.rerere.rikkahub.ui.hooks.ChatInputState
+import me.rerere.rikkahub.utils.isAllowedFileType
+import me.rerere.rikkahub.ui.hooks.DraftAttachmentImporter
 import me.rerere.rikkahub.utils.UiState
 import me.rerere.rikkahub.utils.UpdateChecker
 import java.util.Locale
@@ -67,10 +73,91 @@ class ChatVM(
 ) : ViewModel() {
     private val _conversationId: Uuid = Uuid.parse(id)
     val conversation: StateFlow<Conversation> = chatService.getConversationFlow(_conversationId)
+    val visualizationStore = me.rerere.rikkahub.ui.components.visualization.VizSessionStore()
     var chatListInitialized by mutableStateOf(false) // 聊天列表是否已经滚动到底部
 
     // 聊天输入状态 - 保存在 ViewModel 中避免 TransactionTooLargeException
     val inputState = ChatInputState()
+
+    private val _attachmentImportErrors = kotlinx.coroutines.flow.MutableSharedFlow<String>(extraBufferCapacity = 8)
+    val attachmentImportErrors: SharedFlow<String> = _attachmentImportErrors
+    private val attachmentImporter = DraftAttachmentImporter(
+        state = inputState,
+        scope = viewModelScope,
+        copyImage = { source ->
+            val saved = filesManager.saveManagedFromUri(
+                me.rerere.rikkahub.data.files.FileFolders.UPLOAD, source.toUri())
+            filesManager.getFile(saved).toUri().toString()
+        },
+        discardFile = { url -> withContext(Dispatchers.IO) { filesManager.deleteChatFiles(listOf(url.toUri())) } },
+        onError = { _attachmentImportErrors.tryEmit(it); Unit },
+    )
+
+    fun addGalleryImages(uris: List<android.net.Uri>) = attachmentImporter.add(uris.map { it.toString() })
+
+    fun toggleGalleryImage(uri: android.net.Uri) = attachmentImporter.toggle(uri.toString())
+
+    fun addAttachments(
+        uris: List<android.net.Uri>,
+        kind: ChatAttachmentKind,
+        onImported: (UIMessagePart?) -> Unit = {},
+    ) {
+        uris.forEach { uri ->
+            attachmentImporter.addAttachment(copy = { copyAttachment(uri, kind) }, onImported = onImported)
+        }
+    }
+
+    fun addPastedText(text: String) {
+        attachmentImporter.addAttachment(copy = {
+            val saved = filesManager.saveManagedText(FileFolders.UPLOAD, text)
+            UIMessagePart.Document(
+                url = filesManager.getFile(saved).toUri().toString(),
+                fileName = saved.displayName,
+                mime = saved.mimeType,
+            )
+        })
+    }
+
+    private suspend fun copyAttachment(uri: android.net.Uri, requestedKind: ChatAttachmentKind): UIMessagePart =
+        withContext(Dispatchers.IO) {
+            val name = filesManager.getFileNameFromUri(uri) ?: uri.lastPathSegment ?: "file"
+            val mime = filesManager.getFileMimeType(uri)
+                ?: android.webkit.MimeTypeMap.getSingleton()
+                    .getMimeTypeFromExtension(name.substringAfterLast('.', "").lowercase())
+                ?: if (requestedKind == ChatAttachmentKind.DOCUMENT) "text/plain" else "application/octet-stream"
+            val kind = if (requestedKind == ChatAttachmentKind.AUTO) {
+                when {
+                    mime.startsWith("image/") -> ChatAttachmentKind.IMAGE
+                    mime.startsWith("video/") -> ChatAttachmentKind.VIDEO
+                    mime.startsWith("audio/") -> ChatAttachmentKind.AUDIO
+                    else -> ChatAttachmentKind.DOCUMENT
+                }
+            } else requestedKind
+            if (kind == ChatAttachmentKind.DOCUMENT && !isAllowedFileType(name, mime)) {
+                error("不支持的文件类型：$name")
+            }
+            val saved = filesManager.saveManagedFromUri(FileFolders.UPLOAD, uri, name, mime)
+            val url = filesManager.getFile(saved).toUri().toString()
+            when (kind) {
+                ChatAttachmentKind.IMAGE -> UIMessagePart.Image(url)
+                ChatAttachmentKind.VIDEO -> UIMessagePart.Video(url)
+                ChatAttachmentKind.AUDIO -> UIMessagePart.Audio(url)
+                ChatAttachmentKind.DOCUMENT -> UIMessagePart.Document(url, saved.displayName, saved.mimeType)
+                ChatAttachmentKind.AUTO -> error("未解析的附件类型")
+            }
+        }
+
+    /** 拍照文件移交草稿导入器；切换草稿后拒收，复制完成或取消后删除本次临时原片。 */
+    fun addCameraImage(file: java.io.File, expectedRevision: Long, onImported: (String?) -> Unit = {}) {
+        if (inputState.attachmentRevision != expectedRevision) {
+            file.delete()
+            onImported(null)
+            return
+        }
+        attachmentImporter.add(listOf(file.toUri().toString()), onImported = { _, url -> onImported(url) }) {
+            withContext(Dispatchers.IO) { file.delete() }
+        }
+    }
 
     // 异步任务 (从ChatService获取，响应式)
     val conversationJob: StateFlow<Job?> =
@@ -100,6 +187,7 @@ class ChatVM(
     }
 
     override fun onCleared() {
+        visualizationStore.clear()
         super.onCleared()
         // 移除对话引用
         chatService.removeConversationReference(_conversationId)
@@ -148,24 +236,22 @@ class ChatVM(
     val mcpManager = chatService.mcpManager
 
     // 更新设置
-    fun updateSettings(newSettings: Settings) {
+    fun updateSettings(update: (Settings) -> Settings) {
         viewModelScope.launch {
-            val oldSettings = settings.value
-            // 检查用户头像是否有变化，如果有则删除旧头像
-            checkUserAvatarDelete(oldSettings, newSettings)
-            settingsStore.update(newSettings)
+            settingsStore.updateWithAppearanceCleanup(
+                fileIdentity = filesManager::canonicalOwnedFileUrl,
+                deleteFiles = { urls -> filesManager.deleteChatFiles(urls.map { it.toUri() }) },
+                fn = update,
+            )
         }
+    }
+
+    fun updateAssistant(assistantId: Uuid, update: (Assistant) -> Assistant) {
+        updateSettings { it.updateAssistant(assistantId, update) }
     }
 
     // 检查用户头像删除
-    private fun checkUserAvatarDelete(oldSettings: Settings, newSettings: Settings) {
-        val oldAvatar = oldSettings.displaySetting.userAvatar
-        val newAvatar = newSettings.displaySetting.userAvatar
 
-        if (oldAvatar is Avatar.Image && oldAvatar != newAvatar) {
-            filesManager.deleteChatFiles(listOf(oldAvatar.url.toUri()))
-        }
-    }
 
     // 设置聊天模型
     fun setChatModel(assistant: Assistant, model: Model) {
@@ -200,6 +286,42 @@ class ChatVM(
         analytics.logEvent("ai_send_message", null)
 
         chatService.sendMessage(_conversationId, content, answer)
+    }
+
+    private val acceptedVisualizationEvents = LinkedHashSet<String>()
+    var visualizationSendPending by mutableStateOf(false)
+        private set
+
+    /** 图卡点击仍走正常用户消息；发送前重新确认会话、选中分支和源码版本。 */
+    fun handleVisualizationMessage(event: me.rerere.rikkahub.data.visualization.VizMessageEvent): String? {
+        if (event.eventId in acceptedVisualizationEvents) return null
+        if (event.conversationId != _conversationId.toString()) return "图卡不属于当前会话"
+        if (visualizationSendPending || conversationJob.value != null) return "当前回答仍在生成，请稍后发送"
+        val source = conversation.value.messageNodes.firstOrNull {
+            "${it.currentMessage.id}:${it.selectIndex}" == event.messageId
+        }?.currentMessage ?: return "图卡来源已删除或切换分支"
+        val part = source.parts.getOrNull(event.partIndex) as? UIMessagePart.Text ?: return "图卡来源已变化"
+        val fence = me.rerere.rikkahub.data.visualization.VizFenceScanner.scan(part.text)
+            .getOrNull(event.ordinal)?.fence ?: return "图卡来源已变化"
+        if (me.rerere.rikkahub.data.visualization.VizFenceScanner.digest(fence.code) != event.sourceDigest) {
+            return "图卡正在更新，请重新点击"
+        }
+        return try {
+            val text = "${event.text}\n\n来源：会话 ${event.conversationId}，消息 ${event.messageId}，图卡 ${event.ordinal + 1}"
+            visualizationSendPending = true
+            handleMessageSend(listOf(UIMessagePart.Text(text)))
+            acceptedVisualizationEvents += event.eventId
+            while (acceptedVisualizationEvents.size > 128) acceptedVisualizationEvents.iterator().run { next(); remove() }
+            viewModelScope.launch {
+                try {
+                    chatService.getGenerationJobStateFlow(_conversationId).first()?.join()
+                } finally { visualizationSendPending = false }
+            }
+            null
+        } catch (failure: Exception) {
+            visualizationSendPending = false
+            failure.message ?: "发送失败，请重试"
+        }
     }
 
     fun handleMessageEdit(parts: List<UIMessagePart>, messageId: Uuid) {
@@ -275,15 +397,18 @@ class ChatVM(
 
     fun saveConversationAsync() {
         viewModelScope.launch {
-            chatService.saveConversation(_conversationId, conversation.value)
+            chatService.saveCurrentConversation(_conversationId)
+        }
+    }
+
+    fun updateConversationMetadata(update: (Conversation) -> Conversation) {
+        viewModelScope.launch {
+            chatService.updateConversationMetadataAndSave(_conversationId, update = update)
         }
     }
 
     fun updateTitle(title: String) {
-        viewModelScope.launch {
-            val updatedConversation = conversation.value.copy(title = title)
-            chatService.saveConversation(_conversationId, updatedConversation)
-        }
+        updateConversationMetadata { it.copy(title = title) }
     }
 
     fun deleteConversation(conversation: Conversation) {
@@ -294,24 +419,19 @@ class ChatVM(
 
     fun updatePinnedStatus(conversation: Conversation) {
         viewModelScope.launch {
-            conversationRepo.togglePinStatus(conversation.id)
+            chatService.updateConversationMetadataAndSave(conversation.id, createIfMissing = false) {
+                it.copy(isPinned = !it.isPinned)
+            }
         }
     }
 
     fun moveConversationToAssistant(conversation: Conversation, targetAssistantId: Uuid) {
         viewModelScope.launch {
-            val conversationFull = conversationRepo.getConversationById(conversation.id) ?: return@launch
-            // 文件夹是助手内分组，切换助手后原文件夹在新助手下不可见，需清空归属避免会话丢失
-            val updatedConversation = conversationFull.copy(
-                assistantId = targetAssistantId,
-                folderId = null,
-            )
-            if (conversation.id == _conversationId) {
-                chatService.saveConversation(_conversationId, updatedConversation)
-                settingsStore.updateAssistant(targetAssistantId)
-            } else {
-                conversationRepo.updateConversation(updatedConversation)
+            // 其它客户端也可能持有这个会话，统一通过 Service 同步元数据。
+            chatService.updateConversationMetadataAndSave(conversation.id, createIfMissing = false) {
+                it.copy(assistantId = targetAssistantId, folderId = null)
             }
+            if (conversation.id == _conversationId) settingsStore.updateAssistant(targetAssistantId)
         }
     }
 
@@ -336,10 +456,8 @@ class ChatVM(
         chatService.clearTranslationField(_conversationId, messageId)
     }
 
-    fun updateConversation(newConversation: Conversation) {
-        chatService.updateConversationState(_conversationId) {
-            newConversation
-        }
+    fun updateConversation(update: (Conversation) -> Conversation) {
+        chatService.updateConversationState(_conversationId, update)
     }
 
     fun toggleMessageFavorite(node: MessageNode) {

@@ -32,6 +32,8 @@ data class UIMessage(
     val contextCompaction: ContextCompaction? = null,
     val contextInputTokens: Int? = null,
     val contextInputHash: String? = null,
+    val isContextCheckpoint: Boolean = false,
+    val contextCheckpointHash: String? = null,
 ) {
     private fun appendChunk(chunk: MessageChunk): UIMessage {
         val choice = chunk.choices.getOrNull(0)
@@ -57,8 +59,24 @@ data class UIMessage(
                     }
 
                     is UIMessagePart.Image -> {
+                        val imageId = deltaPart.streamImageId
                         val lastPart = acc.lastOrNull()
-                        if (lastPart is UIMessagePart.Image) {
+                        if (imageId != null) {
+                            val existingIndex = acc.indexOfFirst {
+                                it is UIMessagePart.Image && it.streamImageId == imageId
+                            }
+                            if (existingIndex < 0) {
+                                acc + deltaPart
+                            } else {
+                                val existing = acc[existingIndex] as UIMessagePart.Image
+                                if (existing.acceptsSnapshot(deltaPart)) {
+                                    acc.toMutableList().apply { this[existingIndex] = deltaPart }
+                                } else acc
+                            }
+                        } else if (deltaPart.url.startsWith("data:") || deltaPart.url.contains("://")) {
+                            // 完整 URI 代表独立图片，不能和相邻图片拼接。
+                            acc + deltaPart
+                        } else if (lastPart is UIMessagePart.Image && lastPart.streamImageId == null) {
                             // Append to the last Image part (for streaming base64)
                             acc.dropLast(1) + lastPart.copy(
                                 url = lastPart.url + deltaPart.url,
@@ -292,6 +310,14 @@ private const val CONTEXT_KEEP_RATIO = 0.5f
  * @param limit 触发截断的消息条数上限, 小于等于 0 表示不限制
  */
 fun List<UIMessage>.limitContext(limit: Int): List<UIMessage> {
+    val checkpointIndex = indexOfLast { it.isContextCheckpoint }
+    if (checkpointIndex >= 0) {
+        return listOf(this[checkpointIndex]) + subList(checkpointIndex + 1, size).limitMessageCount(limit)
+    }
+    return limitMessageCount(limit)
+}
+
+private fun List<UIMessage>.limitMessageCount(limit: Int): List<UIMessage> {
     if (limit <= 0 || this.size <= limit) return this
 
     // 截断后回落到的目标条数, 以及两次截断之间截断点前进的步幅
@@ -552,6 +578,7 @@ fun List<UIMessagePart>.toSortedMessageParts(): List<UIMessagePart> {
 }
 
 fun UIMessage.finishReasoning(): UIMessage {
+    if (parts.none { it is UIMessagePart.Reasoning && it.finishedAt == null }) return this
     return copy(
         parts = parts.map { part ->
             when (part) {

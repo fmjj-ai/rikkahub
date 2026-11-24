@@ -323,11 +323,14 @@ fun me.rerere.rikkahub.data.model.Folder.toDto() = FolderDto(
     createAt = createAt.toEpochMilli(),
 )
 
-fun Conversation.toDto(isGenerating: Boolean = false) = ConversationDto(
+fun Conversation.toDto(
+    isGenerating: Boolean = false,
+    nodes: List<MessageNodeDto> = messageNodes.map { it.toDto() },
+) = ConversationDto(
     id = id.toString(),
     assistantId = assistantId.toString(),
     title = title,
-    messages = messageNodes.map { it.toDto() },
+    messages = nodes,
     chatSuggestions = chatSuggestions,
     isPinned = isPinned,
     customSystemPrompt = customSystemPrompt,

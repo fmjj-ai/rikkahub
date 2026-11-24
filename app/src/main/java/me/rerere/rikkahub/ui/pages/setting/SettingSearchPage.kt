@@ -50,12 +50,16 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
 import me.rerere.rikkahub.R
 import me.rerere.rikkahub.Screen
+import me.rerere.rikkahub.data.datastore.moveById
+import me.rerere.rikkahub.data.datastore.removeSearchService
+import me.rerere.rikkahub.data.datastore.updateSearchServices
 import me.rerere.rikkahub.ui.components.nav.BackButton
 import me.rerere.rikkahub.ui.components.ui.AutoAIIcon
 import me.rerere.rikkahub.ui.components.ui.FormItem
 import me.rerere.rikkahub.ui.components.ui.OutlinedNumberInput
 import me.rerere.rikkahub.ui.components.ui.Tag
 import me.rerere.rikkahub.ui.components.ui.TagType
+import me.rerere.rikkahub.ui.components.nav.navigationSource
 import me.rerere.rikkahub.ui.context.LocalNavController
 import me.rerere.rikkahub.ui.theme.CustomColors
 import me.rerere.rikkahub.utils.plus
@@ -103,16 +107,10 @@ fun SettingSearchPage(vm: SettingVM = koinViewModel()) {
         containerColor = CustomColors.topBarColors.containerColor
     ) {
         val reorderableState = rememberReorderableLazyListState(lazyListState) { from, to ->
-            val fromIndex = from.index
-            val toIndex = to.index
-
-            if (fromIndex >= 0 && toIndex >= 0 && fromIndex < settings.searchServices.size && toIndex < settings.searchServices.size) {
-                val newServices = settings.searchServices.toMutableList().apply {
-                    add(toIndex, removeAt(fromIndex))
-                }
-                vm.updateSettings(
-                    settings.copy(searchServices = newServices)
-                )
+            val fromId = settings.searchServices.getOrNull(from.index)?.id
+            val toId = settings.searchServices.getOrNull(to.index)?.id
+            vm.updateSettings { latest ->
+                latest.updateSearchServices { it.moveById(fromId, toId) { service -> service.id } }
             }
         }
         val haptic = LocalHapticFeedback.current
@@ -130,25 +128,20 @@ fun SettingSearchPage(vm: SettingVM = koinViewModel()) {
                     state = reorderableState,
                     key = service.id
                 ) { isDragging ->
+                    val detail = Screen.SettingSearchDetail(service.id.toString())
                     SearchProviderCard(
                         service = service,
                         onEdit = {
-                            nav.navigate(Screen.SettingSearchDetail(service.id.toString()))
+                            nav.navigate(detail)
                         },
                         onDelete = {
-                            if (settings.searchServices.size > 1) {
-                                val index = settings.searchServices.indexOf(service)
-                                val newServices = settings.searchServices.toMutableList()
-                                newServices.removeAt(index)
-                                vm.updateSettings(
-                                    settings.copy(searchServices = newServices)
-                                )
-                            }
+                            vm.updateSettings { it.removeSearchService(service.id) }
                         },
                         canDelete = settings.searchServices.size > 1,
                         modifier = Modifier
                             .scale(if (isDragging) 0.95f else 1f)
                             .animateItem()
+                            .navigationSource(detail)
                             .longPressDraggableHandle(
                                 onDragStarted = {
                                     haptic.performHapticFeedback(HapticFeedbackType.GestureThresholdActivate)
@@ -165,9 +158,7 @@ fun SettingSearchPage(vm: SettingVM = koinViewModel()) {
                 CommonOptions(
                     settings = settings,
                     onUpdate = { options ->
-                        vm.updateSettings(
-                            settings.copy(searchCommonOptions = options)
-                        )
+                        vm.updateSettings { it.copy(searchCommonOptions = options) }
                     }
                 )
             }
@@ -179,11 +170,7 @@ fun SettingSearchPage(vm: SettingVM = koinViewModel()) {
             onDismiss = { showAddDialog = false },
             onConfirm = { options ->
                 showAddDialog = false
-                vm.updateSettings(
-                    settings.copy(
-                        searchServices = listOf(options) + settings.searchServices
-                    )
-                )
+                vm.updateSettings { latest -> latest.updateSearchServices { listOf(options) + it } }
                 scope.launch {
                     lazyListState.animateScrollToItem(0)
                 }

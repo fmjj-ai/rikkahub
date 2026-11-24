@@ -1,5 +1,6 @@
 package me.rerere.ai.provider
 
+import kotlinx.serialization.Transient
 import kotlinx.coroutines.flow.Flow
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonElement
@@ -69,6 +70,8 @@ data class TextGenerationParams(
      * 若自定义请求体中已存在 service_tier，则由用户显式配置覆盖（mergeCustomBody 后写入）。
      */
     val serviceTierPriority: Boolean = false,
+    /** 账号端点的会话缓存标识；为空时由提供商使用首条用户消息的稳定 ID。 */
+    val sessionId: String? = null,
 )
 
 @Serializable
@@ -112,11 +115,29 @@ data class EmbeddingGenerationResult(
 @Serializable
 data class CustomHeader(
     val name: String,
-    val value: String
-)
+    val value: String,
+    // 仅用于编辑期定位，copy 保留；不改变序列化字段或原有值相等语义。
+    @Transient val editKey: Any = Any(),
+) {
+    override fun equals(other: Any?): Boolean =
+        this === other || other is CustomHeader && name == other.name && value == other.value
+
+    override fun hashCode(): Int = 31 * name.hashCode() + value.hashCode()
+
+    override fun toString(): String = "CustomHeader(name=$name, value=$value)"
+}
 
 @Serializable
 data class CustomBody(
     val key: String,
-    val value: JsonElement
-)
+    val value: JsonElement,
+    // 不落盘的行身份，避免并发增删后把字段编辑应用到另一个下标。
+    @Transient val editKey: Any = Any(),
+) {
+    override fun equals(other: Any?): Boolean =
+        this === other || other is CustomBody && key == other.key && value == other.value
+
+    override fun hashCode(): Int = 31 * key.hashCode() + value.hashCode()
+
+    override fun toString(): String = "CustomBody(key=$key, value=$value)"
+}

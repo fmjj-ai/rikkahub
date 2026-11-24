@@ -50,6 +50,7 @@ import androidx.compose.ui.res.stringResource
 import me.rerere.rikkahub.R
 import me.rerere.rikkahub.ui.components.nav.BackButton
 import me.rerere.rikkahub.ui.components.ui.RikkaConfirmDialog
+import me.rerere.rikkahub.ui.components.nav.navigationSource
 import me.rerere.rikkahub.ui.context.LocalNavController
 import me.rerere.rikkahub.ui.theme.CustomColors
 import me.rerere.rikkahub.utils.plus
@@ -93,11 +94,13 @@ fun WorkspacePage(vm: WorkspaceVM = koinViewModel()) {
             }
 
             items(workspaces, key = { it.id }) { workspace ->
+                val detail = Screen.WorkspaceDetail(workspace.id)
                 WorkspaceCard(
                     workspace = workspace,
+                    modifier = Modifier.navigationSource(detail),
                     onRename = { editTarget = workspace },
                     onDelete = { deleteTarget = workspace },
-                    onOpen = { navController.navigate(Screen.WorkspaceDetail(workspace.id)) },
+                    onOpen = { navController.navigate(detail) },
                 )
             }
         }
@@ -175,6 +178,7 @@ private fun EmptyWorkspaceState() {
 @Composable
 private fun WorkspaceCard(
     workspace: WorkspaceEntity,
+    modifier: Modifier,
     onRename: () -> Unit,
     onDelete: () -> Unit,
     onOpen: () -> Unit,
@@ -182,7 +186,7 @@ private fun WorkspaceCard(
     var menuExpanded by remember { mutableStateOf(false) }
 
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .clickable(onClick = onOpen),
         colors = CustomColors.cardColorsOnSurfaceContainer,

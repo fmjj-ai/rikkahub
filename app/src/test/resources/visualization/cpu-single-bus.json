@@ -1,0 +1,712 @@
+{
+  "version": 1,
+  "id": "cpu-single-bus",
+  "title": "单总线 CPU 加法",
+  "state": {
+    "step": 0
+  },
+  "actions": {
+    "next": {
+      "when": {
+        "$": [
+          "lt",
+          {
+            "$": [
+              "get",
+              "step"
+            ]
+          },
+          3
+        ]
+      },
+      "set": {
+        "step": {
+          "$": [
+            "add",
+            {
+              "$": [
+                "get",
+                "step"
+              ]
+            },
+            1
+          ]
+        }
+      }
+    },
+    "prev": {
+      "when": {
+        "$": [
+          "gt",
+          {
+            "$": [
+              "get",
+              "step"
+            ]
+          },
+          0
+        ]
+      },
+      "set": {
+        "step": {
+          "$": [
+            "sub",
+            {
+              "$": [
+                "get",
+                "step"
+              ]
+            },
+            1
+          ]
+        }
+      }
+    }
+  },
+  "view": [
+    {
+      "type": "scene",
+      "width": 340,
+      "height": 300,
+      "shapes": [
+        {
+          "type": "rect",
+          "x": 7,
+          "y": 10,
+          "w": 56,
+          "h": 48,
+          "stroke": "@outline",
+          "fill": "@surface",
+          "r": 4
+        },
+        {
+          "type": "text",
+          "x": 35,
+          "y": 27,
+          "text": "R0",
+          "anchor": "middle"
+        },
+        {
+          "type": "text",
+          "x": 35,
+          "y": 46,
+          "text": "0",
+          "anchor": "middle",
+          "size": 16
+        },
+        {
+          "type": "line",
+          "x1": 35,
+          "y1": 58,
+          "x2": 35,
+          "y2": 91,
+          "stroke": "@outline",
+          "sw": 2
+        },
+        {
+          "type": "rect",
+          "x": 87,
+          "y": 10,
+          "w": 56,
+          "h": 48,
+          "stroke": {
+            "$": [
+              "if",
+              {
+                "$": [
+                  "or",
+                  {
+                    "$": [
+                      "eq",
+                      {
+                        "$": [
+                          "get",
+                          "step"
+                        ]
+                      },
+                      1
+                    ]
+                  },
+                  {
+                    "$": [
+                      "eq",
+                      {
+                        "$": [
+                          "get",
+                          "step"
+                        ]
+                      },
+                      3
+                    ]
+                  }
+                ]
+              },
+              "@success",
+              "@outline"
+            ]
+          },
+          "fill": "@surface",
+          "r": 4
+        },
+        {
+          "type": "text",
+          "x": 115,
+          "y": 27,
+          "text": "R1",
+          "anchor": "middle"
+        },
+        {
+          "type": "text",
+          "x": 115,
+          "y": 46,
+          "text": {
+            "$": [
+              "if",
+              {
+                "$": [
+                  "eq",
+                  {
+                    "$": [
+                      "get",
+                      "step"
+                    ]
+                  },
+                  3
+                ]
+              },
+              "12",
+              "5"
+            ]
+          },
+          "anchor": "middle",
+          "size": 16
+        },
+        {
+          "type": "line",
+          "x1": 115,
+          "y1": 58,
+          "x2": 115,
+          "y2": 91,
+          "stroke": {
+            "$": [
+              "if",
+              {
+                "$": [
+                  "or",
+                  {
+                    "$": [
+                      "eq",
+                      {
+                        "$": [
+                          "get",
+                          "step"
+                        ]
+                      },
+                      1
+                    ]
+                  },
+                  {
+                    "$": [
+                      "eq",
+                      {
+                        "$": [
+                          "get",
+                          "step"
+                        ]
+                      },
+                      3
+                    ]
+                  }
+                ]
+              },
+              "@success",
+              "@outline"
+            ]
+          },
+          "sw": 2
+        },
+        {
+          "type": "rect",
+          "x": 167,
+          "y": 10,
+          "w": 56,
+          "h": 48,
+          "stroke": {
+            "$": [
+              "if",
+              {
+                "$": [
+                  "eq",
+                  {
+                    "$": [
+                      "get",
+                      "step"
+                    ]
+                  },
+                  2
+                ]
+              },
+              "@success",
+              "@outline"
+            ]
+          },
+          "fill": "@surface",
+          "r": 4
+        },
+        {
+          "type": "text",
+          "x": 195,
+          "y": 27,
+          "text": "R2",
+          "anchor": "middle"
+        },
+        {
+          "type": "text",
+          "x": 195,
+          "y": 46,
+          "text": "7",
+          "anchor": "middle",
+          "size": 16
+        },
+        {
+          "type": "line",
+          "x1": 195,
+          "y1": 58,
+          "x2": 195,
+          "y2": 91,
+          "stroke": {
+            "$": [
+              "if",
+              {
+                "$": [
+                  "eq",
+                  {
+                    "$": [
+                      "get",
+                      "step"
+                    ]
+                  },
+                  2
+                ]
+              },
+              "@success",
+              "@outline"
+            ]
+          },
+          "sw": 2
+        },
+        {
+          "type": "rect",
+          "x": 247,
+          "y": 10,
+          "w": 56,
+          "h": 48,
+          "stroke": "@outline",
+          "fill": "@surface",
+          "r": 4
+        },
+        {
+          "type": "text",
+          "x": 275,
+          "y": 27,
+          "text": "R3",
+          "anchor": "middle"
+        },
+        {
+          "type": "text",
+          "x": 275,
+          "y": 46,
+          "text": "0",
+          "anchor": "middle",
+          "size": 16
+        },
+        {
+          "type": "line",
+          "x1": 275,
+          "y1": 58,
+          "x2": 275,
+          "y2": 91,
+          "stroke": "@outline",
+          "sw": 2
+        },
+        {
+          "type": "rect",
+          "x": 7,
+          "y": 91,
+          "w": 326,
+          "h": 30,
+          "stroke": "@outline",
+          "fill": "@surface",
+          "r": 4
+        },
+        {
+          "type": "text",
+          "x": 170,
+          "y": 111,
+          "text": {
+            "$": [
+              "at",
+              [
+                "BUS —",
+                "BUS 5",
+                "BUS 7",
+                "BUS 12"
+              ],
+              {
+                "$": [
+                  "get",
+                  "step"
+                ]
+              }
+            ]
+          },
+          "anchor": "middle"
+        },
+        {
+          "type": "line",
+          "x1": 85,
+          "y1": 121,
+          "x2": 85,
+          "y2": 147,
+          "stroke": {
+            "$": [
+              "if",
+              {
+                "$": [
+                  "eq",
+                  {
+                    "$": [
+                      "get",
+                      "step"
+                    ]
+                  },
+                  1
+                ]
+              },
+              "@success",
+              "@outline"
+            ]
+          },
+          "sw": 2
+        },
+        {
+          "type": "rect",
+          "x": 55,
+          "y": 147,
+          "w": 60,
+          "h": 34,
+          "stroke": {
+            "$": [
+              "if",
+              {
+                "$": [
+                  "eq",
+                  {
+                    "$": [
+                      "get",
+                      "step"
+                    ]
+                  },
+                  1
+                ]
+              },
+              "@success",
+              "@outline"
+            ]
+          },
+          "fill": "@surface",
+          "r": 4
+        },
+        {
+          "type": "text",
+          "x": 85,
+          "y": 169,
+          "text": {
+            "$": [
+              "if",
+              {
+                "$": [
+                  "gte",
+                  {
+                    "$": [
+                      "get",
+                      "step"
+                    ]
+                  },
+                  1
+                ]
+              },
+              "Y: 5",
+              "Y: —"
+            ]
+          },
+          "anchor": "middle"
+        },
+        {
+          "type": "path",
+          "d": "M85 181 V192 H126 V207",
+          "stroke": {
+            "$": [
+              "if",
+              {
+                "$": [
+                  "eq",
+                  {
+                    "$": [
+                      "get",
+                      "step"
+                    ]
+                  },
+                  2
+                ]
+              },
+              "@success",
+              "@outline"
+            ]
+          },
+          "sw": 2
+        },
+        {
+          "type": "line",
+          "x1": 210,
+          "y1": 121,
+          "x2": 210,
+          "y2": 207,
+          "stroke": {
+            "$": [
+              "if",
+              {
+                "$": [
+                  "eq",
+                  {
+                    "$": [
+                      "get",
+                      "step"
+                    ]
+                  },
+                  2
+                ]
+              },
+              "@success",
+              "@outline"
+            ]
+          },
+          "sw": 2
+        },
+        {
+          "type": "path",
+          "d": "M100 207 H151 L168 220 L185 207 H235 L213 250 H122 Z",
+          "stroke": {
+            "$": [
+              "if",
+              {
+                "$": [
+                  "eq",
+                  {
+                    "$": [
+                      "get",
+                      "step"
+                    ]
+                  },
+                  2
+                ]
+              },
+              "@success",
+              "@outline"
+            ]
+          },
+          "fill": "@surface",
+          "sw": 2
+        },
+        {
+          "type": "text",
+          "x": 168,
+          "y": 240,
+          "text": {
+            "$": [
+              "if",
+              {
+                "$": [
+                  "eq",
+                  {
+                    "$": [
+                      "get",
+                      "step"
+                    ]
+                  },
+                  2
+                ]
+              },
+              "5 + 7 = 12",
+              "ALU"
+            ]
+          },
+          "anchor": "middle"
+        },
+        {
+          "type": "line",
+          "x1": 168,
+          "y1": 250,
+          "x2": 168,
+          "y2": 262,
+          "stroke": {
+            "$": [
+              "if",
+              {
+                "$": [
+                  "eq",
+                  {
+                    "$": [
+                      "get",
+                      "step"
+                    ]
+                  },
+                  2
+                ]
+              },
+              "@success",
+              "@outline"
+            ]
+          },
+          "sw": 2
+        },
+        {
+          "type": "rect",
+          "x": 133,
+          "y": 262,
+          "w": 70,
+          "h": 30,
+          "stroke": {
+            "$": [
+              "if",
+              {
+                "$": [
+                  "gte",
+                  {
+                    "$": [
+                      "get",
+                      "step"
+                    ]
+                  },
+                  2
+                ]
+              },
+              "@success",
+              "@outline"
+            ]
+          },
+          "fill": "@surface",
+          "r": 4
+        },
+        {
+          "type": "text",
+          "x": 168,
+          "y": 282,
+          "text": {
+            "$": [
+              "if",
+              {
+                "$": [
+                  "gte",
+                  {
+                    "$": [
+                      "get",
+                      "step"
+                    ]
+                  },
+                  2
+                ]
+              },
+              "Z: 12",
+              "Z: —"
+            ]
+          },
+          "anchor": "middle"
+        },
+        {
+          "type": "path",
+          "d": "M203 277 H310 V121",
+          "stroke": {
+            "$": [
+              "if",
+              {
+                "$": [
+                  "eq",
+                  {
+                    "$": [
+                      "get",
+                      "step"
+                    ]
+                  },
+                  3
+                ]
+              },
+              "@success",
+              "@outline"
+            ]
+          },
+          "sw": 2
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "text": {
+        "$": [
+          "at",
+          [
+            "准备执行 ADD R1, R2",
+            "T1: R1 → Y",
+            "T2: Y + R2 → Z",
+            "T3: Z → R1"
+          ],
+          {
+            "$": [
+              "get",
+              "step"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "type": "row",
+      "children": [
+        {
+          "type": "button",
+          "label": "上一步",
+          "action": "prev",
+          "enabled": {
+            "$": [
+              "gt",
+              {
+                "$": [
+                  "get",
+                  "step"
+                ]
+              },
+              0
+            ]
+          }
+        },
+        {
+          "type": "button",
+          "label": "下一周期",
+          "action": "next",
+          "enabled": {
+            "$": [
+              "lt",
+              {
+                "$": [
+                  "get",
+                  "step"
+                ]
+              },
+              3
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

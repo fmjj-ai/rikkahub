@@ -34,6 +34,7 @@ import me.rerere.rikkahub.R
 import me.rerere.rikkahub.data.datastore.DisplaySetting
 import me.rerere.rikkahub.ui.components.nav.BackButton
 import me.rerere.rikkahub.ui.components.ui.CardGroup
+import me.rerere.rikkahub.ui.hooks.isPhoneLayout
 import me.rerere.rikkahub.ui.hooks.rememberSharedPreferenceBoolean
 import me.rerere.rikkahub.ui.theme.CustomColors
 import me.rerere.rikkahub.utils.plus
@@ -43,10 +44,11 @@ import org.koin.androidx.compose.koinViewModel
 fun SettingPreferencesGeneralPage(vm: SettingVM = koinViewModel()) {
     val settings by vm.settings.collectAsStateWithLifecycle()
     var displaySetting by remember(settings) { mutableStateOf(settings.displaySetting) }
+    val phoneLayout = isPhoneLayout()
 
-    fun updateDisplaySetting(setting: DisplaySetting) {
-        displaySetting = setting
-        vm.updateSettings(settings.copy(displaySetting = setting))
+    fun updateDisplaySetting(transform: (DisplaySetting) -> DisplaySetting) {
+        displaySetting = transform(displaySetting)
+        vm.updateSettings { latest -> latest.copy(displaySetting = transform(latest.displaySetting)) }
     }
 
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
@@ -108,7 +110,7 @@ fun SettingPreferencesGeneralPage(vm: SettingVM = koinViewModel()) {
                             Switch(
                                 checked = displaySetting.sendOnEnter,
                                 onCheckedChange = {
-                                    updateDisplaySetting(displaySetting.copy(sendOnEnter = it))
+                                    updateDisplaySetting { current -> current.copy(sendOnEnter = it) }
                                 }
                             )
                         },
@@ -120,7 +122,7 @@ fun SettingPreferencesGeneralPage(vm: SettingVM = koinViewModel()) {
                             Switch(
                                 checked = displaySetting.showMessageJumper,
                                 onCheckedChange = {
-                                    updateDisplaySetting(displaySetting.copy(showMessageJumper = it))
+                                    updateDisplaySetting { current -> current.copy(showMessageJumper = it) }
                                 }
                             )
                         },
@@ -133,7 +135,7 @@ fun SettingPreferencesGeneralPage(vm: SettingVM = koinViewModel()) {
                                 Switch(
                                     checked = displaySetting.messageJumperOnLeft,
                                     onCheckedChange = {
-                                        updateDisplaySetting(displaySetting.copy(messageJumperOnLeft = it))
+                                        updateDisplaySetting { current -> current.copy(messageJumperOnLeft = it) }
                                     }
                                 )
                             },
@@ -146,7 +148,7 @@ fun SettingPreferencesGeneralPage(vm: SettingVM = koinViewModel()) {
                             Switch(
                                 checked = displaySetting.enableAutoScroll,
                                 onCheckedChange = {
-                                    updateDisplaySetting(displaySetting.copy(enableAutoScroll = it))
+                                    updateDisplaySetting { current -> current.copy(enableAutoScroll = it) }
                                 }
                             )
                         },
@@ -160,7 +162,23 @@ fun SettingPreferencesGeneralPage(vm: SettingVM = koinViewModel()) {
                             Switch(
                                 checked = displaySetting.useAppIconStyleLoadingIndicator,
                                 onCheckedChange = {
-                                    updateDisplaySetting(displaySetting.copy(useAppIconStyleLoadingIndicator = it))
+                                    updateDisplaySetting { current -> current.copy(useAppIconStyleLoadingIndicator = it) }
+                                }
+                            )
+                        },
+                    )
+                    if (phoneLayout) item(
+                        headlineContent = {
+                            Text(stringResource(R.string.setting_display_page_enable_expanded_navigation_title))
+                        },
+                        supportingContent = {
+                            Text(stringResource(R.string.setting_display_page_enable_expanded_navigation_desc))
+                        },
+                        trailingContent = {
+                            Switch(
+                                checked = displaySetting.enableExpandedNavigation,
+                                onCheckedChange = {
+                                    updateDisplaySetting { current -> current.copy(enableExpandedNavigation = it) }
                                 }
                             )
                         },
@@ -172,7 +190,7 @@ fun SettingPreferencesGeneralPage(vm: SettingVM = koinViewModel()) {
                             Switch(
                                 checked = displaySetting.enableBlurEffect,
                                 onCheckedChange = {
-                                    updateDisplaySetting(displaySetting.copy(enableBlurEffect = it))
+                                    updateDisplaySetting { current -> current.copy(enableBlurEffect = it) }
                                 }
                             )
                         },
@@ -184,21 +202,15 @@ fun SettingPreferencesGeneralPage(vm: SettingVM = koinViewModel()) {
                             Switch(
                                 checked = displaySetting.enableMessageGenerationHapticEffect,
                                 onCheckedChange = {
-                                    updateDisplaySetting(displaySetting.copy(enableMessageGenerationHapticEffect = it))
+                                    updateDisplaySetting { current -> current.copy(enableMessageGenerationHapticEffect = it) }
                                 }
                             )
                         },
                     )
                     item(
-                        headlineContent = { Text(stringResource(R.string.setting_display_page_skip_crop_image_title)) },
-                        supportingContent = { Text(stringResource(R.string.setting_display_page_skip_crop_image_desc)) },
-                        trailingContent = {
-                            Switch(
-                                checked = displaySetting.skipCropImage,
-                                onCheckedChange = {
-                                    updateDisplaySetting(displaySetting.copy(skipCropImage = it))
-                                }
-                            )
+                        headlineContent = { Text("图片附件编辑") },
+                        supportingContent = {
+                            Text("相册图片直接加入消息框，点击附件可裁剪；拍照暂保留拍摄后确认。")
                         },
                     )
                     item(
@@ -208,7 +220,7 @@ fun SettingPreferencesGeneralPage(vm: SettingVM = koinViewModel()) {
                             Switch(
                                 checked = displaySetting.pasteLongTextAsFile,
                                 onCheckedChange = {
-                                    updateDisplaySetting(displaySetting.copy(pasteLongTextAsFile = it))
+                                    updateDisplaySetting { current -> current.copy(pasteLongTextAsFile = it) }
                                 }
                             )
                         },
@@ -225,7 +237,7 @@ fun SettingPreferencesGeneralPage(vm: SettingVM = koinViewModel()) {
                                     Slider(
                                         value = displaySetting.pasteLongTextThreshold.toFloat(),
                                         onValueChange = {
-                                            updateDisplaySetting(displaySetting.copy(pasteLongTextThreshold = it.toInt()))
+                                            updateDisplaySetting { current -> current.copy(pasteLongTextThreshold = it.toInt()) }
                                         },
                                         valueRange = 100f..10000f,
                                         modifier = Modifier.weight(1f)
@@ -242,7 +254,7 @@ fun SettingPreferencesGeneralPage(vm: SettingVM = koinViewModel()) {
                             Switch(
                                 checked = displaySetting.enableVolumeKeyScroll,
                                 onCheckedChange = {
-                                    updateDisplaySetting(displaySetting.copy(enableVolumeKeyScroll = it))
+                                    updateDisplaySetting { current -> current.copy(enableVolumeKeyScroll = it) }
                                 }
                             )
                         },
@@ -259,7 +271,7 @@ fun SettingPreferencesGeneralPage(vm: SettingVM = koinViewModel()) {
                                     Slider(
                                         value = displaySetting.volumeKeyScrollRatio,
                                         onValueChange = {
-                                            updateDisplaySetting(displaySetting.copy(volumeKeyScrollRatio = it))
+                                            updateDisplaySetting { current -> current.copy(volumeKeyScrollRatio = it) }
                                         },
                                         valueRange = 0.25f..1.0f,
                                         steps = 2,
@@ -292,7 +304,7 @@ fun SettingPreferencesGeneralPage(vm: SettingVM = koinViewModel()) {
                             Switch(
                                 checked = displaySetting.enableBackgroundKeepAlive,
                                 onCheckedChange = { checked ->
-                                    updateDisplaySetting(displaySetting.copy(enableBackgroundKeepAlive = checked))
+                                    updateDisplaySetting { current -> current.copy(enableBackgroundKeepAlive = checked) }
                                     if (checked) {
                                         // 逐级降级跳转到系统电池设置页，全部失败则静默忽略
                                         val intents = listOf(
@@ -329,7 +341,7 @@ fun SettingPreferencesGeneralPage(vm: SettingVM = koinViewModel()) {
                             Switch(
                                 checked = displaySetting.ttsOnlyReadQuoted,
                                 onCheckedChange = {
-                                    updateDisplaySetting(displaySetting.copy(ttsOnlyReadQuoted = it))
+                                    updateDisplaySetting { current -> current.copy(ttsOnlyReadQuoted = it) }
                                 }
                             )
                         },
@@ -341,7 +353,7 @@ fun SettingPreferencesGeneralPage(vm: SettingVM = koinViewModel()) {
                             Switch(
                                 checked = displaySetting.ttsOnlyReadOutsideBrackets,
                                 onCheckedChange = {
-                                    updateDisplaySetting(displaySetting.copy(ttsOnlyReadOutsideBrackets = it))
+                                    updateDisplaySetting { current -> current.copy(ttsOnlyReadOutsideBrackets = it) }
                                 }
                             )
                         },
@@ -353,7 +365,7 @@ fun SettingPreferencesGeneralPage(vm: SettingVM = koinViewModel()) {
                             Switch(
                                 checked = displaySetting.autoPlayTTSAfterGeneration,
                                 onCheckedChange = {
-                                    updateDisplaySetting(displaySetting.copy(autoPlayTTSAfterGeneration = it))
+                                    updateDisplaySetting { current -> current.copy(autoPlayTTSAfterGeneration = it) }
                                 }
                             )
                         },

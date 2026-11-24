@@ -18,6 +18,7 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
 import me.rerere.ai.core.InputSchema
+import me.rerere.common.http.awaitText
 import me.rerere.search.SearchResult.SearchResultItem
 import me.rerere.search.SearchService.Companion.httpClient
 import me.rerere.search.SearchService.Companion.json
@@ -59,7 +60,7 @@ object GrokSearchService : SearchService<SearchServiceOptions.GrokOptions> {
         commonOptions: SearchCommonOptions,
         serviceOptions: SearchServiceOptions.GrokOptions
     ): Result<SearchResult> = withContext(Dispatchers.IO) {
-        runCatching {
+        runSearchCatching {
             if (serviceOptions.apiKey.isBlank()) {
                 error("Grok API key is required")
             }
@@ -99,9 +100,9 @@ object GrokSearchService : SearchService<SearchServiceOptions.GrokOptions> {
                 .addHeader("Content-Type", "application/json")
                 .build()
 
-            val response = httpClient.newCall(request).await()
+            val response = httpClient.newCall(request).awaitText()
             if (response.isSuccessful) {
-                val responseBody = response.body.string().let {
+                val responseBody = response.body.let {
                     json.decodeFromString<GrokResponse>(it)
                 }
 
@@ -133,7 +134,7 @@ object GrokSearchService : SearchService<SearchServiceOptions.GrokOptions> {
                     )
                 )
             } else {
-                error("response failed #${response.code}: ${response.body?.string()}")
+                error("response failed #${response.code}: ${response.body}")
             }
         }
     }

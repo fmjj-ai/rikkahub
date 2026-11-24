@@ -28,13 +28,26 @@ fun List<UIMessage>.contextFingerprint(): String {
 
 fun List<UIMessage>.contextMessages(): List<UIMessage> {
     for (index in indices.reversed()) {
+        val checkpoint = this[index]
+        if (checkpoint.isContextCheckpoint) {
+            if (checkpoint.toText().isNotBlank() && checkpoint.contextCheckpointHash != null &&
+                subList(0, index).contextFingerprint() == checkpoint.contextCheckpointHash
+            ) {
+                return listOf(checkpoint) + drop(index + 1).filterNot { it.isContextCheckpoint }
+            }
+            continue
+        }
         val compaction = this[index].contextCompaction ?: continue
         if (compaction.summary.isBlank()) continue
         if (subList(0, index + 1).contextFingerprint() == compaction.prefixHash) {
-            return listOf(UIMessage.user(compaction.summary).copy(id = compaction.summaryId)) + drop(index + 1)
+            return listOf(UIMessage.user(compaction.summary).copy(
+                id = compaction.summaryId,
+                isContextCheckpoint = true,
+            )) + drop(index + 1).filterNot { it.isContextCheckpoint }
         }
     }
-    return this
+    // 无效检查点仍可在时间线查看，但不把过期摘要当作真实用户指令发送。
+    return filterNot { it.isContextCheckpoint }
 }
 
 /** 只压缩完整的早期轮次，最后一轮用户消息及其全部工具调用始终保留。 */
@@ -50,10 +63,15 @@ fun List<UIMessage>.compressionBoundary(keepRecentMessages: Int = 4): Int? {
 /** 返回原始记录中的压缩终点，避免反复压缩只有摘要、没有新历史的上下文。 */
 fun List<UIMessage>.compressionTarget(keepRecentMessages: Int = 4): Int? {
     val active = contextMessages()
+    if (keepRecentMessages <= 0) {
+        val last = active.lastOrNull { !it.isContextCheckpoint } ?: return null
+        return indexOfFirst { it.id == last.id }.takeIf { it >= 0 }
+    }
     var boundary = active.compressionBoundary(keepRecentMessages) ?: return null
     if (none { it.id == active[boundary].id }) {
         boundary = active.indexOfLast { it.role == MessageRole.USER } - 1
     }
+    if (active.take(boundary + 1).none { !it.isContextCheckpoint }) return null
     val id = active.getOrNull(boundary)?.id ?: return null
     return indexOfFirst { it.id == id }.takeIf { it >= 0 }
 }
@@ -164,11 +182,12 @@ data class ContextUsage(
      * （OpenAI `prompt_tokens` / Responses `input_tokens`、Google `promptTokenCount`、
      * Claude `input + cache_read + cache_creation`），因此分母直接取 inputTokens。
      * 对异常数据做夹取，保证分母 ≥ 分子且结果落在 0..1；
-     * 无真实缓存数据（首轮请求 / 服务商不返回 / 模型不支持缓存）时返回 null，由 UI 显示占位符。
+     * 有输入但没有缓存命中时返回 0；缺少有效输入用量时返回 null。
      */
     val cacheHitRate: Float?
         get() {
-            if (cachedTokens <= 0 || inputTokens <= 0) return null
+            if (inputTokens <= 0) return null
+            if (cachedTokens <= 0) return 0f
             val denominator = inputTokens.coerceAtLeast(cachedTokens)
             return (cachedTokens.toFloat() / denominator).coerceIn(0f, 1f)
         }

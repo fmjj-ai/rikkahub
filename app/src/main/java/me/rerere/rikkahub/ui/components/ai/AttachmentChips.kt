@@ -1,6 +1,14 @@
 package me.rerere.rikkahub.ui.components.ai
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.core.MutableTransitionState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.slideInVertically
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -13,19 +21,32 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
@@ -33,6 +54,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
 import androidx.core.net.toUri
 import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
+import coil3.request.crossfade
+import com.dokar.sonner.ToastType
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.withContext
 import me.rerere.ai.ui.UIMessagePart
 import me.rerere.hugeicons.HugeIcons
 import me.rerere.hugeicons.stroke.Cancel01
@@ -41,13 +71,16 @@ import me.rerere.hugeicons.stroke.MusicNote03
 import me.rerere.hugeicons.stroke.Video01
 import me.rerere.rikkahub.data.files.FilesManager
 import me.rerere.rikkahub.ui.hooks.ChatInputState
+import me.rerere.rikkahub.ui.context.LocalToaster
 import org.koin.compose.koinInject
 
 @Composable
 internal fun MediaFileInputRow(
     state: ChatInputState,
+    cameraTransition: CameraAttachmentTransitionState? = null,
 ) {
     val filesManager: FilesManager = koinInject()
+    val context = LocalContext.current
     val managedFiles by filesManager.observe().collectAsState(initial = emptyList())
     val displayNameByRelativePath = remember(managedFiles) {
         managedFiles.associate { it.relativePath to it.displayName }
@@ -57,45 +90,114 @@ internal fun MediaFileInputRow(
     }
 
     fun removePart(part: UIMessagePart, url: String) {
-        state.messageContent = state.messageContent.filterNot { it == part }
+        state.removeAttachment(part)
         if (state.shouldDeleteFileOnRemove(part)) {
             filesManager.deleteChatFiles(listOf(url.toUri()))
         }
     }
 
+    val toaster = LocalToaster.current
+    var editing by remember { mutableStateOf<UIMessagePart.Image?>(null) }
+    var editRevision by remember { mutableStateOf(0L) }
+    val launchCrop = useCropLauncher(
+        onCroppedImageReady = { cropped ->
+            val original = editing
+            if (original != null) {
+                val revision = editRevision
+                val deleteOriginal = state.shouldDeleteFileOnRemove(original)
+                var copied: android.net.Uri? = null
+                var accepted = false
+                try {
+                    // 临时文件在挂起回调完成后才释放；流式复制，不在主线程读取整张图片。
+                    withContext(NonCancellable) {
+                        val saved = filesManager.saveManagedFromUri(
+                            me.rerere.rikkahub.data.files.FileFolders.UPLOAD, cropped)
+                        copied = filesManager.getFile(saved).toUri()
+                    }
+                    currentCoroutineContext().ensureActive()
+                    val url = copied ?: error("裁剪图片保存失败")
+                    accepted = state.replaceImage(original, url.toString(), revision)
+                    if (accepted && deleteOriginal) {
+                        withContext(NonCancellable + Dispatchers.IO) {
+                            filesManager.deleteChatFiles(listOf(original.url.toUri()))
+                        }
+                    }
+                } catch (cancelled: CancellationException) {
+                    throw cancelled
+                } catch (error: Exception) {
+                    toaster.show(error.message ?: "裁剪图片保存失败", type = ToastType.Error)
+                } finally {
+                    if (!accepted) copied?.let { uri ->
+                        withContext(NonCancellable + Dispatchers.IO) { filesManager.deleteChatFiles(listOf(uri)) }
+                    }
+                }
+            }
+        },
+        onCleanup = { editing = null },
+    )
+
     Row(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier
             .fillMaxWidth()
+            .animateContentSize()
             .padding(horizontal = 6.dp, vertical = 6.dp)
             .horizontalScroll(rememberScrollState())
     ) {
         state.messageContent.fastForEach { part ->
             when (part) {
                 is UIMessagePart.Image -> {
-                    AttachmentChip(
-                        title = attachmentNameFromUrl(
-                            url = part.url,
-                            fallback = "image",
-                            displayNameByRelativePath = displayNameByRelativePath,
-                            displayNameByFileName = displayNameByFileName
-                        ),
-                        leading = {
-                            Surface(
-                                modifier = Modifier.size(34.dp),
-                                shape = RoundedCornerShape(10.dp),
-                                color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    key(part.url) {
+                        val arriving = cameraTransition?.photo?.url == part.url
+                        val bringIntoView = remember { BringIntoViewRequester() }
+                        val imageRequest = remember(part.url, context) {
+                            ImageRequest.Builder(context).data(part.url).crossfade(false).build()
+                        }
+                        LaunchedEffect(arriving) {
+                            if (arriving) {
+                                withFrameNanos { }
+                                bringIntoView.bringIntoView()
+                                if (cameraTransition?.photo?.url == part.url) cameraTransition.targetVisible = true
+                            }
+                        }
+                        val visible = remember { MutableTransitionState(arriving).apply { targetState = true } }
+                        AnimatedVisibility(
+                            visibleState = visible,
+                            enter = if (arriving) EnterTransition.None
+                                else fadeIn() + scaleIn(initialScale = 0.85f) + slideInVertically { it / 4 },
+                        ) {
+                            Box(Modifier.size(88.dp).bringIntoViewRequester(bringIntoView)
+                                .onGloballyPositioned { cameraTransition?.updateTarget(part.url, it.boundsInWindow()) }
+                                .graphicsLayer { alpha = if (cameraTransition?.photo?.url == part.url) 0f else 1f }
                             ) {
                                 AsyncImage(
-                                    model = part.url,
-                                    contentDescription = null,
+                                    model = imageRequest,
+                                    onSuccess = { cameraTransition?.thumbnailLoaded(part.url) },
+                                    contentDescription = "图片附件，点击裁剪",
                                     contentScale = ContentScale.Crop,
-                                    modifier = Modifier.fillMaxSize()
+                                    modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(16.dp)).clickable(
+                                        enabled = !arriving,
+                                    ) {
+                                        editing = part
+                                        editRevision = state.attachmentRevision
+                                        launchCrop(part.url.toUri())
+                                    },
                                 )
+                                IconButton(
+                                    onClick = { removePart(part, part.url) },
+                                    enabled = !arriving,
+                                    modifier = Modifier.align(Alignment.TopEnd).size(40.dp),
+                                ) {
+                                    Icon(
+                                        HugeIcons.Cancel01, contentDescription = "删除图片附件",
+                                        tint = Color.White,
+                                        modifier = Modifier.size(26.dp).clip(CircleShape)
+                                            .background(Color.Black.copy(alpha = 0.5f)).padding(4.dp),
+                                    )
+                                }
                             }
-                        },
-                        onRemove = { removePart(part, part.url) }
-                    )
+                        }
+                    }
                 }
 
                 is UIMessagePart.Video -> {

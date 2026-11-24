@@ -18,6 +18,7 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
 import me.rerere.ai.core.InputSchema
+import me.rerere.common.http.awaitText
 import me.rerere.search.SearchResult.SearchResultItem
 import me.rerere.search.SearchService.Companion.httpClient
 import me.rerere.search.SearchService.Companion.json
@@ -78,7 +79,7 @@ object TavilySearchService : SearchService<SearchServiceOptions.TavilyOptions> {
         commonOptions: SearchCommonOptions,
         serviceOptions: SearchServiceOptions.TavilyOptions
     ): Result<SearchResult> = withContext(Dispatchers.IO) {
-        runCatching {
+        runSearchCatching {
             val query = params["query"]?.jsonPrimitive?.content ?: error("query is required")
             val topic = params["topic"]?.jsonPrimitive?.contentOrNull ?: "general"
 
@@ -102,9 +103,9 @@ object TavilySearchService : SearchService<SearchServiceOptions.TavilyOptions> {
                 .post(body.toString().toRequestBody())
                 .addHeader("Authorization", "Bearer $apiKey")
                 .build()
-            val response = httpClient.newCall(request).await()
+            val response = httpClient.newCall(request).awaitText()
             if (response.isSuccessful) {
-                val response = response.body.string().let {
+                val response = response.body.let {
                     json.decodeFromString<SearchResponse>(it)
                 }
 
@@ -131,7 +132,7 @@ object TavilySearchService : SearchService<SearchServiceOptions.TavilyOptions> {
         commonOptions: SearchCommonOptions,
         serviceOptions: SearchServiceOptions.TavilyOptions
     ): Result<ScrapedResult> = withContext(Dispatchers.IO) {
-        runCatching {
+        runSearchCatching {
             val url = params["url"]?.jsonPrimitive?.content ?: error("url is required")
             val body = buildJsonObject {
                 put("urls", buildJsonArray {
@@ -144,9 +145,9 @@ object TavilySearchService : SearchService<SearchServiceOptions.TavilyOptions> {
                 .post(body.toString().toRequestBody())
                 .addHeader("Authorization", "Bearer $apiKey")
                 .build()
-            val response = httpClient.newCall(request).await()
+            val response = httpClient.newCall(request).awaitText()
             if (response.isSuccessful) {
-                val response = response.body.string().let {
+                val response = response.body.let {
                     json.decodeFromString<ScrapeResponse>(it)
                 }
                 return@withContext Result.success(

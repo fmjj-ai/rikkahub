@@ -66,6 +66,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.runtime.DisposableEffect
@@ -110,10 +111,12 @@ private const val LoadingIndicatorKey = "LoadingIndicator"
 private const val ScrollBottomKey = "ScrollBottomKey"
 
 @Composable
-fun ChatList(
+internal fun ChatList(
     innerPadding: PaddingValues,
     conversation: Conversation,
+    visualizationStore: me.rerere.rikkahub.ui.components.visualization.VizSessionStore,
     state: LazyListState,
+    scrollController: ChatScrollController? = null,
     loading: Boolean,
     processingStatus: String? = null,
     previewMode: Boolean,
@@ -132,10 +135,15 @@ fun ChatList(
     onClearTranslation: (UIMessage) -> Unit = {},
     onJumpToMessage: (Int) -> Unit = {},
     onToolApproval: ((toolCallId: String, approved: Boolean, reason: String) -> Unit)? = null,
+    onVisualizationMessage: ((me.rerere.rikkahub.data.visualization.VizMessageEvent) -> String?)? = null,
     onToolAnswer: ((toolCallId: String, answer: String) -> Unit)? = null,
     onToggleFavorite: ((MessageNode) -> Unit)? = null,
     onConversationSystemPromptChange: ((String?) -> Unit)? = null,
 ) {
+    val visibleMessageIds = conversation.messageNodes.map { "${it.currentMessage.id}:${it.selectIndex}" }.toSet()
+    LaunchedEffect(visualizationStore, visibleMessageIds) {
+        visualizationStore.retainMessages(visibleMessageIds)
+    }
     AnimatedContent(
         targetState = previewMode,
         label = "ChatListMode",
@@ -156,7 +164,9 @@ fun ChatList(
             ChatListNormal(
                 innerPadding = innerPadding,
                 conversation = conversation,
+                visualizationStore = visualizationStore,
                 state = state,
+                scrollController = scrollController,
                 loading = loading,
                 processingStatus = processingStatus,
                 settings = settings,
@@ -174,6 +184,7 @@ fun ChatList(
                 onClearTranslation = onClearTranslation,
                 animatedVisibilityScope = this@AnimatedContent,
                 onToolApproval = onToolApproval,
+                onVisualizationMessage = onVisualizationMessage,
                 onToolAnswer = onToolAnswer,
                 onToggleFavorite = onToggleFavorite,
                 onConversationSystemPromptChange = onConversationSystemPromptChange,
@@ -186,7 +197,9 @@ fun ChatList(
 private fun ChatListNormal(
     innerPadding: PaddingValues,
     conversation: Conversation,
+    visualizationStore: me.rerere.rikkahub.ui.components.visualization.VizSessionStore,
     state: LazyListState,
+    scrollController: ChatScrollController?,
     loading: Boolean,
     processingStatus: String? = null,
     settings: Settings,
@@ -204,18 +217,17 @@ private fun ChatListNormal(
     onClearTranslation: (UIMessage) -> Unit,
     animatedVisibilityScope: AnimatedVisibilityScope,
     onToolApproval: ((toolCallId: String, approved: Boolean, reason: String) -> Unit)? = null,
+    onVisualizationMessage: ((me.rerere.rikkahub.data.visualization.VizMessageEvent) -> String?)? = null,
     onToolAnswer: ((toolCallId: String, answer: String) -> Unit)? = null,
     onToggleFavorite: ((MessageNode) -> Unit)? = null,
     onConversationSystemPromptChange: ((String?) -> Unit)? = null,
 ) {
     val scope = rememberCoroutineScope()
-    val loadingState by rememberUpdatedState(loading)
     var isRecentScroll by remember { mutableStateOf(false) }
-    val conversationUpdated by rememberUpdatedState(conversation)
     val density = LocalDensity.current
     val activity = LocalContext.current as? me.rerere.rikkahub.RouteActivity
 
-    DisposableEffect(Unit) {
+    DisposableEffect(activity, state, scrollController, settings.displaySetting, innerPadding, density) {
         val listener: (Boolean) -> Boolean = { isVolumeUp ->
             if (settings.displaySetting.enableVolumeKeyScroll) {
                 val bottomPaddingPx = with(density) {
@@ -223,7 +235,11 @@ private fun ChatListNormal(
                 }
                 val scrollAmount = (state.layoutInfo.viewportSize.height - bottomPaddingPx) *
                     settings.displaySetting.volumeKeyScrollRatio
-                scope.launch { state.scrollBy(if (isVolumeUp) -scrollAmount else scrollAmount) }
+                scrollController?.onBrowse(towardTail = !isVolumeUp)
+                scope.launch {
+                    state.scrollBy(if (isVolumeUp) -scrollAmount else scrollAmount)
+                    scrollController?.onUserScrollFinished(explicitUserScroll = true)
+                }
                 true
             } else false
         }
@@ -231,15 +247,6 @@ private fun ChatListNormal(
         onDispose {
             activity?.volumeKeyListeners?.remove(listener)
         }
-    }
-
-    fun List<LazyListItemInfo>.isAtBottom(): Boolean {
-        val lastItem = lastOrNull() ?: return false
-        val inputBarHeight = with(density) { innerPadding.calculateBottomPadding().toPx() }
-        val lastPos = lastItem.offset + lastItem.size
-        val inputPos = (state.layoutInfo.viewportEndOffset - inputBarHeight.roundToInt())
-        // println("lastPos = $lastPos, inputPos = $inputPos  | ${lastPos <= inputPos - 8}")
-        return lastPos <= inputPos - 8
     }
 
     // 聊天选择
@@ -269,26 +276,35 @@ private fun ChatListNormal(
             .associateBy { it.id }
     }
     val lastMessageIndex = conversation.messageNodes.lastIndex
+    val itemKeys = buildList<String?> {
+        conversation.messageNodes.forEach { add(it.id.toString()) }
+        if (!loading && assistant?.allowConversationSystemPrompt == true && onConversationSystemPromptChange != null) {
+            add("ConversationSystemPrompt")
+        }
+        if (loading) add(LoadingIndicatorKey)
+        add(ChatScrollController.ScrollTailKey)
+    }
+
+    androidx.compose.runtime.SideEffect {
+        scrollController?.onState(
+            itemKeys, conversation.messageNodes.size, loading, settings.displaySetting.enableAutoScroll,
+        )
+    }
+    LaunchedEffect(scrollController, state) {
+        val controller = scrollController ?: return@LaunchedEffect
+        snapshotFlow {
+            Triple(
+                state.layoutInfo.visibleItemsInfo.map { it.key to (it.offset to it.size) },
+                state.layoutInfo.totalItemsCount,
+                state.canScrollForward,
+            )
+        }.collect { controller.onLayoutChanged() }
+    }
 
     Box(
         modifier = Modifier
             .fillMaxSize(),
     ) {
-        // 自动滚动到底部
-        if (settings.displaySetting.enableAutoScroll) {
-            LaunchedEffect(state) {
-                snapshotFlow { state.layoutInfo.visibleItemsInfo }.collect { visibleItemsInfo ->
-                    // println("is bottom = ${visibleItemsInfo.isAtBottom()}, scroll = ${state.isScrollInProgress}, can_scroll = ${state.canScrollForward}, loading = $loading")
-                    if (!state.isScrollInProgress && loadingState) {
-                        if (visibleItemsInfo.isAtBottom()) {
-                            state.requestScrollToItem(conversationUpdated.messageNodes.lastIndex + 10)
-                            // Log.i(TAG, "ChatList: scroll to ${conversationUpdated.messageNodes.lastIndex}")
-                        }
-                    }
-                }
-            }
-        }
-
         // 判断最近是否滚动
         LaunchedEffect(state.isScrollInProgress) {
             if (state.isScrollInProgress) {
@@ -310,6 +326,7 @@ private fun ChatListNormal(
                 modifier = Modifier
                     .fillMaxSize()
                     .hazeSource(state = hazeState)
+                    .then(scrollController?.let { Modifier.nestedScroll(it.nestedScrollConnection) } ?: Modifier)
                     .padding(top = innerPadding.calculateTopPadding()),
             ) {
             itemsIndexed(
@@ -331,9 +348,13 @@ private fun ChatListNormal(
                     ) {
                         ChatMessage(
                             node = node,
+                            messageIdentity = "${node.currentMessage.id}:${node.selectIndex}",
+                            conversationId = conversation.id.toString(),
+                            visualizationStore = visualizationStore,
                             model = node.currentMessage.modelId?.let(modelById::get),
                             assistant = assistant,
                             loading = loading && index == lastMessageIndex,
+                            visualizationSendingDisabled = loading,
                             onRegenerate = {
                                 onRegenerate(node.currentMessage)
                             },
@@ -362,6 +383,7 @@ private fun ChatListNormal(
                             onTranslate = onTranslate,
                             onClearTranslation = onClearTranslation,
                             onToolApproval = onToolApproval,
+                            onVisualizationMessage = onVisualizationMessage,
                             onToolAnswer = onToolAnswer,
                             lastMessage = index == lastMessageIndex,
                         )
@@ -513,7 +535,8 @@ private fun ChatListNormal(
                 show = isRecentScroll && !state.isScrollInProgress && settings.displaySetting.showMessageJumper && !captureProgress,
                 onLeft = settings.displaySetting.messageJumperOnLeft,
                 scope = scope,
-                state = state
+                state = state,
+                scrollController = scrollController,
             )
 
             // Suggestion
@@ -750,7 +773,8 @@ private fun BoxScope.MessageJumper(
     show: Boolean,
     onLeft: Boolean,
     scope: CoroutineScope,
-    state: LazyListState
+    state: LazyListState,
+    scrollController: ChatScrollController?,
 ) {
     AnimatedVisibility(
         visible = show,
@@ -768,6 +792,7 @@ private fun BoxScope.MessageJumper(
         ) {
             Surface(
                 onClick = {
+                    scrollController?.onScrollTop()
                     scope.launch {
                         state.scrollToItem(0)
                     }
@@ -787,6 +812,7 @@ private fun BoxScope.MessageJumper(
             }
             Surface(
                 onClick = {
+                    scrollController?.onBrowse()
                     scope.launch {
                         state.animateScrollToItem(
                             (state.firstVisibleItemIndex - 1).fastCoerceAtLeast(
@@ -810,8 +836,13 @@ private fun BoxScope.MessageJumper(
             }
             Surface(
                 onClick = {
+                    scrollController?.onBrowse()
                     scope.launch {
-                        state.animateScrollToItem(state.firstVisibleItemIndex + 1)
+                        state.animateScrollToItem(
+                            (state.firstVisibleItemIndex + 1).coerceAtMost(
+                                (state.layoutInfo.totalItemsCount - 1).coerceAtLeast(0),
+                            ),
+                        )
                     }
                 },
                 shape = CircleShape,
@@ -828,8 +859,12 @@ private fun BoxScope.MessageJumper(
             }
             Surface(
                 onClick = {
-                    scope.launch {
-                        state.scrollToItem(state.layoutInfo.totalItemsCount - 1)
+                    if (scrollController != null) {
+                        scrollController.onJumpToBottom()
+                    } else {
+                        scope.launch {
+                            state.scrollToItem((state.layoutInfo.totalItemsCount - 1).coerceAtLeast(0))
+                        }
                     }
                 },
                 shape = CircleShape,

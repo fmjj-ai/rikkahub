@@ -64,6 +64,7 @@ import me.rerere.rikkahub.Screen
 import me.rerere.rikkahub.data.datastore.isNotConfigured
 import me.rerere.rikkahub.data.files.FilesManager
 import me.rerere.rikkahub.ui.components.nav.BackButton
+import me.rerere.rikkahub.ui.components.nav.navigationSourceModifiers
 import me.rerere.rikkahub.ui.components.ui.CardGroup
 import me.rerere.rikkahub.ui.components.ui.Select
 import me.rerere.rikkahub.ui.components.ui.icons.DiscordIcon
@@ -83,6 +84,21 @@ import org.koin.compose.koinInject
 fun SettingPage(vm: SettingVM = koinViewModel()) {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val navController = LocalNavController.current
+    val navigationSources = navigationSourceModifiers(
+        Screen.SettingPreferences,
+        Screen.Assistant,
+        Screen.Extensions,
+        Screen.SettingModels,
+        Screen.SettingProvider,
+        Screen.SettingSearch,
+        Screen.SettingSpeech,
+        Screen.SettingMcp,
+        Screen.SettingWeb,
+        Screen.Backup,
+        Screen.SettingFiles,
+        Screen.SettingAbout,
+        Screen.Log,
+    )
     val settings by vm.settings.collectAsStateWithLifecycle()
     val filesManager: FilesManager = koinInject()
 
@@ -152,18 +168,21 @@ fun SettingPage(vm: SettingVM = koinViewModel()) {
                         supportingContent = { Text(selectedColorModeText) },
                     )
                     item(
+                        modifier = navigationSources.getValue(Screen.SettingPreferences),
                         onClick = { navController.navigate(Screen.SettingPreferences) },
                         leadingContent = { Icon(HugeIcons.Settings03, null) },
                         supportingContent = { Text(stringResource(R.string.setting_page_preferences_desc)) },
                         headlineContent = { Text(stringResource(R.string.setting_page_preferences)) },
                     )
                     item(
+                        modifier = navigationSources.getValue(Screen.Assistant),
                         onClick = { navController.navigate(Screen.Assistant) },
                         leadingContent = { Icon(HugeIcons.LookTop, null) },
                         supportingContent = { Text(stringResource(R.string.setting_page_assistant_desc)) },
                         headlineContent = { Text(stringResource(R.string.setting_page_assistant)) },
                     )
                     item(
+                        modifier = navigationSources.getValue(Screen.Extensions),
                         onClick = { navController.navigate(Screen.Extensions) },
                         leadingContent = { Icon(HugeIcons.Package, null) },
                         supportingContent = { Text(stringResource(R.string.setting_page_extensions_desc)) },
@@ -178,36 +197,42 @@ fun SettingPage(vm: SettingVM = koinViewModel()) {
                     title = { Text(stringResource(R.string.setting_page_model_and_services)) },
                 ) {
                     item(
+                        modifier = navigationSources.getValue(Screen.SettingModels),
                         onClick = { navController.navigate(Screen.SettingModels) },
                         leadingContent = { Icon(HugeIcons.AiMagic, null) },
                         supportingContent = { Text(stringResource(R.string.setting_page_default_model_desc)) },
                         headlineContent = { Text(stringResource(R.string.setting_page_default_model)) },
                     )
                     item(
+                        modifier = navigationSources.getValue(Screen.SettingProvider),
                         onClick = { navController.navigate(Screen.SettingProvider) },
                         leadingContent = { Icon(HugeIcons.Brain02, null) },
                         supportingContent = { Text(stringResource(R.string.setting_page_providers_desc)) },
                         headlineContent = { Text(stringResource(R.string.setting_page_providers)) },
                     )
                     item(
+                        modifier = navigationSources.getValue(Screen.SettingSearch),
                         onClick = { navController.navigate(Screen.SettingSearch) },
                         leadingContent = { Icon(HugeIcons.GlobalSearch, null) },
                         supportingContent = { Text(stringResource(R.string.setting_page_search_service_desc)) },
                         headlineContent = { Text(stringResource(R.string.setting_page_search_service)) },
                     )
                     item(
+                        modifier = navigationSources.getValue(Screen.SettingSpeech),
                         onClick = { navController.navigate(Screen.SettingSpeech) },
                         leadingContent = { Icon(HugeIcons.Megaphone01, null) },
                         supportingContent = { Text(stringResource(R.string.setting_page_tts_service_desc)) },
                         headlineContent = { Text(stringResource(R.string.setting_page_tts_service)) },
                     )
                     item(
+                        modifier = navigationSources.getValue(Screen.SettingMcp),
                         onClick = { navController.navigate(Screen.SettingMcp) },
                         leadingContent = { Icon(HugeIcons.McpServer, null) },
                         supportingContent = { Text(stringResource(R.string.setting_page_mcp_desc)) },
                         headlineContent = { Text(stringResource(R.string.setting_page_mcp)) },
                     )
                     item(
+                        modifier = navigationSources.getValue(Screen.SettingWeb),
                         onClick = { navController.navigate(Screen.SettingWeb) },
                         leadingContent = { Icon(HugeIcons.ServerStack01, null) },
                         supportingContent = { Text(stringResource(R.string.setting_page_web_server_desc)) },
@@ -225,12 +250,14 @@ fun SettingPage(vm: SettingVM = koinViewModel()) {
                     title = { Text(stringResource(R.string.setting_page_data_settings)) },
                 ) {
                     item(
+                        modifier = navigationSources.getValue(Screen.Backup),
                         onClick = { navController.navigate(Screen.Backup) },
                         leadingContent = { Icon(HugeIcons.Database02, null) },
                         supportingContent = { Text(stringResource(R.string.setting_page_data_backup_desc)) },
                         headlineContent = { Text(stringResource(R.string.setting_page_data_backup)) },
                     )
                     item(
+                        modifier = navigationSources.getValue(Screen.SettingFiles),
                         onClick = { navController.navigate(Screen.SettingFiles) },
                         leadingContent = { Icon(HugeIcons.ImageUpload, null) },
                         supportingContent = {
@@ -261,6 +288,7 @@ fun SettingPage(vm: SettingVM = koinViewModel()) {
                     title = { Text(stringResource(R.string.setting_page_about)) },
                 ) {
                     item(
+                        modifier = navigationSources.getValue(Screen.SettingAbout),
                         onClick = { navController.navigate(Screen.SettingAbout) },
                         leadingContent = { Icon(HugeIcons.Clapping01, null) },
                         supportingContent = { Text(stringResource(R.string.setting_page_about_desc)) },
@@ -313,6 +341,7 @@ fun SettingPage(vm: SettingVM = koinViewModel()) {
                         headlineContent = { Text(stringResource(R.string.setting_page_documentation)) },
                     )
                     item(
+                        modifier = navigationSources.getValue(Screen.Log),
                         onClick = { navController.navigate(Screen.Log) },
                         leadingContent = { Icon(HugeIcons.Bookshelf01, null) },
                         supportingContent = { Text(stringResource(R.string.setting_page_request_logs_desc)) },
@@ -370,7 +399,7 @@ private fun ProviderConfigWarningCard(navController: Navigator) {
 
             TextButton(
                 onClick = {
-                    navController.navigate(Screen.SettingProvider)
+                    navController.navigateWithoutAnchor(Screen.SettingProvider)
                 }
             ) {
                 Text(stringResource(R.string.setting_page_config))

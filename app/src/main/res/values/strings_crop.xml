@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="image_crop_load_failed">图片读取失败，请重新选择</string>
+  <string name="image_crop_failed">图片裁剪失败，请重试</string>
+  <string name="image_crop_rotate">旋转</string>
+  <string name="image_crop_reset">重置</string>
+  <string name="image_crop_free">自由</string>
+  <string name="image_crop_original">原图</string>
+</resources>

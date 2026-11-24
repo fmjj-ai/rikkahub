@@ -62,7 +62,7 @@ fun McpPickerButton(
     servers: List<McpServerConfig>,
     mcpManager: McpManager,
     modifier: Modifier = Modifier,
-    onUpdateAssistant: (Assistant) -> Unit
+    onUpdateAssistant: ((Assistant) -> Assistant) -> Unit
 ) {
     var showMcpPicker by remember { mutableStateOf(false) }
     val status by mcpManager.syncingStatus.collectAsStateWithLifecycle()
@@ -166,7 +166,7 @@ fun McpPickerListItem(
     servers: List<McpServerConfig>,
     mcpManager: McpManager,
     modifier: Modifier = Modifier,
-    onUpdateAssistant: (Assistant) -> Unit
+    onUpdateAssistant: ((Assistant) -> Assistant) -> Unit
 ) {
     var showMcpPicker by remember { mutableStateOf(false) }
     val status by mcpManager.syncingStatus.collectAsStateWithLifecycle()
@@ -224,7 +224,7 @@ private fun McpPickerSheet(
     assistant: Assistant,
     servers: List<McpServerConfig>,
     loading: Boolean,
-    onUpdateAssistant: (Assistant) -> Unit,
+    onUpdateAssistant: ((Assistant) -> Assistant) -> Unit,
     onDismiss: () -> Unit,
 ) {
     ModalBottomSheet(
@@ -278,7 +278,7 @@ fun McpPicker(
     servers: List<McpServerConfig>,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(0.dp),
-    onUpdateAssistant: (Assistant) -> Unit
+    onUpdateAssistant: ((Assistant) -> Assistant) -> Unit
 ) {
     val mcpManager = koinInject<McpManager>()
     LazyColumn(
@@ -348,27 +348,11 @@ fun McpPicker(
                     }
                     Switch(
                         checked = server.id in assistant.mcpServers,
-                        onCheckedChange = {
-                            if (it) {
-                                val newServers = assistant.mcpServers.toMutableSet()
-                                newServers.add(server.id)
-                                newServers.removeIf { servers.none { s -> s.id == server.id } } // remove invalid servers
-                                onUpdateAssistant(
-                                    assistant.copy(
-                                        mcpServers = newServers.toSet()
-                                    )
-                                )
-                            } else {
-                                val newServers = assistant.mcpServers.toMutableSet()
-                                newServers.remove(server.id)
-                                newServers.removeIf { servers.none { s -> s.id == server.id } } //  remove invalid servers
-                                onUpdateAssistant(
-                                    assistant.copy(
-                                        mcpServers = newServers.toSet()
-                                    )
-                                )
-                            }
+                        onCheckedChange = { checked ->
+                        onUpdateAssistant { current ->
+                            current.copy(mcpServers = if (checked) current.mcpServers + server.id else current.mcpServers - server.id)
                         }
+                    }
                     )
                 }
             }

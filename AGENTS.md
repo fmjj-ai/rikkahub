@@ -18,6 +18,16 @@
 
 构建/打包结束后执行 `./gradlew --stop`，关闭残留的 Gradle/Kotlin daemon 进程，避免占用内存。
 
+Windows 下集成校验优先使用 `scripts/Invoke-IntegrationChecks.ps1`。脚本固定离线、单次 daemon、
+Kotlin 进程内编译和最多 2 个 worker，并在 `finally` 中执行 Gradle stop。不要一边长时间修改代码，
+一边留下已经完成的编译 daemon；不得按进程名批量终止 Java，只处理能确认归属本次构建的进程。
+
+Gradle 打包可能清理整个 variant 输出目录；构建前将需要保留的旧 APK 复制到独立 delivery/时间戳目录并校验哈希。
+不得把唯一的备份副本留在 app/build/outputs/apk/release 或 debug 等由打包任务直接管理的目录中。
+
+最终验收构建期间冻结源码；构建过程中改文件可能收到上一份输入快照的错误，需先核对当前源文件，
+不要按旧错误反复修改或叠加启动构建。阶段验证结束后清理后台，再开始下一批修改。
+
 ## Coding Style & Naming Conventions
 
 本仓库使用 `.editorconfig` 统一格式：
@@ -28,12 +38,51 @@
 
 命名习惯：模块名为小写目录（如 `ai/`、`speech/`），Kotlin 类遵循 PascalCase，测试类以 `*Test` 结尾。
 
+扩展使用尾随 lambda 的 Kotlin/Compose API 时，新增可选参数放在最后一个回调之前，保留回调在参数列表末尾；
+修改后搜索所有调用方，避免原来的尾随 lambda 被解析为新增的 Boolean 等参数。
+
+Windows 下 Python 工具若需要向终端输出中文，使用本次调用的 `-X utf8` 显式统一输出编码，
+不要靠修改全局环境解决终端乱码，也不要把终端解码错误误判成源码文件损坏；文件仍需严格 UTF-8 校验。
+
+Windows 下 `rg` 的文件模式使用 `-g '*.kt'` 等参数，不把 `目录/*.kt` 当作文件路径传入。
+
+大屏永久侧栏下，面向整个窗口的相机等浮层应放在抽屉和聊天内容共同的根容器，不能按右侧聊天区域居中。
+跨区域的入框动画统一使用窗口坐标，起点、落点和浮层原点不得混用局部坐标。
+
+相机返回先完成逆向动画再销毁预览；恢复附件面板时重新测量真实按钮落点并保留滚动位置。
+预览首帧就绪与展开动画结束分开判断，首帧到达即显示，不用固定淡入或等待制造加载提示。
+相机和附件的连续转场必须使用同窗口、同根容器的图层；不得用主窗口相机与新建 Dialog 附件面板交叉淡入。
+附件布局在相机期间保持挂载，遮罩只随整体浮层进出，不能随相机返回重新入场或叠加第二层遮罩。
+CameraX 原生预览不得放入缩放、位移或淡出的 Compose 转场层；预览固定在最终位置，动效使用已校正方向的预览帧。
+原生预览需要显式 clipToOutline；返回时先准备画面再启动收缩，测试应包含 AndroidView，不能只用纯 Compose 占位验证。
+附件面板淡出使用完整窗口尺寸的独立父图层；BottomSheet 内部通过放置偏移定位，不能在其 modifier 上设置整体 alpha。
+回归测试检查 alpha 刚低于 1、返回过程和面板底部的真实像素；仅检查节点存在、滚动状态或遮罩不能发现越界裁剪。
+
+仅手机启用的布局或导航动效统一使用最小窗口宽度小于 600dp 的判断，不复用聊天页的永久侧栏判断；
+平板路径不得额外套入限宽、居中或共享边界容器，拍照等两端共用动效另行处理。
+
+函数图默认按真实画布尺寸适配横纵轴单位长度，不能把同一数值视窗直接铺满不同宽高的画布。
+两轴单位等长时横纵刻度共用同一步长，网格必须是正方形；只有单轴拉长后才允许各轴独立取步长。
+消息卡片和未调整的交互视图在尺寸变化时重新适配原始范围；已调整的交互视图保留中心与短边尺度，避免旋转往返累积缩小。
+横轴、纵轴按钮是一次性动作，每点一次只拉长对应轴并保持另一轴范围，不得做成“仅缩放某轴”的模式开关；
+双指缩放始终两轴同步，双击画布或空白处恢复默认视图。双轴缩放触及范围上限时统一夹取倍率；读数浮层不得挤占画布。
+
+同步官方内置提示词时只迁移精确匹配旧默认值的设置，不覆盖自定义文本；依赖不同工具架构的提示不得硬套。
+
+账号 OAuth 凭据仅由账号管理器写入；配置页保存必须保留最新令牌，分享、二维码导入和 Web 设置事件必须脱敏。
+刷新令牌按提供商串行处理并使用独立 HTTP 调度器，避免 401 鉴权阻塞占满推理调度器后无法完成刷新。
+账号模型目录返回的能力和上下文窗口不得被通用模型注册表覆盖；账号提供商不得转换或合并到 API Key 多协议配置。
+
 ## Testing Guidelines
 
 测试框架以 JUnit/AndroidX Test 为主。未设定强制覆盖率门槛，但新逻辑应配套新增/更新测试。测试文件命名建议：
 
 - 单元测试：`FooTest.kt`
 - 仪器测试：`FooInstrumentedTest.kt` 或 `*Test.kt`
+
+设置持久化回归应比较完整序列化字段，不直接用整份 `Settings.equals` 判断往返是否一致：
+提供商的 `@Transient` Compose 描述函数和部分非 data class 搜索选项使用引用相等。
+运行时对象身份是否保留应另写专项测试，不能为通过往返测试而覆盖用户默认值或删掉配置字段。
 
 ## Module Structure
 
@@ -90,7 +139,7 @@
   It posts a persistent notification on the
   `CHAT_LIVE_UPDATE_NOTIFICATION_CHANNEL_ID` channel to prevent the process from being frozen or losing network access
   when the app is backgrounded or the screen is off. It is started/stopped in tandem with the keepAlive task set in
-  ChatService (which also holds the partial wake lock), supports an `ACTION_STOP` intent, and is gated by the
+  ChatService; the foreground service owns the bounded partial wake lock, supports an `ACTION_STOP` intent, and is gated by the
   `settings.displaySetting.enableBackgroundKeepAlive` setting. (
   app/src/main/java/me/rerere/rikkahub/service/ChatGenerationService.kt)
 
@@ -103,3 +152,9 @@
 - If the user does not explicitly request localization, prioritize implementing functionality without considering
   localization. (e.g `Text("Hello world")`)
 - For `locale-tui` operations, use the `locale-tui-localization` skill.
+
+## 迁移与构建回归补充
+
+- 跨克隆迁移时，必须分别确认源目录和目标目录中的完整路径、设置字段及接口签名；源分支存在的组件不能推断目标也存在。纯 Kotlin 替换原生库时，同时检查 `src/main/resources`，字体/CID 表等运行资源遗漏可能只在特定文档中显现。
+- Responses 图片预览同时需要请求 `partial_images` 和解析 `response.image_generation_call.partial_image`；按 item ID 替换快照，不能把完整 base64 快照当字符串增量拼接。
+- 当前 app 使用 github/play 分发维度；集成检查用 `:app:testGithubDebugUnitTest`。2 GB 堆出现 GC thrashing 时，先停止旧构建，再通过脚本 `-MaxWorkers 1 -HeapMegabytes 4096` 单次验证，不改全局配置、不堆叠 daemon。

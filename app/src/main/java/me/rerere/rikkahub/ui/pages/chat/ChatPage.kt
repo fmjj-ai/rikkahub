@@ -1,15 +1,18 @@
 package me.rerere.rikkahub.ui.pages.chat
 
 import android.net.Uri
-import android.util.Log
+import android.content.ClipData
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
@@ -17,21 +20,20 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.PermanentNavigationDrawer
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.adaptive.currentWindowDpSize
-import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -39,25 +41,35 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.withFrameNanos
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.ClipEntry
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.core.content.FileProvider
-import androidx.core.net.toUri
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import com.dokar.sonner.ToastType
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withTimeoutOrNull
 import me.rerere.ai.provider.Model
-import me.rerere.ai.ui.UIMessagePart
-import me.rerere.common.android.appTempFolder
+import me.rerere.ai.ui.isEmptyInputMessage
 import me.rerere.hugeicons.HugeIcons
 import me.rerere.hugeicons.stroke.Cancel01
 import me.rerere.hugeicons.stroke.LeftToRightListBullet
@@ -68,16 +80,25 @@ import me.rerere.rikkahub.data.datastore.Settings
 import me.rerere.rikkahub.data.datastore.findProvider
 import me.rerere.rikkahub.data.datastore.getCurrentAssistant
 import me.rerere.rikkahub.data.datastore.getCurrentChatModel
-import me.rerere.rikkahub.data.files.FilesManager
 import me.rerere.rikkahub.data.model.Assistant
 import me.rerere.rikkahub.data.model.Conversation
 import me.rerere.rikkahub.data.repository.WorkspaceRepository
 import me.rerere.rikkahub.service.ChatError
 import me.rerere.rikkahub.ui.components.ai.ChatInput
+import me.rerere.rikkahub.ui.components.ai.CameraAttachmentTransition
+import me.rerere.rikkahub.ui.components.ai.CameraAttachmentTransitionState
+import me.rerere.rikkahub.ui.components.ai.CameraCloseAction
+import me.rerere.rikkahub.ui.components.ai.CameraPanelState
 import me.rerere.rikkahub.ui.components.ai.ContextUsageDialog
 import me.rerere.rikkahub.ui.components.ai.FilesPicker
+import me.rerere.rikkahub.ui.components.ai.FilesPickerOverlay
+import me.rerere.rikkahub.ui.components.ai.HalfScreenCamera
 import me.rerere.rikkahub.ui.components.ai.completion.WorkspaceCompletionProvider
-import me.rerere.rikkahub.ui.components.ai.useCropLauncher
+import me.rerere.rikkahub.ui.components.visualization.LocalVizDiagnosticActions
+import me.rerere.rikkahub.ui.components.visualization.LocalVizPresentation
+import me.rerere.rikkahub.ui.components.visualization.VizDiagnosticActions
+import me.rerere.rikkahub.ui.components.visualization.VizPresentationState
+import me.rerere.rikkahub.ui.components.visualization.VisualizationViewerHost
 import me.rerere.rikkahub.ui.components.ui.permission.PermissionCamera
 import me.rerere.rikkahub.ui.components.ui.permission.PermissionManager
 import me.rerere.rikkahub.ui.components.ui.permission.rememberPermissionState
@@ -87,14 +108,11 @@ import me.rerere.rikkahub.ui.context.Navigator
 import me.rerere.rikkahub.ui.hooks.ChatInputState
 import me.rerere.rikkahub.ui.hooks.EditStateContent
 import me.rerere.rikkahub.ui.hooks.useEditState
-import me.rerere.rikkahub.utils.ImageUtils
 import me.rerere.rikkahub.utils.base64Decode
-import me.rerere.rikkahub.utils.isAllowedFileType
 import me.rerere.rikkahub.utils.navigateToChatPage
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
-import java.io.File
 import kotlin.uuid.Uuid
 
 @Composable
@@ -104,7 +122,6 @@ fun ChatPage(id: Uuid, text: String?, files: List<Uri>, nodeId: Uuid? = null) {
             parametersOf(id.toString())
         }
     )
-    val filesManager: FilesManager = koinInject()
     val navController = LocalNavController.current
     val scope = rememberCoroutineScope()
 
@@ -115,6 +132,10 @@ fun ChatPage(id: Uuid, text: String?, files: List<Uri>, nodeId: Uuid? = null) {
     val currentChatModel by vm.currentChatModel.collectAsStateWithLifecycle()
     val enableWebSearch by vm.enableWebSearch.collectAsStateWithLifecycle()
     val errors by vm.errors.collectAsStateWithLifecycle()
+    val toaster = LocalToaster.current
+    LaunchedEffect(vm) {
+        vm.attachmentImportErrors.collect { toaster.show(it, type = ToastType.Error) }
+    }
 
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val softwareKeyboardController = LocalSoftwareKeyboardController.current
@@ -150,23 +171,8 @@ fun ChatPage(id: Uuid, text: String?, files: List<Uri>, nodeId: Uuid? = null) {
     // 初始化输入状态（处理传入的 files 和 text 参数）
     LaunchedEffect(files, text) {
         if (files.isNotEmpty()) {
-            val localFiles = filesManager.createChatFilesByContents(files)
-            val contentTypes = files.mapNotNull { file ->
-                filesManager.getFileMimeType(file)
-            }
-            val parts = buildList {
-                localFiles.forEachIndexed { index, file ->
-                    val type = contentTypes.getOrNull(index)
-                    if (type?.startsWith("image/") == true) {
-                        add(UIMessagePart.Image(url = file.toString()))
-                    } else if (type?.startsWith("video/") == true) {
-                        add(UIMessagePart.Video(url = file.toString()))
-                    } else if (type?.startsWith("audio/") == true) {
-                        add(UIMessagePart.Audio(url = file.toString()))
-                    }
-                }
-            }
-            inputState.messageContent = parts
+            inputState.clearAttachments()
+            vm.addAttachments(files, ChatAttachmentKind.AUTO)
         }
         text?.base64Decode()?.let { decodedText ->
             if (decodedText.isNotEmpty()) {
@@ -175,93 +181,252 @@ fun ChatPage(id: Uuid, text: String?, files: List<Uri>, nodeId: Uuid? = null) {
         }
     }
 
-    val chatListState = rememberLazyListState()
-    LaunchedEffect(nodeId, conversation.messageNodes.size) {
-        if (!vm.chatListInitialized && conversation.messageNodes.isNotEmpty()) {
+    val chatListState = rememberSaveable(id, saver = LazyListState.Saver) { LazyListState() }
+    val markdownStore = remember(id) {
+        me.rerere.rikkahub.ui.components.message.MessageMarkdownStateStore(scope)
+    }
+    DisposableEffect(markdownStore) { onDispose { markdownStore.close() } }
+    val chatScrollIntent = rememberSaveable(id, saver = ChatScrollIntent.Saver) { ChatScrollIntent() }
+    val chatScrollController = remember(id, chatListState) {
+        ChatScrollController(chatListState, scope, chatScrollIntent)
+    }
+    DisposableEffect(chatScrollController) {
+        onDispose { chatScrollController.close() }
+    }
+    LaunchedEffect(id, nodeId, conversation.messageNodes.size) {
+        if (!chatScrollIntent.initialized && conversation.messageNodes.isNotEmpty()) {
             if (nodeId != null) {
-                val index = conversation.messageNodes.indexOfFirst { it.id == nodeId }
-                if (index >= 0) {
-                    chatListState.scrollToItem(index)
-                }
+                chatScrollController.onInitialNode(nodeId.toString())
             } else {
-                chatListState.requestScrollToItem(conversation.currentMessages.size + 5)
+                chatScrollController.onInitialBottom()
             }
-            vm.chatListInitialized = true
+            chatScrollIntent.initialized = true
         }
     }
 
-    when {
-        isBigScreen -> {
-            PermanentNavigationDrawer(
-                drawerContent = {
-                    ChatDrawerContent(
-                        navController = navController,
-                        current = conversation,
-                        vm = vm,
-                        settings = setting
-                    )
-                }
-            ) {
-                ChatPageContent(
-                    inputState = inputState,
-                    loadingJob = loadingJob,
-                    processingStatus = processingStatus,
-                    setting = setting,
-                    conversation = conversation,
-                    drawerState = drawerState,
-                    navController = navController,
-                    vm = vm,
-                    chatListState = chatListState,
-                    enableWebSearch = enableWebSearch,
-                    currentChatModel = currentChatModel,
-                    bigScreen = true,
-                    errors = errors,
-                    onDismissError = { vm.dismissError(it) },
-                    onClearAllErrors = { vm.clearAllErrors() },
-                )
+    var showFilesSheet by remember { mutableStateOf(false) }
+    val cameraTransition = remember { CameraAttachmentTransitionState() }
+    val inputFocusRequester = remember { FocusRequester() }
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val visualizationPresentation = remember(id) { VizPresentationState() }
+    val visualizationMessageIds = conversation.messageNodes.map {
+        "${it.currentMessage.id}:${it.selectIndex}"
+    }.toSet()
+    LaunchedEffect(visualizationPresentation, visualizationMessageIds) {
+        visualizationPresentation.retainMessages(visualizationMessageIds)
+    }
+    val clipboard = LocalClipboard.current
+    val onDiagnosticCopy: (String) -> Unit = { text ->
+        scope.launch {
+            clipboard.setClipEntry(ClipEntry(ClipData.newPlainText("诊断", text)))
+            toaster.show("诊断已复制")
+        }
+    }
+    val onDiagnosticFill: (String) -> Unit = { text ->
+        if (inputState.isEditing()) {
+            toaster.show("请先退出消息编辑")
+        } else {
+            val current = inputState.textContent.text.toString()
+            val separator = when {
+                current.isEmpty() -> ""
+                current.endsWith('\n') -> ""
+                else -> "\n"
+            }
+            inputState.appendText(separator + text)
+            visualizationPresentation.collapse()
+            scope.launch {
+                withFrameNanos { }
+                inputFocusRequester.requestFocus()
+                keyboardController?.show()
             }
         }
+    }
+    val viewerOpen = visualizationPresentation.active != null
+    val markdownParts = conversation.messageNodes.flatMap { node ->
+        node.currentMessage.parts.mapIndexedNotNull { index, part ->
+            if (part is me.rerere.ai.ui.UIMessagePart.Text) "${node.currentMessage.id}:${node.selectIndex}" to index
+            else null
+        }
+    }.toSet()
+    val markdownPins = buildSet {
+        visualizationPresentation.active?.messageIdentity?.let(::add)
+        if (loadingJob != null || vm.visualizationSendPending) conversation.messageNodes.lastOrNull()?.let {
+            add("${it.currentMessage.id}:${it.selectIndex}")
+        }
+    }
+    LaunchedEffect(markdownStore, markdownParts, markdownPins) {
+        markdownStore.retainParts(markdownParts, markdownPins)
+    }
+    LaunchedEffect(viewerOpen) {
+        chatScrollController.onViewer(viewerOpen)
+        if (!viewerOpen) {
+            withFrameNanos { }
+            chatScrollController.onLayoutChanged()
+        }
+    }
+    val windowInfo = LocalWindowInfo.current
+    val view = LocalView.current
+    val imeVisible = WindowInsets.isImeVisible
+    var keyboardBeforePicker by remember { mutableStateOf(false) }
+    var keyboardRestoreRequest by remember { mutableStateOf(0) }
+    var cameraActive by remember { mutableStateOf(false) }
 
-        else -> {
-            ModalNavigationDrawer(
-                drawerState = drawerState,
-                drawerContent = {
-                    ChatDrawerContent(
-                        navController = navController,
-                        current = conversation,
-                        vm = vm,
-                        settings = setting
-                    )
+    LaunchedEffect(keyboardRestoreRequest) {
+        if (keyboardRestoreRequest == 0) return@LaunchedEffect
+        val focused = withTimeoutOrNull(1500) { snapshotFlow { windowInfo.isWindowFocused }.first { it } }
+        if (focused != true) return@LaunchedEffect
+        withFrameNanos { }
+        if (showFilesSheet && !cameraActive) return@LaunchedEffect
+        if (keyboardBeforePicker) {
+            inputFocusRequester.requestFocus()
+            keyboardController?.show()
+        } else keyboardController?.hide()
+    }
+
+    CompositionLocalProvider(
+        me.rerere.rikkahub.ui.components.message.LocalMessageMarkdownStore provides markdownStore,
+        LocalVizPresentation provides visualizationPresentation,
+        LocalVizDiagnosticActions provides VizDiagnosticActions(onDiagnosticCopy, onDiagnosticFill),
+    ) {
+    ChatPageOverlayHost(
+        modalOverlayVisible = showFilesSheet,
+        content = {
+            when {
+                isBigScreen -> {
+                    PermanentNavigationDrawer(
+                        drawerContent = {
+                            ChatDrawerContent(
+                                navController = navController,
+                                current = conversation,
+                                vm = vm,
+                                settings = setting
+                            )
+                        }
+                    ) {
+                        ChatPageContent(
+                            inputState = inputState,
+                            inputFocusRequester = inputFocusRequester,
+                            cameraTransition = cameraTransition,
+                            onMoreClick = {
+                                keyboardBeforePicker = ViewCompat.getRootWindowInsets(view)
+                                    ?.isVisible(WindowInsetsCompat.Type.ime()) ?: imeVisible
+                                showFilesSheet = true
+                            },
+                            loadingJob = loadingJob,
+                            processingStatus = processingStatus,
+                            setting = setting,
+                            conversation = conversation,
+                            drawerState = drawerState,
+                            navController = navController,
+                            vm = vm,
+                            chatListState = chatListState,
+                            chatScrollController = chatScrollController,
+                            enableWebSearch = enableWebSearch,
+                            currentChatModel = currentChatModel,
+                            bigScreen = true,
+                            errors = errors,
+                            onDismissError = { vm.dismissError(it) },
+                            onClearAllErrors = { vm.clearAllErrors() },
+                        )
+                    }
                 }
-            ) {
-                ChatPageContent(
+
+                else -> {
+                    ModalNavigationDrawer(
+                        drawerState = drawerState,
+                        drawerContent = {
+                            ChatDrawerContent(
+                                navController = navController,
+                                current = conversation,
+                                vm = vm,
+                                settings = setting
+                            )
+                        }
+                    ) {
+                        ChatPageContent(
+                            inputState = inputState,
+                            inputFocusRequester = inputFocusRequester,
+                            cameraTransition = cameraTransition,
+                            onMoreClick = {
+                                keyboardBeforePicker = ViewCompat.getRootWindowInsets(view)
+                                    ?.isVisible(WindowInsetsCompat.Type.ime()) ?: imeVisible
+                                showFilesSheet = true
+                            },
+                            loadingJob = loadingJob,
+                            processingStatus = processingStatus,
+                            setting = setting,
+                            conversation = conversation,
+                            drawerState = drawerState,
+                            navController = navController,
+                            vm = vm,
+                            chatListState = chatListState,
+                            chatScrollController = chatScrollController,
+                            enableWebSearch = enableWebSearch,
+                            currentChatModel = currentChatModel,
+                            bigScreen = false,
+                            errors = errors,
+                            onDismissError = { vm.dismissError(it) },
+                            onClearAllErrors = { vm.clearAllErrors() },
+                        )
+                    }
+                    BackHandler(drawerState.isOpen) {
+                        scope.launch { drawerState.close() }
+                    }
+                }
+            }
+        },
+        overlay = {
+            if (showFilesSheet) {
+                ChatFilesPickerSheet(
                     inputState = inputState,
-                    loadingJob = loadingJob,
-                    processingStatus = processingStatus,
                     setting = setting,
                     conversation = conversation,
-                    drawerState = drawerState,
-                    navController = navController,
+                    assistant = setting.getCurrentAssistant(),
                     vm = vm,
-                    chatListState = chatListState,
-                    enableWebSearch = enableWebSearch,
-                    currentChatModel = currentChatModel,
-                    bigScreen = false,
-                    errors = errors,
-                    onDismissError = { vm.dismissError(it) },
-                    onClearAllErrors = { vm.clearAllErrors() },
+                    onCameraStarted = { cameraActive = true },
+                    onRestoreKeyboard = { keyboardRestoreRequest++ },
+                    onCameraCancelled = {
+                        cameraActive = false
+                        cameraTransition.photo?.let { cameraTransition.finish(it) }
+                    },
+                    onCameraImageReady = { url, bounds, revision -> cameraTransition.prepare(url, bounds, revision) },
+                    onDismiss = {
+                        showFilesSheet = false
+                        cameraActive = false
+                        cameraTransition.photo?.let { cameraTransition.finish(it) }
+                    },
                 )
             }
-            BackHandler(drawerState.isOpen) {
-                scope.launch { drawerState.close() }
+
+            CameraAttachmentTransition(cameraTransition, inputState) {
+                showFilesSheet = false
+                cameraActive = false
+                keyboardRestoreRequest++
             }
-        }
+
+            VisualizationViewerHost(
+                active = visualizationPresentation.active,
+                store = vm.visualizationStore,
+                loading = loadingJob != null || vm.visualizationSendPending,
+                sendingDisabled = loadingJob != null || vm.visualizationSendPending,
+                conversation = conversation,
+                presentation = visualizationPresentation,
+                onDismiss = { visualizationPresentation.collapse() },
+                onDiagnosticCopy = onDiagnosticCopy,
+                onDiagnosticFill = onDiagnosticFill,
+                onMessage = vm::handleVisualizationMessage,
+            )
+        },
+    )
     }
 }
 
 @Composable
 private fun ChatPageContent(
     inputState: ChatInputState,
+    inputFocusRequester: FocusRequester,
+    cameraTransition: CameraAttachmentTransitionState,
+    onMoreClick: () -> Unit,
     loadingJob: Job?,
     processingStatus: String? = null,
     setting: Settings,
@@ -271,6 +436,7 @@ private fun ChatPageContent(
     navController: Navigator,
     vm: ChatVM,
     chatListState: LazyListState,
+    chatScrollController: ChatScrollController,
     enableWebSearch: Boolean,
     currentChatModel: Model?,
     errors: List<ChatError>,
@@ -284,7 +450,6 @@ private fun ChatPageContent(
     val hazeState = rememberHazeState()
     val assistant = setting.getCurrentAssistant()
     val contextUsage by vm.contextUsage.collectAsStateWithLifecycle()
-    var showFilesSheet by remember { mutableStateOf(false) }
     var showContextUsageDialog by remember { mutableStateOf(false) }
 
     val completionProviders = remember(assistant.workspaceId, conversation.workspaceCwd, workspaceRepository) {
@@ -327,35 +492,30 @@ private fun ChatPageContent(
             },
             bottomBar = {
                 ChatInput(
+                    onPasteImage = { vm.addAttachments(listOf(it), ChatAttachmentKind.IMAGE) },
+                    onPasteTextAsFile = vm::addPastedText,
                     state = inputState,
                     loading = loadingJob != null,
                     settings = setting,
                     hazeState = hazeState,
                     contextUsage = contextUsage,
                     completionProviders = completionProviders,
+                    inputFocusRequester = inputFocusRequester,
+                    cameraTransition = cameraTransition,
                     onCancelClick = {
                         vm.stopGeneration()
                     },
                     enableSearch = enableWebSearch,
                     onToggleSearch = {
-                        val current = setting.getCurrentAssistant()
-                        vm.updateSettings(
-                            setting.copy(
-                                assistants = setting.assistants.map { assistant ->
-                                    if (assistant.id == current.id) {
-                                        assistant.copy(enableWebSearch = !enableWebSearch)
-                                    } else {
-                                        assistant
-                                    }
-                                }
-                            )
-                        )
-                    },
+                            val assistantId = setting.getCurrentAssistant().id
+                            vm.updateAssistant(assistantId) { it.copy(enableWebSearch = !it.enableWebSearch) }
+                        },
                     onSendClick = {
                         if (currentChatModel == null) {
                             toaster.show("请先选择模型", type = ToastType.Error)
                             return@ChatInput
                         }
+                        if (!inputState.isEditing() && inputState.getContents().isEmptyInputMessage()) return@ChatInput
                         if (inputState.isEditing()) {
                             vm.handleMessageEdit(
                                 parts = inputState.getContents(),
@@ -363,13 +523,12 @@ private fun ChatPageContent(
                             )
                         } else {
                             vm.handleMessageSend(inputState.getContents())
-                            scope.launch {
-                                chatListState.requestScrollToItem(conversation.currentMessages.size + 5)
-                            }
+                            chatScrollController.onSend(conversation.messageNodes.size + 1)
                         }
                         inputState.clearInput()
                     },
                     onLongSendClick = {
+                        if (!inputState.isEditing() && inputState.getContents().isEmptyInputMessage()) return@ChatInput
                         if (inputState.isEditing()) {
                             vm.handleMessageEdit(
                                 parts = inputState.getContents(),
@@ -377,38 +536,24 @@ private fun ChatPageContent(
                             )
                         } else {
                             vm.handleMessageSend(content = inputState.getContents(), answer = false)
-                            scope.launch {
-                                chatListState.requestScrollToItem(conversation.currentMessages.size + 5)
-                            }
+                            chatScrollController.onSend(conversation.messageNodes.size + 1)
                         }
                         inputState.clearInput()
                     },
                     onUpdateChatModel = {
                         vm.setChatModel(assistant = setting.getCurrentAssistant(), model = it)
                     },
-                    onUpdateAssistant = {
-                        vm.updateSettings(
-                            setting.copy(
-                                assistants = setting.assistants.map { assistant ->
-                                    if (assistant.id == it.id) {
-                                        it
-                                    } else {
-                                        assistant
-                                    }
-                                }
-                            )
-                        )
-                    },
+                    onUpdateAssistant = { transform -> vm.updateAssistant(assistant.id, transform) },
                     onUpdateSearchService = { index ->
-                        vm.updateSettings(
-                            setting.copy(
-                                searchServiceSelected = index
-                            )
-                        )
-                    },
-                    onMoreClick = {
-                        showFilesSheet = true
-                    },
+                            val selectedId = setting.searchServices.getOrNull(index)?.id
+                            if (selectedId != null) {
+                                vm.updateSettings { latest ->
+                                    val selectedIndex = latest.searchServices.indexOfFirst { it.id == selectedId }
+                                    if (selectedIndex < 0) latest else latest.copy(searchServiceSelected = selectedIndex)
+                                }
+                            }
+                        },
+                    onMoreClick = onMoreClick,
                     onContextUsageClick = {
                         showContextUsageDialog = true
                     },
@@ -419,8 +564,10 @@ private fun ChatPageContent(
             ChatList(
                 innerPadding = innerPadding,
                 conversation = conversation,
+                visualizationStore = vm.visualizationStore,
                 state = chatListState,
-                loading = loadingJob != null,
+                scrollController = chatScrollController,
+                loading = loadingJob != null || vm.visualizationSendPending,
                 processingStatus = processingStatus,
                 previewMode = previewMode,
                 settings = setting,
@@ -449,16 +596,13 @@ private fun ChatPageContent(
                     }
                 },
                 onUpdateMessage = { newNode ->
-                    vm.updateConversation(
-                        conversation.copy(
-                            messageNodes = conversation.messageNodes.map { node ->
-                                if (node.id == newNode.id) {
-                                    newNode
-                                } else {
-                                    node
-                                }
+                    vm.updateConversation { current ->
+                        current.copy(
+                            messageNodes = current.messageNodes.map { node ->
+                                if (node.id == newNode.id) newNode else node
                             }
-                        ))
+                        )
+                    }
                     vm.saveConversationAsync()
                 },
                 onClickSuggestion = { suggestion ->
@@ -473,9 +617,8 @@ private fun ChatPageContent(
                 },
                 onJumpToMessage = { index ->
                     previewMode = false
-                    scope.launch {
-                        chatListState.requestScrollToItem(index)
-                    }
+                    val nodeId = conversation.messageNodes.getOrNull(index)?.id?.toString()
+                    if (nodeId != null) chatScrollController.onPreviewJump(nodeId)
                 },
                 onToolApproval = { toolCallId, approved, reason ->
                     vm.handleToolApproval(toolCallId, approved, reason)
@@ -483,26 +626,16 @@ private fun ChatPageContent(
                 onToolAnswer = { toolCallId, answer ->
                     vm.handleToolAnswer(toolCallId, answer)
                 },
+                onVisualizationMessage = vm::handleVisualizationMessage,
                 onToggleFavorite = { node ->
                     vm.toggleMessageFavorite(node)
                 },
                 onConversationSystemPromptChange = { newPrompt ->
-                    vm.updateConversation(conversation.copy(customSystemPrompt = newPrompt))
-                    vm.saveConversationAsync()
+                    vm.updateConversationMetadata { it.copy(customSystemPrompt = newPrompt) }
                 },
             )
         }
 
-        if (showFilesSheet) {
-            ChatFilesPickerSheet(
-                inputState = inputState,
-                setting = setting,
-                conversation = conversation,
-                assistant = assistant,
-                vm = vm,
-                onDismiss = { showFilesSheet = false },
-            )
-        }
 
         if (showContextUsageDialog && currentChatModel != null) {
             ContextUsageDialog(
@@ -524,99 +657,77 @@ private fun ChatFilesPickerSheet(
     conversation: Conversation,
     assistant: Assistant,
     vm: ChatVM,
+    onCameraStarted: () -> Unit,
+    onRestoreKeyboard: () -> Unit,
+    onCameraCancelled: () -> Unit,
+    onCameraImageReady: (String, Rect, Long) -> Unit,
     onDismiss: () -> Unit,
 ) {
     val context = LocalContext.current
     val toaster = LocalToaster.current
-    val filesManager: FilesManager = koinInject()
     var showInjectionSheet by remember { mutableStateOf(false) }
     var showCompressDialog by remember { mutableStateOf(false) }
+    val cameraPanel = remember { CameraPanelState() }
+    val filesPickerScrollState = rememberScrollState()
+    val keyboardController = LocalSoftwareKeyboardController.current
+    var cameraRequested by remember { mutableStateOf(false) }
+    var cameraDraftRevision by remember { mutableStateOf(0L) }
+    var cameraLaunchBounds by remember { mutableStateOf(Rect.Zero) }
+    var latestCameraButtonBounds by remember { mutableStateOf(Rect.Zero) }
+    var active by remember { mutableStateOf(true) }
+    DisposableEffect(Unit) { onDispose { active = false } }
 
     fun dismissAll() {
+        if (!active) return
+        active = false
         showInjectionSheet = false
         showCompressDialog = false
+        cameraPanel.dismiss()
+        cameraRequested = false
         onDismiss()
+        onRestoreKeyboard()
+    }
+
+    fun closeCamera(dismissPicker: Boolean = false) {
+        if (cameraPanel.requestClose(dismissPicker)) {
+            if (!latestCameraButtonBounds.isEmpty) cameraLaunchBounds = latestCameraButtonBounds
+            onCameraCancelled()
+            // 附件与相机全程保持输入法收起，避免落点被输入法遮住。
+            keyboardController?.hide()
+        }
     }
 
     val cameraPermission = rememberPermissionState(PermissionCamera)
     PermissionManager(permissionState = cameraPermission)
 
-    var cameraOutputUri by remember { mutableStateOf<Uri?>(null) }
-    var cameraOutputFile by remember { mutableStateOf<File?>(null) }
-    val (_, launchCameraCrop) = useCropLauncher(
-        onCroppedImageReady = { croppedUri ->
-            inputState.addImages(filesManager.createChatFilesByContents(listOf(croppedUri)))
-            dismissAll()
-        },
-        onCleanup = {
-            cameraOutputFile?.delete()
-            cameraOutputFile = null
-            cameraOutputUri = null
-        }
-    )
-    val cameraLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { captureSuccessful ->
-        if (captureSuccessful && cameraOutputUri != null) {
-            // 本地补丁：拍照成功后始终进入裁剪/预览页，不再受“跳过图片编辑”影响。
-            launchCameraCrop(cameraOutputUri!!)
-        } else {
-            cameraOutputFile?.delete()
-            cameraOutputFile = null
-            cameraOutputUri = null
+    LaunchedEffect(cameraRequested, cameraPermission.allRequiredPermissionsGranted) {
+        if (cameraRequested && cameraPermission.allRequiredPermissionsGranted) {
+            cameraRequested = false
+            cameraPanel.open()
+            onCameraStarted()
         }
     }
-    val onLaunchCamera: () -> Unit = {
-        if (cameraPermission.allRequiredPermissionsGranted) {
-            cameraOutputFile = context.cacheDir.resolve("camera_${Uuid.random()}.jpg")
-            cameraOutputUri = FileProvider.getUriForFile(
-                context, "${context.packageName}.fileprovider", cameraOutputFile!!
-            )
-            cameraLauncher.launch(cameraOutputUri!!)
-        } else {
+    val onLaunchCamera: (Rect) -> Unit = { bounds ->
+        cameraLaunchBounds = bounds
+        cameraDraftRevision = inputState.attachmentRevision
+        cameraRequested = true
+        if (!cameraPermission.allRequiredPermissionsGranted) {
             cameraPermission.requestPermissions()
         }
     }
 
-    var preCropTempFile by remember { mutableStateOf<File?>(null) }
-    val (_, launchImageCrop) = useCropLauncher(
-        onCroppedImageReady = { croppedUri ->
-            inputState.addImages(filesManager.createChatFilesByContents(listOf(croppedUri)))
-            dismissAll()
-        },
-        onCleanup = {
-            preCropTempFile?.delete()
-            preCropTempFile = null
-        }
-    )
     val imagePickerLauncher =
-        rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { selectedUri ->
-            if (selectedUri != null) {
-                Log.d("ImagePickButton", "Selected URI: $selectedUri")
-                val tempFile = File(context.appTempFolder, "pick_temp_${System.currentTimeMillis()}.jpg")
-                runCatching {
-                    val source = selectedUri
-                    // HEIF/HEIC（尤其 HDR HEIF）交给 UCrop 前先解码转为 JPEG，规避裁剪解码失败。
-                    val converted = ImageUtils.isHeifImage(context, source) &&
-                        ImageUtils.convertHeifToJpeg(context, source, tempFile)
-                    if (!converted) {
-                        context.contentResolver.openInputStream(source)?.use { input ->
-                            tempFile.outputStream().use { output -> input.copyTo(output) }
-                        }
-                    }
-                    preCropTempFile = tempFile
-                    launchImageCrop(tempFile.toUri())
-                }.onFailure {
-                    Log.e("ImagePickButton", "Failed to copy image to temp, falling back", it)
-                    launchImageCrop(selectedUri)
-                }
-            } else {
-                Log.d("ImagePickButton", "No image selected")
+        rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) { selectedUris ->
+            if (selectedUris.isNotEmpty()) {
+                vm.addGalleryImages(selectedUris)
+                dismissAll()
             }
         }
 
     val videoPickerLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) { selectedUris ->
             if (selectedUris.isNotEmpty()) {
-                inputState.addVideos(filesManager.createChatFilesByContents(selectedUris))
+                vm.addAttachments(selectedUris, ChatAttachmentKind.VIDEO)
                 dismissAll()
             }
         }
@@ -624,7 +735,7 @@ private fun ChatFilesPickerSheet(
     val audioPickerLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) { selectedUris ->
             if (selectedUris.isNotEmpty()) {
-                inputState.addAudios(filesManager.createChatFilesByContents(selectedUris))
+                vm.addAttachments(selectedUris, ChatAttachmentKind.AUDIO)
                 dismissAll()
             }
         }
@@ -632,41 +743,46 @@ private fun ChatFilesPickerSheet(
     val filePickerLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
             if (uris.isNotEmpty()) {
-                val documents = uris.mapNotNull { uri ->
-                    val fileName = filesManager.getFileNameFromUri(uri) ?: "file"
-                    val mime = filesManager.getFileMimeType(uri) ?: "text/plain"
-                    if (isAllowedFileType(fileName, mime)) {
-                        val localUri = filesManager.createChatFilesByContents(listOf(uri)).firstOrNull()
-                            ?: run {
-                                toaster.show(
-                                    context.getString(R.string.chat_input_file_read_failed, fileName),
-                                    type = ToastType.Error
-                                )
-                                return@mapNotNull null
-                            }
-                        UIMessagePart.Document(url = localUri.toString(), fileName = fileName, mime = mime)
-                    } else {
-                        toaster.show(
-                            context.getString(R.string.chat_input_unsupported_file_type, fileName),
-                            type = ToastType.Error
-                        )
-                        null
-                    }
-                }
-                if (documents.isNotEmpty()) {
-                    inputState.addFiles(documents)
-                    dismissAll()
+                vm.addAttachments(uris, ChatAttachmentKind.DOCUMENT) { part ->
+                    if (active && part != null) dismissAll()
                 }
             }
         }
 
-    val filesSheetState = rememberBottomSheetState(
-        initialValue = SheetValue.Hidden,
-        enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)
-    )
-    ModalBottomSheet(
-        sheetState = filesSheetState,
+    FilesPickerOverlay(
+        cameraPanel = cameraPanel,
         onDismissRequest = { dismissAll() },
+        onCloseCamera = { closeCamera(it) },
+        camera = {
+            HalfScreenCamera(
+                onCancel = { closeCamera() },
+                launchBounds = cameraLaunchBounds,
+                visible = cameraPanel.expanded,
+                onClosed = {
+                    when (cameraPanel.finishClose()) {
+                        CameraCloseAction.RETURN_TO_ATTACHMENTS -> Unit
+                        CameraCloseAction.DISMISS_PICKER -> dismissAll()
+                        null -> Unit
+                    }
+                },
+                onTransitionProgress = cameraPanel::updateProgress,
+                onCaptured = captured@{ file, bounds ->
+                    if (!cameraPanel.acceptsCapture) {
+                        file.delete()
+                        return@captured
+                    }
+                    val revision = cameraDraftRevision
+                    vm.addCameraImage(file, revision) { url ->
+                        if (active && cameraPanel.acceptsCapture) {
+                            if (url != null) onCameraImageReady(url, bounds, revision)
+                            else {
+                                dismissAll()
+                            }
+                        }
+                    }
+                },
+            )
+        },
     ) {
         FilesPicker(
             conversation = conversation,
@@ -676,23 +792,8 @@ private fun ChatFilesPickerSheet(
             onCompressContext = { additionalPrompt, targetTokens, keepRecentMessages ->
                 vm.handleCompressContext(additionalPrompt, targetTokens, keepRecentMessages)
             },
-            onUpdateAssistant = {
-                vm.updateSettings(
-                    setting.copy(
-                        assistants = setting.assistants.map { assistant ->
-                            if (assistant.id == it.id) {
-                                it
-                            } else {
-                                assistant
-                            }
-                        }
-                    )
-                )
-            },
-            onUpdateConversation = {
-                vm.updateConversation(it)
-                vm.saveConversationAsync()
-            },
+            onUpdateAssistant = { transform -> vm.updateAssistant(assistant.id, transform) },
+            onUpdateConversation = vm::updateConversationMetadata,
             showInjectionSheet = showInjectionSheet,
             onShowInjectionSheetChange = { showInjectionSheet = it },
             showCompressDialog = showCompressDialog,
@@ -700,8 +801,14 @@ private fun ChatFilesPickerSheet(
             onDismiss = { dismissAll() },
             onTakePic = onLaunchCamera,
             onPickImage = { imagePickerLauncher.launch("image/*") },
+            onToggleGalleryImage = vm::toggleGalleryImage,
             onPickVideo = { videoPickerLauncher.launch("video/*") },
             onPickAudio = { audioPickerLauncher.launch("audio/*") },
+            scrollState = filesPickerScrollState,
+            onCameraButtonBoundsChange = { bounds ->
+                latestCameraButtonBounds = bounds
+                if (cameraPanel.returningToAttachments) cameraLaunchBounds = bounds
+            },
             onPickFile = { filePickerLauncher.launch(arrayOf("*/*")) },
         )
     }

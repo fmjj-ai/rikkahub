@@ -42,7 +42,7 @@ fun TagsInput(
     value: List<Uuid>,
     tags: List<Tag>,
     modifier: Modifier = Modifier,
-    onValueChange: (value: List<Uuid>, tags: List<Tag>) -> Unit,
+    onValueChange: ((List<Uuid>, List<Tag>) -> Pair<List<Uuid>, List<Tag>>) -> Unit,
 ) {
     var showAddDialog by remember { mutableStateOf(false) }
 
@@ -66,9 +66,7 @@ fun TagsInput(
                     modifier = Modifier
                         .size(16.dp)
                         .clickable {
-                            onValueChange(
-                                value.filter { it != tag.id }, tags
-                            )
+                            onValueChange { selected, all -> selected.filterNot { it == tag.id } to all }
                         },
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -127,7 +125,7 @@ fun TagsInput(
                         unselectedTags.forEach { tag ->
                             InputChip(
                                 onClick = {
-                                    onValueChange(value + tag.id, tags)
+                                    onValueChange { selected, all -> (selected + tag.id).distinct() to all }
                                     showAddDialog = false
                                     tagName = ""
                                     showError = false
@@ -185,7 +183,11 @@ fun TagsInput(
                         } else {
                             // 创建新标签
                             val newTag = Tag(id = Uuid.random(), name = trimmedName)
-                            onValueChange(value + newTag.id, tags + newTag)
+                            onValueChange { selected, all ->
+                                    val existing = all.find { it.name.equals(newTag.name, ignoreCase = true) }
+                                    val chosen = existing ?: newTag
+                                    (selected + chosen.id).distinct() to if (existing == null) all + chosen else all
+                                }
                             showAddDialog = false
                             tagName = ""
                             showError = false

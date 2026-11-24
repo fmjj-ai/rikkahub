@@ -1,82 +1,105 @@
 package me.rerere.rikkahub.ui.components.ai
 
-import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
-import androidx.core.net.toFile
+import androidx.core.net.toUri
 import com.dokar.sonner.ToastType
-import com.yalantis.ucrop.UCrop
-import com.yalantis.ucrop.UCropActivity
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import me.rerere.common.android.Logging
 import me.rerere.common.android.appTempFolder
 import me.rerere.rikkahub.ui.context.LocalToaster
+import me.rerere.rikkahub.ui.crop.ImageCropDialog
 import java.io.File
+import kotlin.uuid.Uuid
 
+/** 原生裁剪结果只作为临时文件交付；完成、失败、取消或离开页面都清理本次资源。 */
 @Composable
 internal fun useCropLauncher(
-    onCroppedImageReady: (Uri) -> Unit,
+    onCroppedImageReady: suspend (Uri) -> Unit,
     onCleanup: (() -> Unit)? = null,
     aspectRatio: Pair<Float, Float>? = null,
-    freeStyleCropEnabled: Boolean = true
-): Pair<ActivityResultLauncher<Intent>, (Uri) -> Unit> {
+    freeStyleCropEnabled: Boolean = true,
+): (Uri) -> Unit {
     val context = LocalContext.current
     val toaster = LocalToaster.current
-    var cropOutputUri by remember { mutableStateOf<Uri?>(null) }
+    val scope = rememberCoroutineScope()
+    val currentOnReady by rememberUpdatedState(onCroppedImageReady)
+    val currentOnCleanup by rememberUpdatedState(onCleanup)
+    var source by remember { mutableStateOf<Uri?>(null) }
+    var saving by remember { mutableStateOf(false) }
+    var cleanupPending by remember { mutableStateOf(false) }
+    val ratio = aspectRatio?.let { (width, height) ->
+        require(width.isFinite() && height.isFinite() && width > 0 && height > 0)
+        width / height
+    }
+    require(freeStyleCropEnabled || ratio != null) { "固定裁剪模式需要有效宽高比" }
 
-    val cropActivityLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        when (result.resultCode) {
-            android.app.Activity.RESULT_OK -> {
-                cropOutputUri?.let { croppedUri ->
-                    onCroppedImageReady(croppedUri)
+    fun finish() {
+        source = null
+        if (cleanupPending) {
+            cleanupPending = false
+            currentOnCleanup?.invoke()
+        }
+    }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            if (cleanupPending) {
+                cleanupPending = false
+                currentOnCleanup?.invoke()
+            }
+        }
+    }
+
+    source?.let { uri ->
+        ImageCropDialog(
+            image = uri,
+            aspectRatio = ratio,
+            busy = saving,
+            onDismiss = { if (!saving) finish() },
+            onConfirm = { bitmap ->
+                if (!saving) {
+                    saving = true
+                    scope.launch {
+                        val output = File(context.appTempFolder, "crop_output_${Uuid.random()}.png")
+                        try {
+                            withContext(Dispatchers.IO) {
+                                output.outputStream().use { stream ->
+                                    check(bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)) { "图片编码失败" }
+                                }
+                            }
+                            currentOnReady(output.toUri())
+                        } catch (error: CancellationException) {
+                            throw error
+                        } catch (error: Exception) {
+                            Logging.log("CropLauncher", "图片裁剪失败：${error.stackTraceToString()}")
+                            toaster.show("图片裁剪失败：${error.message.orEmpty()}", type = ToastType.Error)
+                        } finally {
+                            output.delete()
+                            saving = false
+                            finish()
+                        }
+                    }
                 }
-            }
-
-            UCrop.RESULT_ERROR -> {
-                val error = result.data?.let { UCrop.getError(it) }
-                Logging.log(
-                    "CropLauncher",
-                    "crop failed: ${error?.message} | ${error?.stackTraceToString()}"
-                )
-                toaster.show(
-                    "Failed to crop image: ${error?.message ?: "unknown error"}",
-                    type = ToastType.Error
-                )
-            }
-        }
-        cropOutputUri?.toFile()?.delete()
-        cropOutputUri = null
-        onCleanup?.invoke()
+            },
+        )
     }
-
-    val launchCrop: (Uri) -> Unit = { sourceUri ->
-        val outputFile = File(context.appTempFolder, "crop_output_${System.currentTimeMillis()}.jpg")
-        cropOutputUri = Uri.fromFile(outputFile)
-
-        var crop = UCrop.of(sourceUri, cropOutputUri!!).withOptions(UCrop.Options().apply {
-            setFreeStyleCropEnabled(freeStyleCropEnabled)
-            setAllowedGestures(
-                UCropActivity.SCALE, UCropActivity.ROTATE, UCropActivity.NONE
-            )
-            setCompressionFormat(Bitmap.CompressFormat.PNG)
-        }).withMaxResultSize(4096, 4096)
-        aspectRatio?.let { (x, y) ->
-            crop = crop.withAspectRatio(x, y)
+    return { uri ->
+        if (!saving) {
+            cleanupPending = true
+            source = uri
         }
-        val cropIntent = crop.getIntent(context)
-
-        cropActivityLauncher.launch(cropIntent)
     }
-
-    return Pair(cropActivityLauncher, launchCrop)
 }

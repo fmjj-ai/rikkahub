@@ -98,7 +98,7 @@ private fun AssistantMemoryContent(
     innerPadding: PaddingValues,
     assistant: Assistant,
     memories: List<AssistantMemory>,
-    onUpdateAssistant: (Assistant) -> Unit,
+    onUpdateAssistant: ((Assistant) -> Assistant) -> Unit,
     onAddMemory: (AssistantMemory) -> Unit,
     onUpdateMemory: (AssistantMemory) -> Unit,
     onDeleteMemory: (AssistantMemory) -> Unit,
@@ -176,11 +176,9 @@ private fun AssistantMemoryContent(
                     Switch(
                         checked = assistant.enableMemory,
                         onCheckedChange = {
-                            onUpdateAssistant(
-                                assistant.copy(
+                            onUpdateAssistant { currentAssistant -> currentAssistant.copy(
                                     enableMemory = it
-                                )
-                            )
+                                ) }
                         }
                     )
                 }
@@ -196,11 +194,9 @@ private fun AssistantMemoryContent(
                     Switch(
                         checked = assistant.useGlobalMemory,
                         onCheckedChange = {
-                            onUpdateAssistant(
-                                assistant.copy(
+                            onUpdateAssistant { currentAssistant -> currentAssistant.copy(
                                     useGlobalMemory = it
-                                )
-                            )
+                                ) }
                         },
                         enabled = assistant.enableMemory
                     )
@@ -217,11 +213,9 @@ private fun AssistantMemoryContent(
                     Switch(
                         checked = assistant.enableRecentChatsReference,
                         onCheckedChange = {
-                            onUpdateAssistant(
-                                assistant.copy(
+                            onUpdateAssistant { currentAssistant -> currentAssistant.copy(
                                     enableRecentChatsReference = it
-                                )
-                            )
+                                ) }
                         }
                     )
                 }
@@ -237,15 +231,40 @@ private fun AssistantMemoryContent(
                     Switch(
                         checked = assistant.enableTimeReminder,
                         onCheckedChange = {
-                            onUpdateAssistant(
-                                assistant.copy(
+                            onUpdateAssistant { currentAssistant -> currentAssistant.copy(
                                     enableTimeReminder = it
-                                )
-                            )
+                                ) }
                         }
                     )
                 }
             )
+            if (assistant.enableTimeReminder) {
+                item(
+                    headlineContent = { Text("时间提醒间隔") },
+                    supportingContent = { Text("两条消息间隔超过所设分钟数时提醒；默认仍为 60 分钟。") },
+                    trailingContent = {
+                        var open by remember { mutableStateOf(false) }
+                        var minutes by remember(assistant.id, assistant.timeReminderIntervalMinutes) {
+                            mutableStateOf(assistant.timeReminderIntervalMinutes.toString())
+                        }
+                        val value = minutes.toIntOrNull()?.takeIf { it >= 1 }
+                        TextButton(onClick = { open = true }) { Text("${assistant.timeReminderIntervalMinutes} 分钟") }
+                        if (open) AlertDialog(
+                            onDismissRequest = { open = false }, title = { Text("时间提醒间隔（分钟）") },
+                            text = { TextField(minutes, { minutes = it }, singleLine = true, isError = value == null) },
+                            confirmButton = {
+                                TextButton(enabled = value != null, onClick = {
+                                    value?.let { interval ->
+                            onUpdateAssistant { current -> current.copy(timeReminderIntervalMinutes = interval) }
+                        }
+                                    open = false
+                                }) { Text("保存") }
+                            },
+                            dismissButton = { TextButton(onClick = { open = false }) { Text("取消") } },
+                        )
+                    },
+                )
+            }
         }
 
         Box(

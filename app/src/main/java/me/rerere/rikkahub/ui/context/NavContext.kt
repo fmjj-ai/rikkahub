@@ -4,7 +4,14 @@ import androidx.compose.runtime.compositionLocalOf
 import androidx.navigation3.runtime.NavKey
 import me.rerere.rikkahub.Screen
 
-class Navigator(private val backStack: MutableList<NavKey>) {
+class Navigator(
+    private val backStack: MutableList<NavKey>,
+    private val unanchoredOrigins: MutableMap<String, String> = mutableMapOf(),
+) {
+    fun navigateWithoutAnchor(screen: Screen) = navigate(screen) {
+        withoutAnchor = true
+    }
+
     fun navigate(screen: Screen, builder: NavigateOptionsBuilder.() -> Unit = {}) {
         val options = NavigateOptionsBuilder().apply(builder)
 
@@ -22,10 +29,21 @@ class Navigator(private val backStack: MutableList<NavKey>) {
             return
         }
 
+        if (unanchoredOrigins.isNotEmpty()) {
+            val active = backStack.mapTo(HashSet()) { it.toString() }
+            unanchoredOrigins.keys.retainAll(active)
+        }
+        val source = backStack.lastOrNull()
+        if (options.withoutAnchor && source != null) {
+            unanchoredOrigins[screen.toString()] = source.toString()
+        } else {
+            unanchoredOrigins.remove(screen.toString())
+        }
         backStack.add(screen)
     }
 
     fun clearAndNavigate(screen: Screen) {
+        unanchoredOrigins.clear()
         backStack.clear()
         backStack.add(screen)
     }
@@ -38,6 +56,7 @@ class Navigator(private val backStack: MutableList<NavKey>) {
 class NavigateOptionsBuilder {
     internal var popUpToScreen: Screen? = null
     internal var popUpToInclusive: Boolean = false
+    internal var withoutAnchor: Boolean = false
     var launchSingleTop: Boolean = false
 
     fun popUpTo(screen: Screen, builder: PopUpToBuilder.() -> Unit = {}) {

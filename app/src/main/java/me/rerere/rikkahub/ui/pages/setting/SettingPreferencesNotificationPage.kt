@@ -37,9 +37,9 @@ fun SettingPreferencesNotificationPage(vm: SettingVM = koinViewModel()) {
     val settings by vm.settings.collectAsStateWithLifecycle()
     var displaySetting by remember(settings) { mutableStateOf(settings.displaySetting) }
 
-    fun updateDisplaySetting(setting: DisplaySetting) {
-        displaySetting = setting
-        vm.updateSettings(settings.copy(displaySetting = setting))
+    fun updateDisplaySetting(transform: (DisplaySetting) -> DisplaySetting) {
+        displaySetting = transform(displaySetting)
+        vm.updateSettings { latest -> latest.copy(displaySetting = transform(latest.displaySetting)) }
     }
 
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
@@ -83,7 +83,7 @@ fun SettingPreferencesNotificationPage(vm: SettingVM = koinViewModel()) {
                             Switch(
                                 checked = displaySetting.showUpdates,
                                 onCheckedChange = {
-                                    updateDisplaySetting(displaySetting.copy(showUpdates = it))
+                                    updateDisplaySetting { current -> current.copy(showUpdates = it) }
                                 }
                             )
                         },
@@ -98,7 +98,7 @@ fun SettingPreferencesNotificationPage(vm: SettingVM = koinViewModel()) {
                                     if (it && !permissionState.allPermissionsGranted) {
                                         permissionState.requestPermissions()
                                     }
-                                    updateDisplaySetting(displaySetting.copy(enableNotificationOnMessageGeneration = it))
+                                    updateDisplaySetting { current -> current.copy(enableNotificationOnMessageGeneration = it) }
                                 }
                             )
                         },
@@ -111,7 +111,7 @@ fun SettingPreferencesNotificationPage(vm: SettingVM = koinViewModel()) {
                                 Switch(
                                     checked = displaySetting.enableLiveUpdateNotification,
                                     onCheckedChange = {
-                                        updateDisplaySetting(displaySetting.copy(enableLiveUpdateNotification = it))
+                                        updateDisplaySetting { current -> current.copy(enableLiveUpdateNotification = it) }
                                     }
                                 )
                             },

@@ -80,6 +80,7 @@ import me.rerere.rikkahub.data.model.AssistantAffectScope
 import me.rerere.rikkahub.data.model.MessageNode
 import me.rerere.rikkahub.data.model.replaceRegexes
 import me.rerere.rikkahub.ui.components.richtext.MarkdownBlock
+import me.rerere.rikkahub.ui.components.message.tools.PlotFunctionToolContent
 import me.rerere.rikkahub.ui.components.richtext.ZoomableAsyncImage
 import me.rerere.rikkahub.ui.components.richtext.buildMarkdownPreviewHtml
 import me.rerere.rikkahub.ui.components.webview.WebViewContentCache
@@ -100,8 +101,12 @@ import kotlin.time.Duration.Companion.milliseconds
 @Composable
 fun ChatMessage(
     node: MessageNode,
+    messageIdentity: String = node.currentMessage.id.toString(),
+    conversationId: String = "",
+    visualizationStore: me.rerere.rikkahub.ui.components.visualization.VizSessionStore? = null,
     modifier: Modifier = Modifier,
     loading: Boolean = false,
+    visualizationSendingDisabled: Boolean = loading,
     model: Model? = null,
     assistant: Assistant? = null,
     lastMessage: Boolean = false,
@@ -116,9 +121,14 @@ fun ChatMessage(
     onTranslate: ((UIMessage, Locale) -> Unit)? = null,
     onClearTranslation: (UIMessage) -> Unit = {},
     onToolApproval: ((toolCallId: String, approved: Boolean, reason: String) -> Unit)? = null,
+    onVisualizationMessage: ((me.rerere.rikkahub.data.visualization.VizMessageEvent) -> String?)? = null,
     onToolAnswer: ((toolCallId: String, answer: String) -> Unit)? = null,
 ) {
     val message = node.messages[node.selectIndex]
+    if (message.isContextCheckpoint) {
+        ChatMessageContextCheckpoint(message, modifier)
+        return
+    }
     val settings = LocalSettings.current.displaySetting
     val chatFontFamily = LocalChatFontFamily.current ?: rememberChatFontFamily(settings)
     val textStyle = LocalTextStyle.current.copy(
@@ -161,6 +171,11 @@ fun ChatMessage(
         ProvideTextStyle(textStyle) {
             MessagePartsBlock(
                 assistant = assistant,
+                conversationId = conversationId,
+                messageId = messageIdentity,
+                visualizationStore = visualizationStore,
+                visualizationSendingDisabled = visualizationSendingDisabled,
+                onVisualizationMessage = onVisualizationMessage,
                 role = message.role,
                 parts = message.parts,
                 annotations = message.annotations,
@@ -265,12 +280,17 @@ fun ChatMessage(
 @Composable
 private fun MessagePartsBlock(
     assistant: Assistant?,
+    conversationId: String,
+    messageId: String,
+    visualizationStore: me.rerere.rikkahub.ui.components.visualization.VizSessionStore?,
     role: MessageRole,
     model: Model?,
     parts: List<UIMessagePart>,
     annotations: List<UIMessageAnnotation>,
     loading: Boolean,
+    visualizationSendingDisabled: Boolean = loading,
     onToolApproval: ((toolCallId: String, approved: Boolean, reason: String) -> Unit)? = null,
+    onVisualizationMessage: ((me.rerere.rikkahub.data.visualization.VizMessageEvent) -> String?)? = null,
     onToolAnswer: ((toolCallId: String, answer: String) -> Unit)? = null,
     onUserMessageClick: (() -> Unit)? = null,
 ) {
@@ -316,6 +336,9 @@ private fun MessagePartsBlock(
     val groupedParts = remember(parts) { parts.groupMessageParts() }
     groupedParts.fastForEach { block ->
         when (block) {
+            is MessagePartBlock.GraphDisplayBlock -> key("graph:${block.tool.toolCallId.ifBlank { block.index.toString() }}") {
+                PlotFunctionToolContent(tool = block.tool, loading = loading && !block.tool.isExecuted)
+            }
             is MessagePartBlock.ThinkingBlock -> {
                 if (block.steps.isNotEmpty()) {
                     val isReasoningOnlyBlock = block.steps.fastAll { it is ThinkingStep.ReasoningStep }
@@ -357,6 +380,16 @@ private fun MessagePartsBlock(
             is MessagePartBlock.ContentBlock -> key(block.index) {
                 when (val part = block.part) {
                     is UIMessagePart.Text -> {
+                        val prepared = if (role != MessageRole.USER) rememberMessageMarkdown(
+                            source = part.text,
+                            assistant = assistant,
+                            conversationId = conversationId,
+                            messageId = messageId,
+                            partIndex = block.index,
+                            precedingSources = parts.take(block.index).filterIsInstance<UIMessagePart.Text>().map { it.text },
+                            visualizations = role == MessageRole.ASSISTANT && visualizationStore != null &&
+                                settings.displaySetting.enableInlineVisualizations,
+                        ) else null
                         val textContent = @Composable {
                             if (role == MessageRole.USER) {
                                 Surface(
@@ -384,26 +417,33 @@ private fun MessagePartsBlock(
                                         color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = settings.displaySetting.bubbleOpacity),
                                     ) {
                                         Column(modifier = Modifier.padding(8.dp)) {
-                                            MarkdownBlock(
-                                                content = part.text.replaceRegexes(
-                                                    assistant = assistant,
-                                                    scope = AssistantAffectScope.ASSISTANT,
-                                                    visual = true,
-                                                ),
+                                            AssistantMessageMarkdown(
+                                                prepared = checkNotNull(prepared).snapshot,
+                                                assistant = assistant,
+                                                conversationId = conversationId,
+                                                messageId = messageId,
+                                                partIndex = block.index,
+                                                store = visualizationStore,
+                                                sendingDisabled = visualizationSendingDisabled,
+                                                onMessage = onVisualizationMessage,
+                                                loading = loading,
                                                 onClickCitation = handleClickCitation,
                                             )
                                         }
                                     }
                                 } else {
-                                    MarkdownBlock(
-                                        content = part.text.replaceRegexes(
-                                            assistant = assistant,
-                                            scope = AssistantAffectScope.ASSISTANT,
-                                            visual = true,
-                                        ),
+                                    AssistantMessageMarkdown(
+                                        prepared = checkNotNull(prepared).snapshot,
+                                        assistant = assistant,
+                                        conversationId = conversationId,
+                                        messageId = messageId,
+                                        partIndex = block.index,
+                                        store = visualizationStore,
+                                        sendingDisabled = visualizationSendingDisabled,
+                                        onMessage = onVisualizationMessage,
+                                        loading = loading,
                                         onClickCitation = handleClickCitation,
-                                        modifier = Modifier
-                                            .animateContentSize()
+                                        modifier = Modifier.animateContentSize(),
                                     )
                                 }
                             }
@@ -412,8 +452,8 @@ private fun MessagePartsBlock(
                         // 流式生成期间不启用 SelectionContainer：Markdown 在不断重渲染，
                         // 内部可选择的 Text 会频繁注册/注销，与 Compose 选择工具栏在绘制阶段
                         // 对 selectable 列表的排序产生并发修改，导致 ConcurrentModificationException。
-                        // 生成结束后内容稳定，再启用文本选择。
-                        if (loading) {
+                        // 生成结束且最终准备输入提交后才启用选择，避免最后一份异步快照仍在替换正文。
+                        if (loading || prepared?.settled == false) {
                             textContent()
                         } else {
                             SelectionContainer {

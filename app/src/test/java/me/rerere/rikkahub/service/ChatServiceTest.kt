@@ -22,8 +22,16 @@ class ChatServiceTest {
         val params = backgroundTextGenerationParams(model)
 
         assertEquals(model, params.model)
-        assertEquals(ReasoningLevel.OFF, params.reasoningLevel)
+        assertEquals(ReasoningLevel.AUTO, params.reasoningLevel)
         assertEquals(headers, params.customHeaders)
         assertEquals(bodies, params.customBody)
+    }
+
+    @Test
+    fun `explicit fast model reasoning level is preserved without priority tier`() {
+        val params = backgroundTextGenerationParams(Model(modelId = "fast"), ReasoningLevel.MAX)
+
+        assertEquals(ReasoningLevel.MAX, params.reasoningLevel)
+        assertEquals(false, params.serviceTierPriority)
     }
 }

@@ -86,10 +86,13 @@ import me.rerere.rikkahub.R
 import me.rerere.rikkahub.data.datastore.Settings
 import me.rerere.rikkahub.data.datastore.findModelById
 import me.rerere.rikkahub.data.model.Conversation
+import me.rerere.rikkahub.data.graph.GraphProtocol
 import me.rerere.rikkahub.ui.components.message.MessagePartBlock
 import me.rerere.rikkahub.ui.components.message.ThinkingStep
 import me.rerere.rikkahub.ui.components.message.groupMessageParts
+import me.rerere.rikkahub.ui.components.richtext.LocalPreparedMarkdown
 import me.rerere.rikkahub.ui.components.richtext.MarkdownBlock
+import me.rerere.rikkahub.ui.components.richtext.prepareMarkdown
 import me.rerere.rikkahub.ui.components.ui.AutoAIIcon
 import me.rerere.rikkahub.ui.components.ui.BitmapComposer
 import me.rerere.rikkahub.ui.components.ui.ChainOfThought
@@ -398,12 +401,26 @@ private suspend fun exportToImage(
         return
     }
 
+    // 在挂载截图内容前完成实际显示文本的准备，不依赖截图器的固定等待时间。
+    val preparedMarkdown = messages.flatMap { message ->
+        message.parts.mapNotNull { part ->
+            when (part) {
+                is UIMessagePart.Text -> part.text
+                is UIMessagePart.Reasoning -> part.reasoning.takeIf { options.expandReasoning }
+                else -> null
+            }
+        }
+    }.distinct().associateWith { prepareMarkdown(it) }
+
     val bitmap = composer.composableToBitmap(
         activity = activity,
         width = 540.dp,
         screenDensity = density,
         content = {
-            CompositionLocalProvider(LocalSettings provides settings) {
+            CompositionLocalProvider(
+                LocalSettings provides settings,
+                LocalPreparedMarkdown provides preparedMarkdown,
+            ) {
                 ExportedChatImage(
                     conversation = conversation,
                     messages = messages,
@@ -553,6 +570,26 @@ private fun ExportedChatMessage(
         ) {
             groupedParts.forEach { block ->
                 when (block) {
+                    is MessagePartBlock.GraphDisplayBlock -> {
+                        val graphDefinitions = remember(block.tool.output) {
+                            runCatching {
+                                val text = block.tool.output.filterIsInstance<UIMessagePart.Text>()
+                                    .joinToString("\n") { it.text }
+                                GraphProtocol.decodeResult(text)
+                            }.getOrNull()
+                        }
+                        Card {
+                            Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                Text("交互式函数图像 · 请在聊天中打开", style = MaterialTheme.typography.labelMedium)
+                                if (graphDefinitions?.ok == true) {
+                                    graphDefinitions.graphs.forEach { graph ->
+                                        Text(graph.title, style = MaterialTheme.typography.titleSmall)
+                                        graph.curves.forEach { curve -> Text("y = ${curve.expression}") }
+                                    }
+                                } else Text(graphDefinitions?.error?.message ?: "绘图记录不可用")
+                            }
+                        }
+                    }
                     is MessagePartBlock.ThinkingBlock -> {
                         if (block.steps.isNotEmpty()) {
                             ChainOfThought(

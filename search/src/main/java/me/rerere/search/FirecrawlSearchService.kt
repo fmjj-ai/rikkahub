@@ -21,6 +21,7 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
 import me.rerere.ai.core.InputSchema
+import me.rerere.common.http.awaitText
 import me.rerere.search.SearchResult.SearchResultItem
 import me.rerere.search.SearchService.Companion.httpClient
 import me.rerere.search.SearchService.Companion.json
@@ -90,7 +91,7 @@ object FirecrawlSearchService : SearchService<SearchServiceOptions.FirecrawlOpti
         commonOptions: SearchCommonOptions,
         serviceOptions: SearchServiceOptions.FirecrawlOptions
     ): Result<SearchResult> = withContext(Dispatchers.IO) {
-        runCatching {
+        runSearchCatching {
             val query = params["query"]?.jsonPrimitive?.content ?: error("query is required")
 
             val sources = params["sources"].asStringList()
@@ -122,12 +123,12 @@ object FirecrawlSearchService : SearchService<SearchServiceOptions.FirecrawlOpti
                 }
                 .build()
 
-            val response = httpClient.newCall(request).await()
+            val response = httpClient.newCall(request).awaitText()
             if (!response.isSuccessful) {
                 error("response failed #${response.code}")
             }
 
-            val bodyString = response.body.string()
+            val bodyString = response.body
             val payload = json.parseToJsonElement(bodyString).jsonObject
             val data = payload["data"]?.jsonObject ?: error("empty response data")
             val resultData = json.decodeFromJsonElement<FirecrawlSearchResultData>(data)
@@ -160,7 +161,7 @@ object FirecrawlSearchService : SearchService<SearchServiceOptions.FirecrawlOpti
         commonOptions: SearchCommonOptions,
         serviceOptions: SearchServiceOptions.FirecrawlOptions
     ): Result<ScrapedResult> = withContext(Dispatchers.IO) {
-        runCatching {
+        runSearchCatching {
             val url = params["url"]?.jsonPrimitive?.content ?: error("url is required")
             val onlyMainContent = params["onlyMainContent"]?.jsonPrimitive?.contentOrNull?.toBoolean() ?: true
 
@@ -185,12 +186,12 @@ object FirecrawlSearchService : SearchService<SearchServiceOptions.FirecrawlOpti
                 }
                 .build()
 
-            val response = httpClient.newCall(request).await()
+            val response = httpClient.newCall(request).awaitText()
             if (!response.isSuccessful) {
                 error("response failed #${response.code}")
             }
 
-            val bodyString = response.body.string()
+            val bodyString = response.body
             val payload = json.parseToJsonElement(bodyString).jsonObject
 
             val success = payload["success"]?.jsonPrimitive?.contentOrNull?.toBoolean() ?: false

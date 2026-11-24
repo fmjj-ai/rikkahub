@@ -10,6 +10,7 @@ import java.io.File
 import java.net.HttpURLConnection
 import java.net.URL
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -43,18 +44,13 @@ class FilesManager(
     ): ManagedFileEntity = withContext(Dispatchers.IO) {
         val resolvedName = displayName ?: getFileNameFromUri(uri) ?: "file"
         val resolvedMime = mimeType ?: getFileMimeType(uri) ?: "application/octet-stream"
-        val target = createTargetFile(folder, resolvedName, resolvedMime)
-        context.contentResolver.openInputStream(uri)?.use { input ->
-            target.outputStream().use { output ->
-                input.copyTo(output)
+        saveManagedContent(folder, resolvedName, resolvedMime) { target ->
+            val input = context.contentResolver.openInputStream(uri) ?: error("无法读取所选文件")
+            input.use {
+                target.outputStream().use { output -> it.copyTo(output) }
             }
+            check(target.length() > 0) { "所选文件为空或已不可访问" }
         }
-        createManagedFileEntity(
-            folder = folder,
-            file = target,
-            displayName = resolvedName,
-            mimeType = resolvedMime,
-        )
     }
 
     suspend fun saveManagedFromBytes(
@@ -78,15 +74,31 @@ class FilesManager(
         text: String,
         displayName: String = "pasted_text.txt",
         mimeType: String = "text/plain",
+    ): ManagedFileEntity = saveManagedContent(folder, displayName, mimeType) { target ->
+        target.writeText(text)
+    }
+
+    /** URI 与文本共用写入、登记和失败清理，避免返回文件 URL 前遗留半成品。 */
+    private suspend fun saveManagedContent(
+        folder: String,
+        displayName: String,
+        mimeType: String,
+        write: (File) -> Unit,
     ): ManagedFileEntity = withContext(Dispatchers.IO) {
         val target = createTargetFile(folder, displayName, mimeType)
-        target.writeText(text)
-        createManagedFileEntity(
-            folder = folder,
-            file = target,
-            displayName = displayName,
-            mimeType = mimeType,
-        )
+        try {
+            write(target)
+            createManagedFileEntity(folder, target, displayName, mimeType)
+        } catch (error: Throwable) {
+            withContext(NonCancellable) {
+                runCatching { repository.deleteByPath(buildRelativePath(folder, target)) }
+                    .onFailure { error.addSuppressed(it) }
+                if (target.exists() && !target.delete()) {
+                    error.addSuppressed(java.io.IOException("未能清理未完成的导入文件"))
+                }
+            }
+            throw error
+        }
     }
 
     fun observe(folder: String = FileFolders.UPLOAD): Flow<List<ManagedFileEntity>> =
@@ -144,14 +156,18 @@ class FilesManager(
         return newUris
     }
 
-    fun createChatFilesByByteArrays(byteArrays: List<ByteArray>): List<Uri> {
+    fun createChatFilesByByteArrays(
+        byteArrays: List<ByteArray>,
+        displayName: String = "image.png",
+        mimeType: String = "image/png",
+    ): List<Uri> {
         val newUris = mutableListOf<Uri>()
         val dir = context.filesDir.resolve(FileFolders.UPLOAD)
         if (!dir.exists()) {
             dir.mkdirs()
         }
         byteArrays.forEach { byteArray ->
-            val fileName = buildUuidFileName(displayName = "image.png", mimeType = "image/png")
+            val fileName = buildUuidFileName(displayName = displayName, mimeType = mimeType)
             val file = dir.resolve(fileName)
             if (!file.exists()) {
                 file.createNewFile()
@@ -163,8 +179,8 @@ class FilesManager(
             trackManagedFile(
                 folder = FileFolders.UPLOAD,
                 file = file,
-                displayName = "image.png",
-                mimeType = "image/png"
+                displayName = displayName,
+                mimeType = mimeType,
             )
             newUris.add(newUri)
         }
@@ -174,15 +190,28 @@ class FilesManager(
     @OptIn(ExperimentalEncodingApi::class)
     suspend fun convertBase64ImagePartToLocalFile(message: UIMessage): UIMessage =
         withContext(Dispatchers.IO) {
+            if (message.parts.none { it is UIMessagePart.Image && it.url.startsWith("data:image") }) {
+                return@withContext message
+            }
             message.copy(
                 parts = message.parts.map { part ->
                     when (part) {
                         is UIMessagePart.Image -> {
                             if (part.url.startsWith("data:image")) {
                                 val sourceByteArray = Base64.decode(part.url.substringAfter("base64,").toByteArray())
-                                val bitmap = BitmapFactory.decodeByteArray(sourceByteArray, 0, sourceByteArray.size)
-                                val byteArray = FileUtils.compressBitmapToPng(bitmap)
-                                val urls = createChatFilesByByteArrays(listOf(byteArray))
+                                // 仅探测尺寸以验证图片，保存原始编码，避免大图二次解码和 PNG 膨胀。
+                                val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+                                BitmapFactory.decodeByteArray(sourceByteArray, 0, sourceByteArray.size, bounds)
+                                require(bounds.outWidth > 0 && bounds.outHeight > 0) { "生成结果不是有效图片" }
+                                val mime = bounds.outMimeType ?: "image/png"
+                                val extension = when (mime) {
+                                    "image/jpeg" -> "jpg"
+                                    "image/webp" -> "webp"
+                                    else -> "png"
+                                }
+                                val urls = createChatFilesByByteArrays(
+                                    listOf(sourceByteArray), displayName = "image.$extension", mimeType = mime,
+                                )
                                 Log.i(
                                     TAG,
                                     "convertBase64ImagePartToLocalFile: convert base64 img to ${urls.joinToString(", ")}"
@@ -201,14 +230,21 @@ class FilesManager(
             )
         }
 
+    /** 引用比较与删除共用规范化后的应用内文件身份，不把等价 URI 当成不同文件。 */
+    fun canonicalOwnedFileUrl(url: String): String? = runCatching {
+        val uri = url.toUri()
+        if (uri.scheme != "file") return@runCatching null
+        val file = uri.toFile().canonicalFile
+        if (getRelativePathInFilesDir(file) == null) null else file.toUri().toString()
+    }.getOrNull()
+
     fun deleteChatFiles(uris: List<Uri>) {
         val relativePaths = mutableSetOf<String>()
-        uris.filter { it.toString().startsWith("file:") }.forEach { uri ->
-            val file = uri.toFile()
-            getRelativePathInFilesDir(file)?.let { relativePaths.add(it) }
-            if (file.exists()) {
-                file.delete()
-            }
+        uris.filter { it.scheme == "file" }.forEach { uri ->
+            val file = runCatching { uri.toFile().canonicalFile }.getOrNull() ?: return@forEach
+            val relativePath = getRelativePathInFilesDir(file) ?: return@forEach
+            // 仅删除应用目录中的文件；删除失败时保留登记，供后续清理重试。
+            if (!file.exists() || (file.isFile && file.delete())) relativePaths.add(relativePath)
         }
         if (relativePaths.isNotEmpty()) {
             appScope.launch(Dispatchers.IO) {
@@ -487,6 +523,7 @@ data class SyncResult(
 )
 
 object FileFolders {
+    const val MEDIA_CREATION = "media_creation"
     const val UPLOAD = "upload"
     const val SKILLS = "skills"
     const val FONTS = "fonts"

@@ -677,6 +677,8 @@
   <string name="setting_display_page_enable_auto_scroll_desc">AI生成内容时自动滚动到底部</string>
   <string name="setting_display_page_enable_auto_scroll_title">自动滚动</string>
   <string name="setting_display_page_enable_blur_effect_desc">在聊天输入栏启用模糊效果</string>
+  <string name="setting_display_page_enable_expanded_navigation_title">启用展开式导航</string>
+  <string name="setting_display_page_enable_expanded_navigation_desc">点击设置条目时，页面从该条目上下展开，返回时收回原处。关闭后使用原有切换动画。</string>
   <string name="setting_display_page_enable_blur_effect_title">启用模糊效果</string>
   <string name="setting_display_page_enable_latex_rendering_desc">使用 LaTeX 语法渲染数学表达式和公式</string>
   <string name="setting_display_page_enable_latex_rendering_title">启用 LaTeX 渲染</string>
@@ -944,7 +946,6 @@ mDNS 地址：使用 .local 主机名，同一网络中的其他设备可通过�
   <string name="setting_provider_page_protocol_not_configured">%1$s 协议未配置</string>
   <string name="setting_provider_page_protocol_models">%1$s 协议（%2$d）</string>
   <string name="setting_provider_page_fetch_models_failed">%1$s 协议拉取失败：%2$s</string>
-  <string name="setting_provider_page_multi_protocol_hint">三个协议默认都可用；没填 API Key 的协议不会参与拉取模型。</string>
   <string name="setting_provider_page_no_protocol_configured">未配置协议</string>
   <string name="setting_provider_page_provider_override_protocol_disabled">已使用独立服务商覆盖，协议选择不生效。</string>
   <string name="setting_provider_page_merge_same_url">检测到 %1$d 个相同地址的服务商</string>
